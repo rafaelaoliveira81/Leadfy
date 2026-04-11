@@ -1,4 +1,3 @@
-using Repository;
 using Application;
 using Repository.Context;
 using Microsoft.EntityFrameworkCore;
@@ -7,6 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Adicione serviços ao contêiner.
 builder.Services.AddScoped<IUserApp, UserApp>();
+builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 
 // Adicione as interfaces de banco de dados
 builder.Services.AddScoped<IUserRepo, UserRepository>();
