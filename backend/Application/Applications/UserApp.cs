@@ -3,57 +3,92 @@ using Domain.Enuns;
 
 namespace Application;
 
+/// <summary>
+/// Serviço de aplicação responsável por orquestrar os casos de uso relacionados a usuários.
+/// </summary>
+/// <remarks>
+/// Esta classe pertence à camada de Application.
+/// Sua responsabilidade é validar entradas, aplicar regras de fluxo,
+/// coordenar chamadas ao domínio e persistir alterações por meio do repositório.
+/// </remarks>
 public class UserApp : IUserApp
 {
-    // Injeção de dependência do repositório de usuários e do serviço de hash de senhas
+    /// <summary>
+    /// Repositório responsável pelo acesso e persistência dos usuários.
+    /// </summary>
     private readonly IUserRepo _userRepo;
+
+    /// <summary>
+    /// Serviço responsável por gerar e validar hashes de senha.
+    /// </summary>
     private readonly IPasswordHasher _passwordHasher;
-    
-    // Construtor para injetar as dependências necessárias
+
+    /// <summary>
+    /// Inicializa uma nova instância de <see cref="UserApp"/>.
+    /// </summary>
+    /// <param name="userRepo">Repositório de usuários.</param>
+    /// <param name="passwordHasher">Serviço de hash de senha.</param>
     public UserApp(IUserRepo userRepo, IPasswordHasher passwordHasher)
     {
         _userRepo = userRepo;
         _passwordHasher = passwordHasher;
     }
 
-    // Implementação do método para adicionar um novo usuário
+    /// <summary>
+    /// Adiciona um novo usuário ao sistema.
+    /// </summary>
+    /// <param name="user">Entidade de usuário a ser cadastrada.</param>
+    /// <param name="password">Senha em texto puro informada no cadastro.</param>
+    /// <returns>Retorna o identificador do usuário criado.</returns>
+    /// <exception cref="ArgumentException">
+    /// Lançada quando os dados do usuário ou a senha são inválidos,
+    /// ou quando já existe um usuário com o mesmo e-mail.
+    /// </exception>
     public async Task<int> AddAsync(User user, string password)
     {
-        // Valida as informações do usuário (nome, email)
         ValidateUserInformation(user);
 
-        // Valida a senha do usuário e gera o hash da senha utilizando o serviço de hash de senhas
         if (string.IsNullOrWhiteSpace(password))
             throw new ArgumentException("A senha do usuário deve ser informada.");
-        user.SetPassword(password, _passwordHasher);
 
-        // Verifica se já existe um usuário com o mesmo e-mail para evitar duplicidade
         var userEntity = await _userRepo.GetByEmailAsync(user.Email);
         if (userEntity != null)
             throw new ArgumentException("Já existe usuário com o e-mail informado.");
 
-        // Adiciona o usuário no banco de dados e retorna o ID do novo usuário criado
+        user.SetPassword(password, _passwordHasher);
+
         return await _userRepo.AddAsync(user);
     }
 
-    // Implementação do método para obter um usuário por ID
+    /// <summary>
+    /// Obtém um usuário pelo seu identificador.
+    /// </summary>
+    /// <param name="idUser">ID do usuário.</param>
+    /// <returns>Usuário encontrado.</returns>
+    /// <exception cref="KeyNotFoundException">
+    /// Lançada quando o usuário não é localizado.
+    /// </exception>
     public async Task<User> GetByIdAsync(int idUser)
     {
-        // Verifica se existe usuário com o ID informado e retorna o usuário encontrado; 
-        // caso contrário, lança uma exceção indicando que o usuário não foi localizado
-        
         return await ValidateUserExistsByIdAsync(idUser);
     }
 
-    // Implementação do método para obter um usuário por e-mail
+    /// <summary>
+    /// Obtém um usuário pelo e-mail.
+    /// </summary>
+    /// <param name="emailUser">E-mail do usuário.</param>
+    /// <returns>Usuário encontrado.</returns>
+    /// <exception cref="ArgumentException">
+    /// Lançada quando o e-mail não é informado.
+    /// </exception>
+    /// <exception cref="KeyNotFoundException">
+    /// Lançada quando o usuário não é localizado.
+    /// </exception>
     public async Task<User> GetByEmailAsync(string emailUser)
     {
-        // Valida se o e-mail do usuário é nulo ou vazio
         if (string.IsNullOrWhiteSpace(emailUser))
             throw new ArgumentException("Email não pode ser vazio");
 
-        // Verifica se existe um usuário com o e-mail informado e retorna o usuário encontrado;
-        // caso contrário, lança uma exceção indicando que o usuário não foi localizado
         var userEntity = await _userRepo.GetByEmailAsync(emailUser);
         if (userEntity == null)
             throw new KeyNotFoundException("Usuário não localizado.");
@@ -61,82 +96,105 @@ public class UserApp : IUserApp
         return userEntity;
     }
 
-    // Implementação do método para obter um usuário por nome
-    public async Task<User> GetByNameAsync(string nameUser)
+    /// <summary>
+    /// Busca usuários cujo nome contenha o valor informado.
+    /// </summary>
+    /// <param name="nameUser">
+    /// Texto utilizado para filtrar os usuários pelo nome.
+    /// Não pode ser nulo, vazio ou composto apenas por espaços.
+    /// </param>
+    /// <returns>
+    /// Uma coleção de usuários que possuem o nome contendo o valor informado.
+    /// </returns>
+    /// <exception cref="ArgumentException">
+    /// Lançada quando o parâmetro <paramref name="nameUser"/> é nulo ou inválido.
+    /// </exception>
+    /// <exception cref="KeyNotFoundException">
+    /// Lançada quando nenhum usuário é encontrado para o critério informado.
+    /// </exception>
+    /// <remarks>
+    /// Este método aplica validações de entrada e garante que o resultado da busca não seja vazio.
+    /// A responsabilidade de acesso a dados é delegada ao repositório.
+    /// </remarks>
+    public async Task<IEnumerable<User>> GetByNameContainingAsync(string nameUser)
     {
-        // Valida se o nome do usuário é nulo ou vazio
         if (string.IsNullOrWhiteSpace(nameUser))
             throw new ArgumentException("Nome do usuário não pode ser vazio");
+        
+        nameUser = nameUser.Trim();
 
-        // Verifica se existe um usuário com o nome informado e retorna o usuário encontrado;
-        // caso contrário, lança uma exceção indicando que o usuário não foi localizado
-        var userEntity = await _userRepo.GetByNameAsync(nameUser);
+        var userEntity = await _userRepo.GetByNameContainingAsync(nameUser);
         if (userEntity == null)
             throw new KeyNotFoundException("Usuário não localizado.");
 
         return userEntity;
     }
-    
-    // Implementação do método para obter todos os usuários
-    public async Task<IEnumerable<User>> GetAllAsync() => await _userRepo.GetAllAsync();
-    
-    // Implementação do método para obter todos os usuários por status (ativo/inativo)
-    public async Task<IEnumerable<User>> GetAllByStatusAsync(bool statusUser) => await _userRepo.GetAllByStatusAsync(statusUser);
 
-    // Implementação do método para atualizar as informações de um usuário existente
+    /// <summary>
+    /// Obtém todos os usuários cadastrados.
+    /// </summary>
+    /// <returns>Coleção com todos os usuários.</returns>
+    public async Task<IEnumerable<User>> GetAllAsync()
+    {
+        return await _userRepo.GetAllAsync();
+    }
+
+    /// <summary>
+    /// Obtém todos os usuários filtrando pelo status.
+    /// </summary>
+    /// <param name="statusUser">
+    /// Status desejado para o filtro (true = ativo, false = inativo).
+    /// </param>
+    /// <returns>Coleção de usuários com o status informado.</returns>
+    public async Task<IEnumerable<User>> GetAllByStatusAsync(bool statusUser)
+    {
+        return await _userRepo.GetAllByStatusAsync(statusUser);
+    }
+
+    /// <summary>
+    /// Atualiza os dados de um usuário existente.
+    /// </summary>
+    /// <param name="user">Usuário com os dados atualizados.</param>
+    /// <exception cref="ArgumentException">
+    /// Lançada quando os dados do usuário são inválidos
+    /// ou quando já existe outro usuário com o mesmo e-mail.
+    /// </exception>
+    /// <exception cref="KeyNotFoundException">
+    /// Lançada quando o usuário a ser atualizado não é localizado.
+    /// </exception>
     public async Task UpdateAsync(User user)
     {
-        // Garante que o usuário existe pelo ID; caso não exista, lança uma exceção
         var userEntity = await ValidateUserExistsByIdAsync(user.ID);
 
-        // Valida os campos obrigatórios e regras de negócio do usuário
         ValidateUserInformation(user);
 
-        // Verifica se já existe outro usuário utilizando o e-mail informado
         var userEntityByEmail = await _userRepo.GetByEmailAsync(user.Email);
 
-        // Caso exista um usuário com o mesmo e-mail e 
-        // que não seja o próprio usuário que está sendo atualizado, lança exceção
         if (userEntityByEmail != null && user.ID != userEntityByEmail.ID)
             throw new ArgumentException("Já existe um usuário com o e-mail informado.");
 
-        // Atualiza os dados do usuário existente
         userEntity.Name = user.Name;
         userEntity.Email = user.Email;
         userEntity.Role = user.Role;
 
-        // Salva as alterações no banco de dados
         await _userRepo.UpdateAsync(userEntity);
     }
 
-    // Implementação do método para deletar um usuário
-    public async Task DeleteAsync(int idUser)
-    {
-        // Garante que o usuário existe pelo ID; caso não exista, lança uma exceção
-        var userEntity = await ValidateUserExistsByIdAsync(idUser);
-
-        await _userRepo.DeleteAsync(userEntity);
-    }
-
-    // Implementação do método para desativar um usuário
-    public async Task DeactivateAsync(int idUser)
-    {
-        var userEntity = await ValidateUserExistsByIdAsync(idUser);
-
-        userEntity.Deactivate();
-
-        await _userRepo.UpdateAsync(userEntity);
-    }
-
-    public async Task RestoreAsync(int idUser)
-    {
-        var userEntity = await ValidateUserExistsByIdAsync(idUser);
-
-        userEntity.Activate();
-
-        await _userRepo.UpdateAsync(userEntity);
-    }
-
+    /// <summary>
+    /// Atualiza a senha de um usuário.
+    /// </summary>
+    /// <param name="userId">ID do usuário.</param>
+    /// <param name="currentPassword">Senha atual informada para validação.</param>
+    /// <param name="newPassword">Nova senha que será definida.</param>
+    /// <exception cref="ArgumentException">
+    /// Lançada quando a senha atual ou a nova senha não são informadas.
+    /// </exception>
+    /// <exception cref="UnauthorizedAccessException">
+    /// Lançada quando a senha atual informada é inválida.
+    /// </exception>
+    /// <exception cref="KeyNotFoundException">
+    /// Lançada quando o usuário não é localizado.
+    /// </exception>
     public async Task UpdatePasswordAsync(int userId, string currentPassword, string newPassword)
     {
         var userEntity = await ValidateUserExistsByIdAsync(userId);
@@ -157,34 +215,96 @@ public class UserApp : IUserApp
         await _userRepo.UpdateAsync(userEntity);
     }
 
-    #region Uteis
+    /// <summary>
+    /// Remove um usuário do sistema.
+    /// </summary>
+    /// <param name="idUser">ID do usuário a ser removido.</param>
+    /// <exception cref="KeyNotFoundException">
+    /// Lançada quando o usuário não é localizado.
+    /// </exception>
+    /// <remarks>
+    /// Este método realiza remoção física do registro.
+    /// </remarks>
+    public async Task DeleteAsync(int idUser)
+    {
+        var userEntity = await ValidateUserExistsByIdAsync(idUser);
+
+        await _userRepo.DeleteAsync(userEntity);
+    }
+
+    /// <summary>
+    /// Desativa um usuário no sistema.
+    /// </summary>
+    /// <param name="idUser">ID do usuário a ser desativado.</param>
+    /// <exception cref="KeyNotFoundException">
+    /// Lançada quando o usuário não é localizado.
+    /// </exception>
+    public async Task DeactivateAsync(int idUser)
+    {
+        var userEntity = await ValidateUserExistsByIdAsync(idUser);
+
+        userEntity.Deactivate();
+
+        await _userRepo.UpdateAsync(userEntity);
+    }
+
+    /// <summary>
+    /// Ativa um usuário no sistema.
+    /// </summary>
+    /// <param name="idUser">ID do usuário a ser ativado.</param>
+    /// <exception cref="KeyNotFoundException">
+    /// Lançada quando o usuário não é localizado.
+    /// </exception>
+    public async Task ActivateAsync(int idUser)
+    {
+        var userEntity = await ValidateUserExistsByIdAsync(idUser);
+
+        userEntity.Activate();
+
+        await _userRepo.UpdateAsync(userEntity);
+    }
+
+
+    #region Métodos auxiliares
+
+    /// <summary>
+    /// Valida as informações básicas obrigatórias de um usuário.
+    /// </summary>
+    /// <param name="user">Usuário a ser validado.</param>
+    /// <exception cref="ArgumentException">
+    /// Lançada quando o usuário, nome, e-mail ou tipo de usuário são inválidos.
+    /// </exception>
     private static void ValidateUserInformation(User user)
     {
-        // valida se o usuário é nulo
         if (user == null)
             throw new ArgumentException("Usuário não pode ser vazio.");
-        
-        // valida se o nome do usuário é nulo ou vazio
+
         if (string.IsNullOrWhiteSpace(user.Name))
             throw new ArgumentException("O nome do usuário deve ser informado.");
 
-        // valida se o e-mail do usuário é nulo ou vazio
         if (string.IsNullOrWhiteSpace(user.Email))
             throw new ArgumentException("O e-mail do usuário deve ser informado.");
-        
-        // valida se o tipo de usuário é válido (Admin, Manager, etc.)
+
         if (!Enum.IsDefined(typeof(UserRole), user.Role))
-            throw new Exception("Tipo de usuário inválido.");
+            throw new ArgumentException("Tipo de usuário inválido.");
     }
 
+    /// <summary>
+    /// Valida se existe um usuário com o ID informado.
+    /// </summary>
+    /// <param name="idUser">ID do usuário.</param>
+    /// <returns>Usuário encontrado.</returns>
+    /// <exception cref="KeyNotFoundException">
+    /// Lançada quando o usuário não é localizado.
+    /// </exception>
     private async Task<User> ValidateUserExistsByIdAsync(int idUser)
     {
-        // Verifica se existe um usuário com o ID informado; caso contrário, lança uma exceção indicando que o usuário não foi encontrado
         var userEntity = await _userRepo.GetByIdAsync(idUser);
         if (userEntity == null)
             throw new KeyNotFoundException("Usuário não localizado.");
 
         return userEntity;
     }
+
     #endregion
 }
