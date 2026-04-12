@@ -372,4 +372,44 @@ public class UserController : ControllerBase
             return StatusCode(500, new { message = ex.Message });
         }
     }
+
+    /// <summary>
+    /// Lista todos os perfis de usuário disponíveis.
+    /// </summary>
+    /// <remarks>
+    /// Endpoint utilizado para obter os tipos de papéis (roles) que podem ser atribuídos a um usuário.
+    /// </remarks>
+    /// // <returns>
+    /// Retorna status 200 com a lista de roles disponíveis.
+    /// Retorna status 500 em caso de erro interno.
+    /// </returns>
+    [HttpGet("roles")]
+    public IActionResult GetAvailableRoles()
+    {
+        try
+        {
+            var roles = Enum.GetValues<UserRole>()
+                .Select(role => new UserRoleResponse
+                {
+                    ID = (int)role,
+                    Name = role.ToString(),
+                    DisplayName = role switch
+                    {
+                        UserRole.Admin => "Administrador",
+                        UserRole.Manager => "Gerente",
+                        UserRole.SalesRepresentative => "Representante Comercial",
+                        UserRole.CustomerSupport => "Atendimento ao Cliente",
+                        UserRole.RegularUser => "Usuário Comum",
+                        _ => role.ToString()
+                    }
+                })
+                .ToList();
+
+            return Ok(roles);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = ex.Message });
+        }
+    }
 }
