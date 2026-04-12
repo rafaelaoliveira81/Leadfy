@@ -2,10 +2,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Domain.Entities;
 
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Domain.Entities;
-
 namespace Repository.Configurations;
 
 public class OwerConfig : IEntityTypeConfiguration<Ower>
