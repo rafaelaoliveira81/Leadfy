@@ -159,7 +159,7 @@ public class UserController : ControllerBase
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
     [HttpGet]
-    public async Task<ActionResult> Get([FromQuery] bool? isActive, [FromQuery] string? name)
+    public async Task<ActionResult> Get([FromQuery] bool? isActive, [FromQuery] string name)
     {
         try
         {
