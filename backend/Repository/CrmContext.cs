@@ -12,11 +12,13 @@ public class CRMContext : DbContext
     }
 
     public DbSet<User> Users { get; set; }
-   
+    public DbSet<Ower> Owers { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfiguration(new UserConfig());
-   
+        modelBuilder.ApplyConfiguration(new OwerConfig());
+
         base.OnModelCreating(modelBuilder);
     }
 }

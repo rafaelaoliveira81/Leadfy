@@ -14,7 +14,8 @@ public class User
     public UserRole Role { get; set; } //required
     public bool IsActive { get; set; } //required and default true
     public DateTime CreatedAt { get; set; } //required and default current time
-
+    public ICollection<Ower> Owers { get; set; } //Relacionamento 1:N com Ower
+    
     /// <summary>
     /// Construtor padrão.
     /// Inicializa o usuário como ativo e define a data de criação.
