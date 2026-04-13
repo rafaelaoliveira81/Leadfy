@@ -8,10 +8,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddScoped<IUserApp, UserApp>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IOwerApp, OwerApp>();
+builder.Services.AddScoped<ILeadApp, LeadApp>();
 
 // Adicione as interfaces de banco de dados
 builder.Services.AddScoped<IUserRepo, UserRepository>();
 builder.Services.AddScoped<IOwerRepo, OwerRepo>();
+builder.Services.AddScoped<ILeadRepo, LeadRepo>();
 
 // Adiciona os serviços
 builder.Services.AddControllers();
