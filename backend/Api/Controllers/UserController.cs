@@ -4,6 +4,9 @@ using Models.Request;
 using Domain.Entities;
 using Domain.Enuns;
 
+/// <summary>
+/// Controller responsável pelos endpoints de gerenciamento de usuários.
+/// </summary>
 [ApiController]
 [Route("users")]
 public class UserController : ControllerBase
@@ -33,6 +36,9 @@ public class UserController : ControllerBase
     /// e delega o processo de cadastro para a camada de aplicação.
     /// </remarks>
     [HttpPost]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult> Add([FromBody] UserAdd user)
     {
         try
@@ -68,6 +74,9 @@ public class UserController : ControllerBase
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
     [HttpGet("{id:int}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult> GetById([FromRoute] int id)
     {
         try
@@ -111,6 +120,10 @@ public class UserController : ControllerBase
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
     [HttpGet("email/{email}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult> GetByEmail([FromRoute] string email)
     {
         try
@@ -159,6 +172,10 @@ public class UserController : ControllerBase
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
     [HttpGet]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult> Get([FromQuery] bool? isActive, [FromQuery] string name)
     {
         try
@@ -220,6 +237,10 @@ public class UserController : ControllerBase
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
     [HttpPut("{id:int}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult> Update([FromRoute] int id, [FromBody] UserUpdate userRequest)
     {
         try
@@ -263,6 +284,11 @@ public class UserController : ControllerBase
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
     [HttpPatch("{id:int}/password")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult> UpdatePassword([FromRoute] int id, [FromBody] UserUpdatePassword request)
     {
         try
@@ -299,6 +325,9 @@ public class UserController : ControllerBase
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
     [HttpDelete("{id:int}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult> Delete([FromRoute] int id)
     {
         try
@@ -327,6 +356,9 @@ public class UserController : ControllerBase
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
     [HttpPatch("{id:int}/deactivate")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult> Deactivate([FromRoute] int id)
     {
         try
@@ -355,6 +387,9 @@ public class UserController : ControllerBase
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
     [HttpPatch("{id:int}/activate")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult> Activate([FromRoute] int id)
     {
         try
@@ -384,6 +419,8 @@ public class UserController : ControllerBase
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
     [HttpGet("roles")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public IActionResult GetAvailableRoles()
     {
         try
