@@ -20,12 +20,14 @@ builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IOwerApp, OwerApp>();
 builder.Services.AddScoped<ILeadApp, LeadApp>();
 builder.Services.AddScoped<IProductApp, ProductApp>();
+builder.Services.AddScoped<IOpportunityApp, OpportunityApp>();
 
 // Adicione as interfaces de banco de dados
 builder.Services.AddScoped<IUserRepo, UserRepository>();
 builder.Services.AddScoped<IOwerRepo, OwerRepo>();
 builder.Services.AddScoped<ILeadRepo, LeadRepo>();
 builder.Services.AddScoped<IProductRepo, ProductRepo>();
+builder.Services.AddScoped<IOpportunityRepo, OpportunityRepo>();
 
 // Adiciona os serviços
 builder.Services.AddControllers();
