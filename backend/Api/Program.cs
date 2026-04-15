@@ -2,16 +2,28 @@ using Application;
 using Repository.Context;
 using Microsoft.EntityFrameworkCore;
 using Repository.Repositories;
+using System.Reflection;
+
 var builder = WebApplication.CreateBuilder(args);
+
+// Configura o Swagger para incluir comentários XML
+builder.Services.AddSwaggerGen(c =>
+{
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    c.IncludeXmlComments(xmlPath);
+});
 
 // Adicione serviços ao contêiner.
 builder.Services.AddScoped<IUserApp, UserApp>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IOwerApp, OwerApp>();
+builder.Services.AddScoped<ILeadApp, LeadApp>();
 
 // Adicione as interfaces de banco de dados
 builder.Services.AddScoped<IUserRepo, UserRepository>();
 builder.Services.AddScoped<IOwerRepo, OwerRepo>();
+builder.Services.AddScoped<ILeadRepo, LeadRepo>();
 
 // Adiciona os serviços
 builder.Services.AddControllers();
