@@ -3,6 +3,11 @@ using Models.Request;
 using Models.Response;
 using Domain.Entities;
 
+namespace Api.Controllers;
+
+/// <summary>
+/// Controller responsável pelos endpoints de gerenciamento de leads.
+/// </summary>
 [ApiController]
 [Route("leads")]
 public class LeadController : ControllerBase
@@ -28,6 +33,9 @@ public class LeadController : ControllerBase
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
     [HttpPost]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult> Add([FromBody] LeadAdd leadRequest)
     {
         try
@@ -67,6 +75,9 @@ public class LeadController : ControllerBase
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
     [HttpGet("{id:int}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult> GetById([FromRoute] int id)
     {
         try
@@ -107,6 +118,10 @@ public class LeadController : ControllerBase
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
     [HttpGet]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult> Get([FromQuery] bool? isActive, [FromQuery] string name)
     {
         try
@@ -164,6 +179,10 @@ public class LeadController : ControllerBase
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
     [HttpPut("{id:int}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult> Update([FromRoute] int id, [FromBody] LeadUpdate leadRequest)
     {
         try
@@ -173,8 +192,7 @@ public class LeadController : ControllerBase
                 Id = id,
                 Name = leadRequest.Name,
                 Email = leadRequest.Email,
-                PhoneNumber = leadRequest.PhoneNumber,
-                IsActive = leadRequest.IsActive
+                PhoneNumber = leadRequest.PhoneNumber
             };
 
             await _leadApp.UpdateAsync(lead);
@@ -205,6 +223,9 @@ public class LeadController : ControllerBase
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
     [HttpDelete("{id:int}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult> Delete([FromRoute] int id)
     {
         try
@@ -233,6 +254,9 @@ public class LeadController : ControllerBase
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
     [HttpPatch("{id:int}/deactivate")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult> Deactivate([FromRoute] int id)
     {
         try
@@ -265,6 +289,9 @@ public class LeadController : ControllerBase
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
     [HttpPatch("{id:int}/activate")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult> Activate([FromRoute] int id)
     {
         try
