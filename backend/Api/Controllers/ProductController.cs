@@ -28,6 +28,9 @@ public class ProductController : ControllerBase
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
     [HttpPost]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult> Add([FromBody] ProductAdd productRequest)
     {
         try
@@ -63,6 +66,9 @@ public class ProductController : ControllerBase
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
     [HttpGet("{id:int}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult> GetById([FromRoute] int id)
     {
         try
@@ -103,6 +109,10 @@ public class ProductController : ControllerBase
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
     [HttpGet]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult> Get([FromQuery] bool? isActive, [FromQuery] string name)
     {
         try
@@ -160,6 +170,10 @@ public class ProductController : ControllerBase
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
     [HttpPut("{id:int}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult> Update([FromRoute] int id, [FromBody] ProductUpdate productRequest)
     {
         try
@@ -201,6 +215,9 @@ public class ProductController : ControllerBase
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
     [HttpDelete("{id:int}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult> Delete([FromRoute] int id)
     {
         try
@@ -229,6 +246,9 @@ public class ProductController : ControllerBase
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
     [HttpPatch("{id:int}/deactivate")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult> Deactivate([FromRoute] int id)
     {
         try
@@ -261,6 +281,9 @@ public class ProductController : ControllerBase
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
     [HttpPatch("{id:int}/activate")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult> Activate([FromRoute] int id)
     {
         try
