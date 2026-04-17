@@ -155,7 +155,7 @@ Regra:
    - barra de filtros
    - tabela
    - paginacao
-   - modal de create/edit
+   - modal de create/edit/delete
 5. Mutacoes chamam o servico da API e recarregam a lista.
 6. Feedback visual e feito com toast e estados de loading/erro.
 
@@ -200,6 +200,7 @@ Responsabilidade:
 - buscar por id
 - criar
 - editar
+- excluir
 - ativar/desativar se existir
 
 Seguir o mesmo formato de tratamento de erro usado em `product.js`.
@@ -250,7 +251,7 @@ Esse hook deve concentrar:
 - validacao
 - valores iniciais
 - normalizacao de campos
-- submit de create/edit
+- submit de create/edit/delete
 
 Regra:
 
@@ -317,6 +318,7 @@ Ao finalizar:
 - validar paginação
 - validar create em modal
 - validar edit em modal
+- validar delete em modal
 - validar acao por linha
 - validar empty state
 - validar loading state

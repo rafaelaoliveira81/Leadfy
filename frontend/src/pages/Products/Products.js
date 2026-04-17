@@ -5,6 +5,7 @@ import { ProductListHeader } from '../../features/products/components/ProductLis
 import { ProductFilters } from '../../features/products/components/ProductFilters';
 import { ProductTable } from '../../features/products/components/ProductTable';
 import { ProductFormModal } from '../../features/products/components/ProductFormModal';
+import { ProductDeleteModal } from '../../features/products/components/ProductDeleteModal';
 import { useProductsPage } from '../../features/products/hooks/useProductsPage';
 import style from './_products.module.css';
 
@@ -29,9 +30,13 @@ export function Products() {
     openCreateModal,
     openEditModal,
     closeModal,
+    deleteModal,
+    openDeleteModal,
+    closeDeleteModal,
     createProduct,
     updateProduct,
     toggleProductStatus,
+    deleteProduct,
   } = useProductsPage();
 
   const handleToggleStatus = async (product) => {
@@ -45,6 +50,15 @@ export function Products() {
       );
     } catch {
       addToast('Erro ao alterar status do produto.', 'error');
+    }
+  };
+
+  const handleDelete = async (productId) => {
+    try {
+      await deleteProduct(productId);
+      addToast('Produto excluído com sucesso!', 'success');
+    } catch {
+      addToast('Erro ao excluir produto.', 'error');
     }
   };
 
@@ -69,6 +83,7 @@ export function Products() {
           isLoading={isLoading}
           onEdit={openEditModal}
           onToggleStatus={handleToggleStatus}
+          onDelete={openDeleteModal}
           emptyMessage="Nenhum produto encontrado."
           emptyActionLabel="+ Novo Produto"
           onEmptyAction={openCreateModal}
@@ -95,6 +110,15 @@ export function Products() {
           onCreateSubmit={createProduct}
           onUpdateSubmit={updateProduct}
           addToast={addToast}
+        />
+      )}
+
+      {deleteModal.open && (
+        <ProductDeleteModal
+          open={deleteModal.open}
+          product={deleteModal.product}
+          onClose={closeDeleteModal}
+          onConfirm={handleDelete}
         />
       )}
     </AppLayout>

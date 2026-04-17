@@ -11,6 +11,7 @@ import { formatPrice } from '../mappers/product.mapper';
  * @param {boolean} props.isLoading
  * @param {(product: object) => void} props.onEdit
  * @param {(product: object) => void} props.onToggleStatus
+ * @param {(product: object) => void} props.onDelete
  * @param {string} [props.emptyMessage]
  * @param {string} [props.emptyActionLabel]
  * @param {() => void} [props.onEmptyAction]
@@ -20,6 +21,7 @@ export function ProductTable({
   isLoading,
   onEdit,
   onToggleStatus,
+  onDelete,
   emptyMessage,
   emptyActionLabel,
   onEmptyAction,
@@ -50,11 +52,12 @@ export function ProductTable({
             product={row}
             onEdit={onEdit}
             onToggleStatus={onToggleStatus}
+            onDelete={onDelete}
           />
         ),
       },
     ],
-    [onEdit, onToggleStatus]
+    [onEdit, onToggleStatus, onDelete]
   );
 
   return (

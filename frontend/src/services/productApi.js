@@ -7,37 +7,40 @@ import { HTTPClient } from './client';
  */
 const mapApiError = (error) => {
     if (!error.response) {
-        throw new Error('Erro de rede ou servidor indisponível');
+        throw {
+            type: 'network',
+            message: 'Erro de rede ou servidor indisponível'
+        };
     }
 
     const { status, data } = error.response;
 
     if (status === 400) {
-        return Promise.reject({
+        throw {
             type: 'validation',
-            message: data.message || 'Dados inválidos',
-            errors: data.errors || null
-        });
+            message: data?.message || 'Dados inválidos',
+            errors: data?.errors || null
+        };
     }
 
     if (status === 404) {
-        return Promise.reject({
+        throw {
             type: 'not_found',
-            message: data.message || 'Recurso não encontrado'
-        });
+            message: data?.message || 'Recurso não encontrado'
+        };
     }
 
     if (status === 500) {
-        return Promise.reject({
+        throw {
             type: 'server',
-            message: 'Erro interno. Tente novamente mais tarde.'
-        });
+            message: data?.message || 'Erro interno. Tente novamente mais tarde.'
+        };
     }
 
-    return Promise.reject({
+    throw {
         type: 'unknown',
-        message: 'Erro inesperado'
-    });
+        message: data?.message || 'Erro inesperado'
+    };
 };
 
 const productAPI = {
