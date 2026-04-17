@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import productAPI from '../../../services/product';
+import productAPI from '../../../services/productApi';
 import {
   PRODUCT_DEFAULT_PAGE_SIZE,
   PRODUCT_SEARCH_DEBOUNCE_MS,
@@ -35,6 +35,7 @@ export function useProductsPage() {
 
   // --- Modal ---
   const [modal, setModal] = useState({ open: false, mode: null, product: null });
+  const [deleteModal, setDeleteModal] = useState({ open: false, product: null });
 
   // --- Debounce da busca ---
   const debounceRef = useRef(null);
@@ -125,6 +126,14 @@ export function useProductsPage() {
     setModal({ open: false, mode: null, product: null });
   }, []);
 
+  const openDeleteModal = useCallback((product) => {
+    setDeleteModal({ open: true, product });
+  }, []);
+
+  const closeDeleteModal = useCallback(() => {
+    setDeleteModal({ open: false, product: null });
+  }, []);
+
   // --- Mutações ---
   const createProduct = useCallback(
     async (data) => {
@@ -156,6 +165,15 @@ export function useProductsPage() {
     [fetchProducts]
   );
 
+  const deleteProduct = useCallback(
+    async (productId) => {
+      await productAPI.Delete(productId);
+      closeDeleteModal();
+      await fetchProducts();
+    },
+    [closeDeleteModal, fetchProducts]
+  );
+
   return {
     // Listagem
     items: paginatedItems,
@@ -177,16 +195,22 @@ export function useProductsPage() {
     setPage,
     setPageSize: handleSetPageSize,
 
-    // Modal
+    // Modal de criar/editar
     modal,
     openCreateModal,
     openEditModal,
     closeModal,
 
+    // Modal de exclusão
+    deleteModal,
+    openDeleteModal,
+    closeDeleteModal,
+
     // Mutações
     createProduct,
     updateProduct,
     toggleProductStatus,
+    deleteProduct,
 
     // Refetch manual
     refetch: fetchProducts,

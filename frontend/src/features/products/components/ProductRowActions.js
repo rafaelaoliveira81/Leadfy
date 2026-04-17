@@ -8,8 +8,9 @@ import style from './_productRowActions.module.css';
  * @param {object} props.product
  * @param {(product: object) => void} props.onEdit
  * @param {(product: object) => void} props.onToggleStatus
+ * @param {(product: object) => void} props.onDelete
  */
-export function ProductRowActions({ product, onEdit, onToggleStatus }) {
+export function ProductRowActions({ product, onEdit, onToggleStatus, onDelete }) {
   const [open, setOpen] = useState(false);
   const menuRef = useRef(null);
 
@@ -56,6 +57,16 @@ export function ProductRowActions({ product, onEdit, onToggleStatus }) {
             }}
           >
             {product.isActive ? 'Desativar' : 'Ativar'}
+          </button>
+          <button
+            className={style.menuItem}
+            role="menuitem"
+            onClick={() => {
+              setOpen(false);
+              onDelete(product);
+            }}
+          >
+            Excluir
           </button>
         </div>
       )}
