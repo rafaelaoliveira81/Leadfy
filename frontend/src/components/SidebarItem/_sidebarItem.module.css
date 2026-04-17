@@ -1,0 +1,55 @@
+.item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  color: #edf2f4;
+  text-decoration: none;
+  transition: background-color 0.2s, color 0.2s;
+  white-space: nowrap;
+}
+
+.item:hover {
+  background-color: rgba(239, 35, 60, 0.15);
+  color: #ef233c;
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 1.4rem;
+}
+
+.icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.label {
+  font-size: 0.95rem;
+  font-weight: 500;
+  overflow: hidden;
+}
+
+/* ── Collapsed ── */
+.item.collapsed {
+  justify-content: center;
+  padding: 12px 0;
+}
+
+.item.collapsed .label {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .item.collapsed {
+    justify-content: flex-start;
+    padding: 12px 20px;
+  }
+
+  .item.collapsed .label {
+    display: inline;
+  }
+}

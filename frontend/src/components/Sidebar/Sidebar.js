@@ -1,0 +1,64 @@
+import style from './_sidebar.module.css';
+import { RiTeamFill } from 'react-icons/ri';
+import {
+  MdOutlineDashboard,
+  MdPeople,
+  MdPersonSearch,
+  MdShoppingCart,
+  MdMenuOpen,
+  MdMenu,
+  MdClose,
+} from 'react-icons/md';
+import { SidebarItem } from '../SidebarItem/SidebarItem';
+
+const menuItems = [
+  { texto: 'Dashboard', link: '/dashboard', logo: <MdOutlineDashboard /> },
+  { texto: 'Leads', link: '/leads', logo: <MdPersonSearch /> },
+  { texto: 'Owners', link: '/owners', logo: <RiTeamFill /> },
+  { texto: 'Produtos', link: '/products', logo: <MdShoppingCart /> },
+  { texto: 'Usuários', link: '/users', logo: <MdPeople /> },
+];
+
+export function Sidebar({ isCollapsed, onToggle, isMobileOpen, onCloseMobile }) {
+  return (
+    <>
+      {isMobileOpen && (
+        <div className={style.overlay} onClick={onCloseMobile} aria-hidden="true" />
+      )}
+      <aside
+        className={`${style.sidebar} ${isCollapsed ? style.collapsed : ''} ${isMobileOpen ? style.mobileOpen : ''}`}
+      >
+        <div className={style.header}>
+          <span className={style.title}>CRM Admin</span>
+          <button
+            className={style.toggleBtn}
+            onClick={onToggle}
+            aria-label={isCollapsed ? 'Expandir menu' : 'Minimizar menu'}
+          >
+            {isCollapsed ? <MdMenu /> : <MdMenuOpen />}
+          </button>
+          <button
+            className={style.closeBtn}
+            onClick={onCloseMobile}
+            aria-label="Fechar menu"
+          >
+            <MdClose />
+          </button>
+        </div>
+        <hr className={style.divider} />
+        <nav className={style.nav}>
+          {menuItems.map((item) => (
+            <SidebarItem
+              key={item.link}
+              texto={item.texto}
+              link={item.link}
+              logo={item.logo}
+              isCollapsed={isCollapsed}
+              onClick={onCloseMobile}
+            />
+          ))}
+        </nav>
+      </aside>
+    </>
+  );
+}
