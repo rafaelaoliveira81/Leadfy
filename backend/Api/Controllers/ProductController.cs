@@ -4,7 +4,7 @@ using Models.Response;
 using Domain.Entities;
 
 [ApiController]
-[Route("products")]
+[Route("api/products")]
 public class ProductController : ControllerBase
 {
     private readonly IProductApp _productApp;
