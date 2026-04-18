@@ -8,6 +8,7 @@ import {
   MdMenuOpen,
   MdMenu,
   MdClose,
+  MdTrendingUp,
 } from 'react-icons/md';
 import { SidebarItem } from '../SidebarItem/SidebarItem';
 
@@ -17,6 +18,7 @@ const menuItems = [
   { texto: 'Owners', link: '/owners', logo: <RiTeamFill /> },
   { texto: 'Produtos', link: '/products', logo: <MdShoppingCart /> },
   { texto: 'Usuários', link: '/users', logo: <MdPeople /> },
+  { texto: 'Oportunidades', link: '/opportunities', logo: <MdTrendingUp /> },
 ];
 
 export function Sidebar({ isCollapsed, onToggle, isMobileOpen, onCloseMobile }) {
