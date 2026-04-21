@@ -8,7 +8,7 @@ using Domain.Enuns;
 /// Controller responsável pelos endpoints de gerenciamento de usuários.
 /// </summary>
 [ApiController]
-[Route("users")]
+[Route("api/users")]
 public class UserController : ControllerBase
 {
     private readonly IUserApp _userApp;

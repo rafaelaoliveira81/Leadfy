@@ -7,7 +7,7 @@ using Domain.Entities;
 /// Controller responsável pelos endpoints de gerenciamento de responsáveis.
 /// </summary>
 [ApiController]
-[Route("owers")]
+[Route("api/owers")]
 public class OwerController : ControllerBase
 {
     private readonly IOwerApp _owerApp;

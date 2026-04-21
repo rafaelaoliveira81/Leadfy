@@ -8,7 +8,7 @@ using Domain.Enuns;
 /// Controller responsável pelos endpoints de gerenciamento de opportunities.
 /// </summary>
 [ApiController]
-[Route("opportunities")]
+[Route("api/opportunities")]
 public class OpportunityController : ControllerBase
 {
     private readonly IOpportunityApp _opportunityApp;

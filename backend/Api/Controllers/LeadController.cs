@@ -9,7 +9,7 @@ namespace Api.Controllers;
 /// Controller responsável pelos endpoints de gerenciamento de leads.
 /// </summary>
 [ApiController]
-[Route("leads")]
+[Route("api/leads")]
 public class LeadController : ControllerBase
 {
     private readonly ILeadApp _leadApp;
