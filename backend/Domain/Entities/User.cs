@@ -15,6 +15,7 @@ public class User
     public bool IsActive { get; set; } //required and default true
     public DateTime CreatedAt { get; set; } //required and default current time
     public ICollection<Ower> Owers { get; set; } //Relacionamento 1:N com Ower
+    public ICollection<Interaction> Interactions { get; set; } //Relacionamento 1:N com Interaction
     
     /// <summary>
     /// Construtor padrão.
@@ -24,6 +25,8 @@ public class User
     {
         IsActive = true;
         CreatedAt = DateTime.UtcNow;
+        Owers = new List<Ower>();
+        Interactions = new List<Interaction>();
     }
 
     /// <summary>

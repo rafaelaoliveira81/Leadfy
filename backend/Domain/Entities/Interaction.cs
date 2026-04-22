@@ -2,55 +2,76 @@ using Domain.Enuns;
 
 namespace Domain.Entities;
 
+/// <summary>
+/// Representa uma interação registrada no histórico do CRM.
+/// Permite armazenar anotações, mudanças de etapa e próximos contatos
+/// vinculados a uma entidade do domínio, como uma opportunity.
+/// </summary>
 public class Interaction
 {
+    /// <summary>
+    /// Identificador único da interação.
+    /// </summary>
     public int Id { get; set; }
 
-    // Id do registro no contexto do CRM
-    // Ex: OpportunityId, PostSaleId, etc.
+    /// <summary>
+    /// Identificador da entidade de negócio dentro do contexto do CRM.
+    /// Exemplo: ID da opportunity associada ao histórico.
+    /// </summary>
     public int CrmEntityId { get; set; }
 
-    // Tipo da entidade do CRM
+    /// <summary>
+    /// Tipo da entidade do CRM à qual a interação pertence.
+    /// </summary>
     public CrmEntityType CrmEntityType { get; set; }
 
-    // Status/etapa de origem e destino
+    /// <summary>
+    /// Etapa de origem antes da interação, quando aplicável.
+    /// </summary>
     public int? FromStage { get; set; }
+
+    /// <summary>
+    /// Etapa de destino após a interação, quando aplicável.
+    /// </summary>
     public int? ToStage { get; set; }
 
+    /// <summary>
+    /// Descrição textual da interação registrada no histórico.
+    /// </summary>
     public string Description { get; set; }
 
+    /// <summary>
+    /// Data e hora em que a interação ocorreu.
+    /// </summary>
     public DateTime InteractionDate { get; set; }
+
+    /// <summary>
+    /// Data e hora de criação do registro da interação.
+    /// </summary>
     public DateTime CreatedAt { get; set; }
 
+    /// <summary>
+    /// Identificador do usuário responsável pelo registro da interação.
+    /// </summary>
     public int UserId { get; set; }
+
+    /// <summary>
+    /// Usuário responsável pela criação da interação.
+    /// </summary>
     public User User { get; set; }
 
+    /// <summary>
+    /// Próxima data de contato prevista, quando existir acompanhamento futuro.
+    /// </summary>
     public DateTime? NextContactDate { get; set; }
+
+    /// <summary>
+    /// Construtor padrão.
+    /// Inicializa a data de criação e a data da interação com o horário atual em UTC.
+    /// </summary>
+    public Interaction()
+    {
+        CreatedAt = DateTime.UtcNow;
+        InteractionDate = DateTime.UtcNow;
+    }
 }
-
-// exemplo de uso:
-
-// var interaction = new Interaction
-// {
-//     CrmEntityId = 123,
-//     CrmEntityType = CrmEntityType.Opportunity,
-//     FromStage = (int)OpportunityStage.Qualified,
-//     ToStage = (int)OpportunityStage.ProposalSent,
-//     Description = "Oportunidade avançou para proposta enviada.",
-//     InteractionDate = DateTime.UtcNow,
-//     CreatedAt = DateTime.UtcNow,
-//     UserId = 10
-// };
-
-// var interaction = new Interaction
-// {
-//     CrmEntityId = 45,
-//     CrmEntityType = CrmEntityType.PostSale,
-//     FromStage = (int)PostSaleStage.Activated,
-//     ToStage = (int)PostSaleStage.InFollowUp,
-//     Description = "Cliente entrou em acompanhamento pós ativação.",
-//     InteractionDate = DateTime.UtcNow,
-//     CreatedAt = DateTime.UtcNow,
-//     UserId = 10,
-//     NextContactDate = DateTime.UtcNow.AddDays(7)
-// };

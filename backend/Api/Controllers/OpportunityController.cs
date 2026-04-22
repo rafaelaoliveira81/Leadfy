@@ -98,6 +98,7 @@ public class OpportunityController : ControllerBase
                 ProductId = opportunity.ProductId,
                 ProductName = opportunity.Product?.Name,
                 StageName = opportunity.Stage.ToString(),
+                Status = opportunity.IsActive ? "Active" : "Inactive",
                 Amount = opportunity.Amount,
                 ExpectedCloseDate = opportunity.ExpectedCloseDate,
                 CreatedAt = opportunity.CreatedAt,
@@ -172,6 +173,7 @@ public class OpportunityController : ControllerBase
                 ProductId = o.ProductId,
                 ProductName = o.Product?.Name,
                 StageName = o.Stage.ToString(),
+                Status = o.IsActive ? "Active" : "Inactive",
                 Amount = o.Amount,
                 ExpectedCloseDate = o.ExpectedCloseDate,
                 CreatedAt = o.CreatedAt,
@@ -222,6 +224,7 @@ public class OpportunityController : ControllerBase
                 OwnerId = opportunityRequest.OwnerId,
                 ProductId = opportunityRequest.ProductId,
                 Stage = (OpportunityStage)opportunityRequest.Stage,
+                Amount = opportunityRequest.Amount,
                 ExpectedCloseDate = opportunityRequest.ExpectedCloseDate,
                 IsActive = opportunityRequest.IsActive
             };

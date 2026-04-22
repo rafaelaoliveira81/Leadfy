@@ -155,17 +155,17 @@ public class OpportunityApp : IOpportunityApp
 
         await ValidateOpportunityInformation(opportunity);
 
-        // Validação: Amount não pode ser atualizado após Proposal (Stage >= Proposal)
-        if (opportunityEntity.Stage >= OpportunityStage.Proposal &&
+        // Validação: Amount não pode ser atualizado após ProposalSent.
+        if (opportunityEntity.Stage >= OpportunityStage.ProposalSent &&
             opportunityEntity.Amount != opportunity.Amount)
-            throw new ArgumentException("Amount não pode ser atualizado após a stage Proposal.");
+            throw new ArgumentException("Amount não pode ser atualizado após a stage ProposalSent.");
 
         opportunityEntity.Title = opportunity.Title;
         opportunityEntity.LeadId = opportunity.LeadId;
         opportunityEntity.OwnerId = opportunity.OwnerId;
         opportunityEntity.ProductId = opportunity.ProductId;
         opportunityEntity.Stage = opportunity.Stage;
-        if (opportunityEntity.Stage < OpportunityStage.Proposal)
+        if (opportunityEntity.Stage < OpportunityStage.ProposalSent)
             opportunityEntity.Amount = opportunity.Amount;
         opportunityEntity.ExpectedCloseDate = opportunity.ExpectedCloseDate;
         opportunityEntity.IsActive = opportunity.IsActive;
@@ -245,12 +245,15 @@ public class OpportunityApp : IOpportunityApp
         if (opportunity.Title.Length > 150)
             throw new ArgumentException("O título da opportunity não pode exceder 150 caracteres.");
 
+        if (!Enum.IsDefined(typeof(OpportunityStage), opportunity.Stage))
+            throw new ArgumentException("A stage da opportunity é inválida.");
+
         if (opportunity.LeadId <= 0)
             throw new ArgumentException("O lead vinculado à opportunity deve ser informado.");
 
-        // Owner é obrigatório apenas quando Stage != New
-        if (opportunity.Stage != OpportunityStage.New && opportunity.OwnerId <= 0)
-            throw new ArgumentException("O owner deve ser informado quando a stage não é New.");
+        // Owner é obrigatório apenas quando Stage != NewLead.
+        if (opportunity.Stage != OpportunityStage.NewLead && opportunity.OwnerId <= 0)
+            throw new ArgumentException("O owner deve ser informado quando a stage não é NewLead.");
 
         if (opportunity.ProductId <= 0)
             throw new ArgumentException("O produto vinculado à opportunity deve ser informado.");

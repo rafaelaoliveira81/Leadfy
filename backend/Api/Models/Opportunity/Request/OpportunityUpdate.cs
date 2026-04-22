@@ -7,6 +7,7 @@ public class OpportunityUpdate
     public int? OwnerId { get; set; }
     public int ProductId { get; set; }
     public int Stage { get; set; }
+    public decimal Amount { get; set; }
     public DateTime ExpectedCloseDate { get; set; }
     public bool IsActive { get; set; }
 }
