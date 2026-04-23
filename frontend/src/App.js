@@ -7,6 +7,7 @@ import { Leads } from './pages/Leads/Leads';
 import { Owers } from './pages/Owers/Owers';
 import { Users } from './pages/Users/Users';
 import { Opportunities } from './pages/Opportunities/Opportunities';
+import { OpportunitiesKanban } from './pages/Opportunities/Kanban/OpportunitiesKanban';
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
           <Route path="/owners" element={<Owers />} />
           <Route path="/users" element={<Users />} />
           <Route path="/opportunities" element={<Opportunities />} />
+          <Route path="/opportunities/kanban" element={<OpportunitiesKanban />} />
         </Routes>
       </BrowserRouter>
     </ToastProvider>

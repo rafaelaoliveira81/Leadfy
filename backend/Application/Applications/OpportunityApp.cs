@@ -343,4 +343,43 @@ public class OpportunityApp : IOpportunityApp
     }
 
     #endregion
+
+    /// <summary>
+    /// Altera apenas o stage de uma opportunity existente.
+    /// Respeita as mesmas regras de negócio do fluxo principal.
+    /// </summary>
+    public async Task ChangeStageAsync(int idOpportunity, OpportunityStage newStage)
+    {
+        if (!Enum.IsDefined(typeof(OpportunityStage), newStage))
+            throw new ArgumentException("A stage informada é inválida.");
+
+        var opportunityEntity = await ValidateOpportunityExistsByIdAsync(idOpportunity);
+
+        // Owner é obrigatório quando Stage != NewLead.
+        if (newStage != OpportunityStage.NewLead &&
+            (!opportunityEntity.OwnerId.HasValue || opportunityEntity.OwnerId <= 0))
+            throw new ArgumentException("O owner deve ser informado quando a stage não é NewLead.");
+
+        opportunityEntity.Stage = newStage;
+
+        await _opportunityRepo.UpdateAsync(opportunityEntity);
+    }
+
+    /// <summary>
+    /// Atualiza o stage e a ordenação de múltiplas opportunities em lote.
+    /// Usado para persistir a ordem visual do Kanban.
+    /// </summary>
+    public async Task UpdateSortOrderAsync(IEnumerable<(int id, OpportunityStage stage, int sortOrder)> items)
+    {
+        if (items == null || !items.Any())
+            throw new ArgumentException("A lista de itens não pode ser vazia.");
+
+        foreach (var item in items)
+        {
+            var opportunityEntity = await ValidateOpportunityExistsByIdAsync(item.id);
+            opportunityEntity.Stage = item.stage;
+            opportunityEntity.SortOrder = item.sortOrder;
+            await _opportunityRepo.UpdateAsync(opportunityEntity);
+        }
+    }
 }

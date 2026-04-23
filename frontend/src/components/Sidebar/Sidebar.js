@@ -9,6 +9,7 @@ import {
   MdMenu,
   MdClose,
   MdTrendingUp,
+  MdViewKanban,
 } from 'react-icons/md';
 import { SidebarItem } from '../SidebarItem/SidebarItem';
 
@@ -19,6 +20,7 @@ const menuItems = [
   { texto: 'Produtos', link: '/products', logo: <MdShoppingCart /> },
   { texto: 'Usuários', link: '/users', logo: <MdPeople /> },
   { texto: 'Oportunidades', link: '/opportunities', logo: <MdTrendingUp /> },
+  { texto: 'Kanban', link: '/opportunities/kanban', logo: <MdViewKanban /> },
 ];
 
 export function Sidebar({ isCollapsed, onToggle, isMobileOpen, onCloseMobile }) {

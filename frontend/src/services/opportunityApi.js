@@ -154,6 +154,35 @@ const opportunityAPI = {
         } catch (error) {
             return mapApiError(error);
         }
+    },
+
+    /**
+     * Altera o stage de uma oportunidade (usado pelo Kanban).
+     * @param {number} opportunityId - ID da oportunidade.
+     * @param {number} stage - Novo stage (int do enum backend).
+     * @returns {Promise<void>}
+     */
+    async PatchStage(opportunityId, stage) {
+        try {
+            await HTTPClient.patch(`/opportunities/${opportunityId}/stage`, { stage });
+            return;
+        } catch (error) {
+            return mapApiError(error);
+        }
+    },
+
+    /**
+     * Atualiza a ordenação de múltiplas oportunidades em lote (Kanban reorder).
+     * @param {Array<{id: number, stage: number, sortOrder: number}>} items
+     * @returns {Promise<void>}
+     */
+    async PatchSortOrder(items) {
+        try {
+            await HTTPClient.patch(`/opportunities/reorder`, { items });
+            return;
+        } catch (error) {
+            return mapApiError(error);
+        }
     }
 };
 

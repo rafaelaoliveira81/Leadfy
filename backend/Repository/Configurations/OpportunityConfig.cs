@@ -43,6 +43,10 @@ public class OpportunityConfig : IEntityTypeConfiguration<Opportunity>
         builder.Property(o => o.IsActive)
                .IsRequired();
 
+        builder.Property(o => o.SortOrder)
+               .IsRequired()
+               .HasDefaultValue(0);
+
         builder.HasOne(o => o.Lead)
                .WithMany()
                .HasForeignKey(o => o.LeadId)

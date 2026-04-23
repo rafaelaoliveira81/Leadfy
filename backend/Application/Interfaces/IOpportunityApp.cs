@@ -1,4 +1,5 @@
 using Domain.Entities;
+using Domain.Enuns;
 
 public interface IOpportunityApp
 {
@@ -13,4 +14,6 @@ public interface IOpportunityApp
     Task DeleteAsync(int idOpportunity);
     Task DeactivateAsync(int idOpportunity);
     Task ActivateAsync(int idOpportunity);
+    Task ChangeStageAsync(int idOpportunity, OpportunityStage newStage);
+    Task UpdateSortOrderAsync(IEnumerable<(int id, OpportunityStage stage, int sortOrder)> items);
 }

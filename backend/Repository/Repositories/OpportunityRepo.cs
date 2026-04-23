@@ -76,6 +76,8 @@ public class OpportunityRepo : BaseRepo, IOpportunityRepo
             .Include(o => o.Lead)
             .Include(o => o.Owner)
             .Include(o => o.Product)
+            .OrderBy(o => o.Stage)
+            .ThenBy(o => o.SortOrder)
             .ToListAsync();
     }
 
@@ -91,6 +93,8 @@ public class OpportunityRepo : BaseRepo, IOpportunityRepo
             .Include(o => o.Lead)
             .Include(o => o.Owner)
             .Include(o => o.Product)
+            .OrderBy(o => o.Stage)
+            .ThenBy(o => o.SortOrder)
             .ToListAsync();
     }
 

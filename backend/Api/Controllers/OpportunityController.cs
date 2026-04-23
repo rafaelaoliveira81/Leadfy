@@ -97,9 +97,11 @@ public class OpportunityController : ControllerBase
                 OwnerName = opportunity.Owner?.Name,
                 ProductId = opportunity.ProductId,
                 ProductName = opportunity.Product?.Name,
+                Stage = (int)opportunity.Stage,
                 StageName = opportunity.Stage.ToString(),
                 Status = opportunity.IsActive ? "Active" : "Inactive",
                 Amount = opportunity.Amount,
+                SortOrder = opportunity.SortOrder,
                 ExpectedCloseDate = opportunity.ExpectedCloseDate,
                 CreatedAt = opportunity.CreatedAt,
                 IsActive = opportunity.IsActive
@@ -172,9 +174,11 @@ public class OpportunityController : ControllerBase
                 OwnerName = o.Owner?.Name,
                 ProductId = o.ProductId,
                 ProductName = o.Product?.Name,
+                Stage = (int)o.Stage,
                 StageName = o.Stage.ToString(),
                 Status = o.IsActive ? "Active" : "Inactive",
                 Amount = o.Amount,
+                SortOrder = o.SortOrder,
                 ExpectedCloseDate = o.ExpectedCloseDate,
                 CreatedAt = o.CreatedAt,
                 IsActive = o.IsActive
@@ -331,6 +335,72 @@ public class OpportunityController : ControllerBase
         try
         {
             await _opportunityApp.ActivateAsync(id);
+
+            return NoContent();
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Altera o stage de uma opportunity (usado pelo Kanban).
+    /// </summary>
+    /// <param name="id">Identificador da opportunity.</param>
+    /// <param name="request">Novo stage.</param>
+    [HttpPatch("{id:int}/stage")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult> UpdateStage([FromRoute] int id, [FromBody] OpportunityStageUpdate request)
+    {
+        try
+        {
+            await _opportunityApp.ChangeStageAsync(id, (OpportunityStage)request.Stage);
+
+            return NoContent();
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Atualiza o stage e a ordenação de múltiplas opportunities em lote (usado pelo Kanban).
+    /// </summary>
+    /// <param name="request">Lista de itens com id, stage e sortOrder.</param>
+    [HttpPatch("reorder")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult> Reorder([FromBody] OpportunitySortOrderUpdate request)
+    {
+        try
+        {
+            var items = request.Items.Select(i =>
+                (i.Id, (OpportunityStage)i.Stage, i.SortOrder));
+
+            await _opportunityApp.UpdateSortOrderAsync(items);
 
             return NoContent();
         }

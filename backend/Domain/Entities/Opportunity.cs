@@ -17,6 +17,7 @@ public class Opportunity
     public DateTime ExpectedCloseDate { get; set; }
     public DateTime CreatedAt { get; set; }
     public bool IsActive { get; set; }
+    public int SortOrder { get; set; }
 
     /// <summary>
     /// Construtor padrão.
