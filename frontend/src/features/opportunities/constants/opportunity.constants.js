@@ -19,11 +19,13 @@ export const OPPORTUNITY_STAGE_OPTIONS = [
 ];
 
 export const OPPORTUNITY_STAGE_MAP = {
-  New: "Novo",
+  NewLead: "Novo",
+  Contacted: "Em contato",
   Qualified: "Qualificado",
-  Proposal: "Proposta",
+  ProposalSent: "Proposta",
   Negotiation: "Negociação",
-  Closed: "Fechado",
+  Won: "Fechado",
+  Lost: "Perdido",
 };
 
 export const OPPORTUNITY_SEARCH_DEBOUNCE_MS = 400;
