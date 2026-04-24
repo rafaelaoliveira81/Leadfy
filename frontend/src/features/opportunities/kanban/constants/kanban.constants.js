@@ -6,7 +6,7 @@
 
 export const KANBAN_STAGES = [
   { value: 1, key: 'NewLead',      label: 'Novo Lead',    accent: '#a2d2ff' },
-  { value: 2, key: 'Contacted',    label: 'Contactado',   accent: '#48cae4' },
+  { value: 2, key: 'Contacted',    label: 'Em contado',   accent: '#48cae4' },
   { value: 3, key: 'Qualified',    label: 'Qualificado',  accent: '#fb8500' },
   { value: 4, key: 'ProposalSent', label: 'Proposta',     accent: '#8338ec' },
   { value: 5, key: 'Negotiation',  label: 'Negociação',   accent: '#ffb703' },
