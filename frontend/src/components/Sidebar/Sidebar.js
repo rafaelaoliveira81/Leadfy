@@ -14,13 +14,13 @@ import {
 import { SidebarItem } from '../SidebarItem/SidebarItem';
 
 const menuItems = [
-  { texto: 'Dashboard', link: '/dashboard', logo: <MdOutlineDashboard /> },
-  { texto: 'Leads', link: '/leads', logo: <MdPersonSearch /> },
-  { texto: 'Owners', link: '/owners', logo: <RiTeamFill /> },
-  { texto: 'Produtos', link: '/products', logo: <MdShoppingCart /> },
-  { texto: 'Usuários', link: '/users', logo: <MdPeople /> },
-  { texto: 'Oportunidades', link: '/opportunities', logo: <MdTrendingUp /> },
-  { texto: 'Kanban', link: '/opportunities/kanban', logo: <MdViewKanban /> },
+{ texto: 'Dashboard', link: '/dashboard', logo: <MdOutlineDashboard /> },
+{ texto: 'Kanban', link: '/opportunities/kanban', logo: <MdViewKanban /> },
+{ texto: 'Leads', link: '/leads', logo: <MdPersonSearch /> },
+{ texto: 'Oportunidades', link: '/opportunities', logo: <MdTrendingUp /> },
+{ texto: 'Produtos', link: '/products', logo: <MdShoppingCart /> },
+{ texto: 'Responsáveis', link: '/owners', logo: <RiTeamFill /> },
+{ texto: 'Usuários', link: '/users', logo: <MdPeople /> },
 ];
 
 export function Sidebar({ isCollapsed, onToggle, isMobileOpen, onCloseMobile }) {
