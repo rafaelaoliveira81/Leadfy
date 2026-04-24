@@ -35,7 +35,7 @@ export function KanbanBoard({
     <>
       {error && <div className={style.errorBanner}>{error}</div>}
 
-      <KanbanProgress columns={columns} />
+      {/* <KanbanProgress columns={columns} /> */}
 
       <DndContext
         sensors={sensors}

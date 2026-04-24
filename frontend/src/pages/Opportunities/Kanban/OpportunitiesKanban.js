@@ -53,9 +53,9 @@ export function OpportunitiesKanban() {
         <div className={style.boardHeader}>
           <div>
             <h1 className={style.boardTitle}>Kanban de Oportunidades</h1>
-            <p className={style.boardSubtitle}>
+            {/* <p className={style.boardSubtitle}>
               Gerencie o funil de vendas arrastando os cards entre as colunas.
-            </p>
+            </p> */}
           </div>
         </div>
 
