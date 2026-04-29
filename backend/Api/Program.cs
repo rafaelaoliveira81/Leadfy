@@ -22,6 +22,7 @@ builder.Services.AddScoped<ILeadApp, LeadApp>();
 builder.Services.AddScoped<IProductApp, ProductApp>();
 builder.Services.AddScoped<IOpportunityApp, OpportunityApp>();
 builder.Services.AddScoped<IInteractionApp, InteractionApp>();
+builder.Services.AddScoped<IAiService, AiService>();
 
 // Adicione as interfaces de banco de dados
 builder.Services.AddScoped<IUserRepo, UserRepository>();
