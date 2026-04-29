@@ -1,17 +1,20 @@
+using Microsoft.Extensions.Configuration;
+using System.Net.Http.Headers;
+using System.Text;
 using System.Text.Json;
 
 public class AiService : IAiService
 {
     private readonly HttpClient _httpClient;
     private readonly IConfiguration _config;
- 
+
     public AiService(IConfiguration config)
     {
         _httpClient = new HttpClient();
         _config = config;
     }
 
-    public async Task<string> GetAiResponseAsync(string prompt)
+    public async Task<string?> GetResponseFromModel(string prompt)
     {
         var url = _config["GitHubModels:BaseUrl"];
         var token = _config["GitHubModels:Token"];
@@ -21,7 +24,16 @@ public class AiService : IAiService
         _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("Itera360App");
 
         var content = new StringContent(
-            JsonSerializer.Serialize(new { prompt = prompt, max_tokens = 100 }),
+            JsonSerializer.Serialize(
+                new
+                {
+                    model = "gpt-4.1",
+                    messages = new[]
+                    {
+                        new { role = "user", content = prompt }
+                    },
+                    max_tokens = 100
+                }),
             Encoding.UTF8,
             "application/json"
         );
@@ -34,8 +46,18 @@ public class AiService : IAiService
 
             throw new Exception($"Erro: {response.StatusCode}, Detalhes: {error}");
         }
+        ;
 
-        var responseContent = await response.Content.ReadAsStringAsync();
-        return responseContent;
+        using (JsonDocument jsonDoc = JsonDocument.Parse(await response.Content.ReadAsStringAsync()))
+        {
+            var choices = jsonDoc.RootElement;
+
+            var message = choices.GetProperty("choices")[0]
+                                .GetProperty("message")
+                                .GetProperty("content")
+                                .GetString();
+
+            return message;
+        }
     }
 }

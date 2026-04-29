@@ -1,6 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using ProjetoFinal.Application.Interfaces;
-
 namespace Api.Controllers;
 
 /// <summary>
@@ -11,7 +9,7 @@ namespace Api.Controllers;
 public class AiController : ControllerBase
 {
     private readonly IAiService _aiService;
-    
+
     /// <summary>
     /// Inicializa uma nova instância do controller de interações.
     /// </summary>
@@ -24,7 +22,14 @@ public class AiController : ControllerBase
     [HttpPost("completar")]
     public async Task<IActionResult> Completar([FromBody] string prompt)
     {
-        var resposta = await _aiService.GetAiResponseAsync(prompt);
-        return Ok(resposta);
+        try
+        {
+            var resposta = await _aiService.GetResponseFromModel(prompt);
+            return Ok(resposta);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Erro ao obter resposta da IA: {ex.Message}");
+        }
     }
 }
