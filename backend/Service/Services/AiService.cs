@@ -3,61 +3,57 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 
+/// <summary>
+/// Implementação do serviço de IA usando a API GitHub Models.
+/// </summary>
 public class AiService : IAiService
 {
-    private readonly HttpClient _httpClient;
     private readonly IConfiguration _config;
 
     public AiService(IConfiguration config)
     {
-        _httpClient = new HttpClient();
         _config = config;
     }
 
-    public async Task<string?> GetResponseFromModel(string prompt)
+    /// <summary>
+    /// Envia o <paramref name="prompt"/> ao modelo especificado usando a <paramref name="apiKey"/> fornecida.
+    /// A URL base é lida de <c>GitHubModels:BaseUrl</c> nas configurações da aplicação.
+    /// </summary>
+    /// <exception cref="Exception">Lançada quando a API retorna um status de erro.</exception>
+    public async Task<string?> GetResponseFromModel(string prompt, string modelName, string apiKey)
     {
-        var url = _config["GitHubModels:BaseUrl"];
-        var token = _config["GitHubModels:Token"];
+        var url = _config["GitHubModels:BaseUrl"]
+            ?? throw new InvalidOperationException("URL do GitHub Models não configurada (GitHubModels:BaseUrl).");
 
-        _httpClient.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue("Bearer", token);
-        _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("Itera360App");
+        using var httpClient = new HttpClient();
+        httpClient.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", apiKey);
+        httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("Itera360App");
 
-        var content = new StringContent(
-            JsonSerializer.Serialize(
-                new
-                {
-                    model = "gpt-4.1",
-                    messages = new[]
-                    {
-                        new { role = "user", content = prompt }
-                    },
-                    max_tokens = 100
-                }),
+        var body = new StringContent(
+            JsonSerializer.Serialize(new
+            {
+                model = modelName,
+                messages = new[] { new { role = "user", content = prompt } },
+                max_tokens = 1000
+            }),
             Encoding.UTF8,
             "application/json"
         );
 
-        var response = await _httpClient.PostAsync(url, content);
+        var response = await httpClient.PostAsync(url, body);
 
         if (!response.IsSuccessStatusCode)
         {
             var error = await response.Content.ReadAsStringAsync();
-
-            throw new Exception($"Erro: {response.StatusCode}, Detalhes: {error}");
+            throw new Exception($"Erro ao chamar o modelo '{modelName}': {response.StatusCode}. Detalhes: {error}");
         }
-        ;
 
-        using (JsonDocument jsonDoc = JsonDocument.Parse(await response.Content.ReadAsStringAsync()))
-        {
-            var choices = jsonDoc.RootElement;
-
-            var message = choices.GetProperty("choices")[0]
-                                .GetProperty("message")
-                                .GetProperty("content")
-                                .GetString();
-
-            return message;
-        }
+        using var jsonDoc = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+        return jsonDoc.RootElement
+            .GetProperty("choices")[0]
+            .GetProperty("message")
+            .GetProperty("content")
+            .GetString();
     }
 }

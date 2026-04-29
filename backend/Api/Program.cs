@@ -22,6 +22,8 @@ builder.Services.AddScoped<ILeadApp, LeadApp>();
 builder.Services.AddScoped<IProductApp, ProductApp>();
 builder.Services.AddScoped<IOpportunityApp, OpportunityApp>();
 builder.Services.AddScoped<IInteractionApp, InteractionApp>();
+builder.Services.AddScoped<IAiConfigApp, AiConfigApp>();
+builder.Services.AddScoped<IApiKeyEncryptionService, ApiKeyEncryptionService>();
 builder.Services.AddScoped<IAiService, AiService>();
 
 // Adicione as interfaces de banco de dados
@@ -31,6 +33,7 @@ builder.Services.AddScoped<ILeadRepo, LeadRepo>();
 builder.Services.AddScoped<IProductRepo, ProductRepo>();
 builder.Services.AddScoped<IOpportunityRepo, OpportunityRepo>();
 builder.Services.AddScoped<IInteractionRepo, InteractionRepo>();
+builder.Services.AddScoped<IAiConfigRepo, AiConfigRepo>();
 
 // Adiciona os serviços
 builder.Services.AddControllers();

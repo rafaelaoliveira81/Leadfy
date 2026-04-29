@@ -17,6 +17,7 @@ public class CRMContext : DbContext
     public DbSet<Product> Products { get; set; }
     public DbSet<Opportunity> Opportunities { get; set; }
     public DbSet<Interaction> Interactions { get; set; }
+    public DbSet<AiConfig> AiConfigs { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -26,6 +27,7 @@ public class CRMContext : DbContext
         modelBuilder.ApplyConfiguration(new ProductConfig());
         modelBuilder.ApplyConfiguration(new OpportunityConfig());
         modelBuilder.ApplyConfiguration(new InteractionConfig());
+        modelBuilder.ApplyConfiguration(new AiConfigConfig());
 
         base.OnModelCreating(modelBuilder);
     }
