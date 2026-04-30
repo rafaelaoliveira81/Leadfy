@@ -10,6 +10,7 @@ import {
   MdClose,
   MdTrendingUp,
   MdViewKanban,
+  MdSmartToy,
 } from 'react-icons/md';
 import { SidebarItem } from '../SidebarItem/SidebarItem';
 
@@ -21,6 +22,7 @@ const menuItems = [
 { texto: 'Produtos', link: '/products', logo: <MdShoppingCart /> },
 { texto: 'Responsáveis', link: '/owners', logo: <RiTeamFill /> },
 { texto: 'Usuários', link: '/users', logo: <MdPeople /> },
+{ texto: 'Config. de IA', link: '/ai-config', logo: <MdSmartToy /> },
 ];
 
 export function Sidebar({ isCollapsed, onToggle, isMobileOpen, onCloseMobile }) {

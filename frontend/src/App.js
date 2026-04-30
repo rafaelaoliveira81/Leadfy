@@ -8,6 +8,7 @@ import { Owers } from './pages/Owers/Owers';
 import { Users } from './pages/Users/Users';
 import { Opportunities } from './pages/Opportunities/Opportunities';
 import { OpportunitiesKanban } from './pages/Opportunities/Kanban/OpportunitiesKanban';
+import { AiConfig } from './pages/AiConfig/AiConfig';
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
           <Route path="/users" element={<Users />} />
           <Route path="/opportunities" element={<Opportunities />} />
           <Route path="/opportunities/kanban" element={<OpportunitiesKanban />} />
+          <Route path="/ai-config" element={<AiConfig />} />
         </Routes>
       </BrowserRouter>
     </ToastProvider>

@@ -1,0 +1,18 @@
+.content {
+  padding: 1rem 0;
+}
+
+.message {
+  margin: 0 0 1rem 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #333;
+}
+
+.warning {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: #666;
+  font-style: italic;
+}
