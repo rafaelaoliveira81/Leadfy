@@ -8,9 +8,6 @@ public class AiPromptRequest
     /// <summary>Mensagem a ser enviada ao modelo.</summary>
     public string Prompt { get; set; }
 
-    /// <summary>Nome do modelo (ex: gpt-4.1, gpt-4o-mini).</summary>
-    public string ModelName { get; set; }
-
-    /// <summary>Chave da API do GitHub Models.</summary>
-    public string ApiKey { get; set; }
+    /// <summary>ID da configuração de IA a ser utilizada (modelo e chave de API).</summary>
+    public int ConfigId { get; set; }
 }
