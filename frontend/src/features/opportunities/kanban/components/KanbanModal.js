@@ -15,7 +15,13 @@ import { InteractionAddModal } from "./InteractionAddModal";
 import { InteractionDetailModal } from "./InteractionDetailModal";
 import style from "./_kanban.module.css";
 
-export function KanbanModal({ open, opportunity, onClose, onStageChange, onAfterInteraction }) {
+export function KanbanModal({
+  open,
+  opportunity,
+  onClose,
+  onStageChange,
+  onAfterInteraction,
+}) {
   const [leadDetail, setLeadDetail] = useState(null);
   const [selectedStage, setSelectedStage] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -136,7 +142,10 @@ export function KanbanModal({ open, opportunity, onClose, onStageChange, onAfter
                   </span>
                 </div>
 
-                <h3 className={style.modalSectionTitle} style={{ marginTop: 12 }}>
+                <h3
+                  className={style.modalSectionTitle}
+                  style={{ marginTop: 12 }}
+                >
                   Informações da Oportunidade
                 </h3>
                 <div className={style.modalField}>
@@ -181,7 +190,10 @@ export function KanbanModal({ open, opportunity, onClose, onStageChange, onAfter
                           {opportunity.productName || "—"}
                         </span>
                       </div>
-                      <div className={style.modalField} style={{ marginTop: 8 }}>
+                      <div
+                        className={style.modalField}
+                        style={{ marginTop: 8 }}
+                      >
                         <span className={style.modalFieldLabel}>
                           Valor da Oportunidade
                         </span>
@@ -193,27 +205,6 @@ export function KanbanModal({ open, opportunity, onClose, onStageChange, onAfter
                   )}
                 </div>
               </div>
-            </div>
-
-            {/* Actions — stage select */}
-            <div className={style.modalActions}>
-              <select
-                className={style.stageSelect}
-                value={selectedStage ?? ""}
-                onChange={(e) => setSelectedStage(Number(e.target.value))}
-              >
-                {KANBAN_STAGES.map((s) => (
-                  <option key={s.value} value={s.value}>
-                    {s.label}
-                  </option>
-                ))}
-              </select>
-              <Button
-                onClick={handleSaveStage}
-                disabled={isSubmitting || selectedStage === opportunity.stage}
-              >
-                {isSubmitting ? "Salvando..." : "Alterar Etapa"}
-              </Button>
             </div>
 
             {/* Footer */}
@@ -253,5 +244,3 @@ export function KanbanModal({ open, opportunity, onClose, onStageChange, onAfter
     </>
   );
 }
-
-
