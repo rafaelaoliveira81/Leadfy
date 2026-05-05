@@ -34,7 +34,7 @@ export function KanbanModal({ open, opportunity, onClose, onStageChange, onAfter
     openDetailModal,
     closeDetailModal,
     addInteraction,
-  } = useInteractions(opportunity?.id);
+  } = useInteractions(opportunity?.id, open);
 
   const handleInteractionSubmit = async (data) => {
     await addInteraction(data);

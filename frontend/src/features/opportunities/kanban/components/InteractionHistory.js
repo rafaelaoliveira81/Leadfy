@@ -1,5 +1,6 @@
-import { MdExpandMore, MdAdd, MdVisibility } from 'react-icons/md';
+import { MdExpandMore, MdVisibility } from 'react-icons/md';
 import { KANBAN_STAGE_BY_VALUE, formatDateShort } from '../constants/kanban.constants';
+import { Button } from '../../../../components/ui/Button/Button';
 import style from './_kanban.module.css';
 
 export function InteractionHistory({
@@ -23,14 +24,9 @@ export function InteractionHistory({
                         className={`${style.accordionIcon} ${historyOpen ? style.accordionIconOpen : ''}`}
                     />
                 </button>
-                <button
-                    className={style.interactionAddBtn}
-                    onClick={onOpenAddModal}
-                    title="Nova interação"
-                    aria-label="Adicionar interação"
-                >
-                    <MdAdd />
-                </button>
+                <Button onClick={onOpenAddModal}>
+                    Nova interação
+                </Button>
             </div>
 
             {historyOpen && (

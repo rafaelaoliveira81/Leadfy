@@ -1,13 +1,20 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import interactionApi from '../../../../services/interactionApi';
 import opportunityAPI from '../../../../services/opportunityApi';
 
-export function useInteractions(opportunityId) {
+export function useInteractions(opportunityId, open) {
     const [interactions, setInteractions] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [historyOpen, setHistoryOpen] = useState(false);
     const [addModalOpen, setAddModalOpen] = useState(false);
     const [detailModalData, setDetailModalData] = useState(null);
+
+    // Limpa interações ao reabrir o modal para forçar re-fetch no próximo expand
+    useEffect(() => {
+        if (open) {
+            setInteractions([]);
+        }
+    }, [open]);
 
     const fetchInteractions = useCallback(async () => {
         if (!opportunityId) return;
