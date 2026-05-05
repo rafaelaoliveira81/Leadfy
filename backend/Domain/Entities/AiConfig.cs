@@ -32,7 +32,13 @@ public class AiConfig
         ModelName = modelName;
         ApiKeyHash = apiKeyHash;
         IsActive = true;
-        CreatedAt = DateTime.UtcNow;
+
+        var brasiliaTimeZone = TimeZoneInfo.FindSystemTimeZoneById(
+            OperatingSystem.IsWindows()
+                ? "E. South America Standard Time"
+                : "America/Sao_Paulo");
+
+        CreatedAt = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, brasiliaTimeZone);
     }
 
     private AiConfig() { }
