@@ -1,10 +1,10 @@
-import { AppLayout } from '../../../layouts/AppLayout/AppLayout';
-import { useToast } from '../../../components/ui/Toast/Toast';
-import { KanbanBoard } from '../../../features/opportunities/kanban/components/KanbanBoard';
-import { KanbanModal } from '../../../features/opportunities/kanban/components/KanbanModal';
-import { OpportunityFormModal } from '../../../features/opportunities/components/OpportunityFormModal';
-import { useOpportunitiesKanbanPage } from '../../../features/opportunities/kanban/hooks/useOpportunitiesKanbanPage';
-import style from '../../../features/opportunities/kanban/components/_kanban.module.css';
+import { AppLayout } from "../../../layouts/AppLayout/AppLayout";
+import { useToast } from "../../../components/ui/Toast/Toast";
+import { KanbanBoard } from "../../../features/opportunities/kanban/components/KanbanBoard";
+import { KanbanModal } from "../../../features/opportunities/kanban/components/KanbanModal";
+import { OpportunityFormModal } from "../../../features/opportunities/components/OpportunityFormModal";
+import { useOpportunitiesKanbanPage } from "../../../features/opportunities/kanban/hooks/useOpportunitiesKanbanPage";
+import style from "../../../features/opportunities/kanban/components/_kanban.module.css";
 
 export function OpportunitiesKanban() {
   const addToast = useToast();
@@ -32,18 +32,18 @@ export function OpportunitiesKanban() {
   const onStageChange = async (opportunityId, newStage) => {
     try {
       await handleStageChange(opportunityId, newStage);
-      addToast('Stage atualizado com sucesso!', 'success');
+      addToast("Etapa atualizado com sucesso!", "success");
     } catch {
-      addToast('Erro ao alterar stage da oportunidade.', 'error');
+      addToast("Erro ao alterar etapa da oportunidade.", "error");
     }
   };
 
   const onCreateSubmit = async (data) => {
     try {
       await createOpportunity(data);
-      addToast('Oportunidade criada com sucesso!', 'success');
+      addToast("Oportunidade criada com sucesso!", "success");
     } catch {
-      addToast('Erro ao criar oportunidade.', 'error');
+      addToast("Erro ao criar oportunidade.", "error");
     }
   };
 

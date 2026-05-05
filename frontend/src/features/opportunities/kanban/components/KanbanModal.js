@@ -1,15 +1,15 @@
-import { useState, useEffect, useCallback } from 'react';
-import { createPortal } from 'react-dom';
-import { MdClose, MdExpandMore } from 'react-icons/md';
-import { Button } from '../../../../components/ui/Button/Button';
+import { useState, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
+import { MdClose, MdExpandMore } from "react-icons/md";
+import { Button } from "../../../../components/ui/Button/Button";
 import {
   KANBAN_STAGES,
   KANBAN_STAGE_BY_VALUE,
   formatCurrency,
   formatDateShort,
-} from '../constants/kanban.constants';
-import leadAPI from '../../../../services/leadApi';
-import style from './_kanban.module.css';
+} from "../constants/kanban.constants";
+import leadAPI from "../../../../services/leadApi";
+import style from "./_kanban.module.css";
 
 export function KanbanModal({ open, opportunity, onClose, onStageChange }) {
   const [leadDetail, setLeadDetail] = useState(null);
@@ -31,18 +31,18 @@ export function KanbanModal({ open, opportunity, onClose, onStageChange }) {
 
   const handleKeyDown = useCallback(
     (e) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === "Escape") onClose();
     },
-    [onClose]
+    [onClose],
   );
 
   useEffect(() => {
     if (!open) return;
-    document.addEventListener('keydown', handleKeyDown);
-    document.body.style.overflow = 'hidden';
+    document.addEventListener("keydown", handleKeyDown);
+    document.body.style.overflow = "hidden";
     return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = '';
+      document.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = "";
     };
   }, [open, handleKeyDown]);
 
@@ -77,7 +77,11 @@ export function KanbanModal({ open, opportunity, onClose, onStageChange }) {
         {/* Header */}
         <div className={style.modalHeader}>
           <h2 className={style.modalTitle}>{opportunity.title}</h2>
-          <button className={style.modalCloseBtn} onClick={onClose} aria-label="Fechar">
+          <button
+            className={style.modalCloseBtn}
+            onClick={onClose}
+            aria-label="Fechar"
+          >
             <MdClose />
           </button>
         </div>
@@ -90,13 +94,13 @@ export function KanbanModal({ open, opportunity, onClose, onStageChange }) {
             <div className={style.modalField}>
               <span className={style.modalFieldLabel}>Nome</span>
               <span className={style.modalFieldValue}>
-                {leadDetail?.name || opportunity.leadName || '—'}
+                {leadDetail?.name || opportunity.leadName || "—"}
               </span>
             </div>
             <div className={style.modalField}>
               <span className={style.modalFieldLabel}>Telefone</span>
               <span className={style.modalFieldValue}>
-                {leadDetail?.phoneNumber || '—'}
+                {leadDetail?.phoneNumber || "—"}
               </span>
             </div>
 
@@ -106,7 +110,7 @@ export function KanbanModal({ open, opportunity, onClose, onStageChange }) {
             <div className={style.modalField}>
               <span className={style.modalFieldLabel}>Owner</span>
               <span className={style.modalFieldValue}>
-                {opportunity.ownerName || '—'}
+                {opportunity.ownerName || "—"}
               </span>
             </div>
             <div className={style.modalField}>
@@ -132,9 +136,9 @@ export function KanbanModal({ open, opportunity, onClose, onStageChange }) {
                 onClick={() => setProductOpen((p) => !p)}
                 aria-expanded={productOpen}
               >
-                {opportunity.productName || 'Produto'}
+                {opportunity.productName || "Produto"}
                 <MdExpandMore
-                  className={`${style.accordionIcon} ${productOpen ? style.accordionIconOpen : ''}`}
+                  className={`${style.accordionIcon} ${productOpen ? style.accordionIconOpen : ""}`}
                 />
               </button>
               {productOpen && (
@@ -142,11 +146,13 @@ export function KanbanModal({ open, opportunity, onClose, onStageChange }) {
                   <div className={style.modalField}>
                     <span className={style.modalFieldLabel}>Produto</span>
                     <span className={style.modalFieldValue}>
-                      {opportunity.productName || '—'}
+                      {opportunity.productName || "—"}
                     </span>
                   </div>
                   <div className={style.modalField} style={{ marginTop: 8 }}>
-                    <span className={style.modalFieldLabel}>Valor da Oportunidade</span>
+                    <span className={style.modalFieldLabel}>
+                      Valor da Oportunidade
+                    </span>
                     <span className={style.modalFieldValue}>
                       {formatCurrency(opportunity.amount)}
                     </span>
@@ -161,7 +167,7 @@ export function KanbanModal({ open, opportunity, onClose, onStageChange }) {
         <div className={style.modalActions}>
           <select
             className={style.stageSelect}
-            value={selectedStage ?? ''}
+            value={selectedStage ?? ""}
             onChange={(e) => setSelectedStage(Number(e.target.value))}
           >
             {KANBAN_STAGES.map((s) => (
@@ -174,20 +180,20 @@ export function KanbanModal({ open, opportunity, onClose, onStageChange }) {
             onClick={handleSaveStage}
             disabled={isSubmitting || selectedStage === opportunity.stage}
           >
-            {isSubmitting ? 'Salvando...' : 'Alterar Stage'}
+            {isSubmitting ? "Salvando..." : "Alterar Etapa"}
           </Button>
         </div>
 
         {/* Footer */}
         <div className={style.modalFooter}>
-          Stage atual:{' '}
+          Estado atual:{" "}
           <strong style={{ color: stageInfo.accent }}>
             {stageInfo.label || opportunity.stageName}
-          </strong>{' '}
+          </strong>{" "}
           — Criada em {formatDateShort(opportunity.createdAt)}
         </div>
       </div>
     </div>,
-    document.body
+    document.body,
   );
 }
