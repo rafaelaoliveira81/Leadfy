@@ -27,6 +27,7 @@ export function OpportunitiesKanban() {
     leads,
     owers,
     products,
+    refresh,
   } = useOpportunitiesKanbanPage();
 
   const onStageChange = async (opportunityId, newStage) => {
@@ -77,6 +78,7 @@ export function OpportunitiesKanban() {
         opportunity={detailModal.opportunity}
         onClose={closeDetailModal}
         onStageChange={onStageChange}
+        onAfterInteraction={refresh}
       />
 
       {createModal.open && (

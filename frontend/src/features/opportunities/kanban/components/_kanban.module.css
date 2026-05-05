@@ -506,6 +506,253 @@
   font-size: 14px;
 }
 
+/* ===== Interaction Section ===== */
+
+.interactionSection {
+  border-top: 1px solid #edf2f4;
+  margin-top: 0;
+}
+
+.interactionSectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+}
+
+.interactionToggleBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 12px 0;
+  flex: 1;
+}
+
+.interactionSectionTitle {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #8d99ae;
+}
+
+.interactionAddBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid #d5dce0;
+  border-radius: 6px;
+  background: #fff;
+  color: #8d99ae;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.interactionAddBtn:hover {
+  border-color: #ef233c;
+  color: #ef233c;
+  background: #fef2f2;
+}
+
+.interactionList {
+  padding: 0 24px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.interactionEmpty {
+  font-size: 13px;
+  color: #8d99ae;
+  text-align: center;
+  padding: 12px 0;
+  margin: 0;
+}
+
+.interactionItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fafbfc;
+  border: 1px solid #edf2f4;
+  border-radius: 6px;
+  padding: 8px 12px;
+  gap: 8px;
+}
+
+.interactionItemInfo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+.interactionItemDate {
+  font-size: 12px;
+  color: #8d99ae;
+  white-space: nowrap;
+}
+
+.interactionItemUser {
+  font-size: 12px;
+  font-weight: 600;
+  color: #2b2d42;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 120px;
+}
+
+.interactionItemStage {
+  font-size: 12px;
+  color: #ef233c;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.interactionViewBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #8d99ae;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  transition: color 0.15s ease;
+}
+
+.interactionViewBtn:hover {
+  color: #2b2d42;
+}
+
+/* ===== Interaction Add Modal ===== */
+
+.interactionAddModal,
+.interactionDetailModal {
+  max-width: 480px;
+}
+
+.interactionFormBody {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.interactionFormField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.interactionFormLabel {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: #8d99ae;
+}
+
+.interactionTextarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d5dce0;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #2b2d42;
+  resize: vertical;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.interactionTextarea:focus {
+  outline: none;
+  border-color: #ef233c;
+  box-shadow: 0 0 0 2px rgba(239, 35, 60, 0.15);
+}
+
+.interactionInput {
+  padding: 8px 12px;
+  border: 1px solid #d5dce0;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #2b2d42;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.interactionInput:focus {
+  outline: none;
+  border-color: #ef233c;
+  box-shadow: 0 0 0 2px rgba(239, 35, 60, 0.15);
+}
+
+.interactionError {
+  font-size: 13px;
+  color: #d90429;
+  margin: 0;
+  background: #fdeced;
+  padding: 8px 12px;
+  border-radius: 6px;
+}
+
+/* ===== Interaction Detail Modal ===== */
+
+.interactionDetailBody {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.interactionDetailRow {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.interactionDetailRowFull {
+  border-top: 1px solid #edf2f4;
+  padding-top: 14px;
+}
+
+.interactionDetailLabel {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: #8d99ae;
+}
+
+.interactionDetailValue {
+  font-size: 14px;
+  font-weight: 500;
+  color: #2b2d42;
+}
+
+.interactionDetailDescription {
+  font-size: 14px;
+  color: #2b2d42;
+  line-height: 1.6;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
 /* ===== Animations ===== */
 
 @keyframes fadeIn {
