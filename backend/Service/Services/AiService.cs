@@ -1,3 +1,4 @@
+using Domain.Interfaces;
 using Microsoft.Extensions.Configuration;
 using System.Net.Http.Headers;
 using System.Text;
@@ -6,7 +7,7 @@ using System.Text.Json;
 /// <summary>
 /// Implementação do serviço de IA usando a API GitHub Models.
 /// </summary>
-public class AiService : IAiService
+public class AiService : IAiService, IGenerativeAiService
 {
     private readonly IConfiguration _config;
 
@@ -55,5 +56,14 @@ public class AiService : IAiService
             .GetProperty("message")
             .GetProperty("content")
             .GetString();
+    }
+
+    /// <summary>
+    /// Gera conteúdo textual usando o provedor configurado.
+    /// </summary>
+    public async Task<string> GenerateAsync(string prompt, string modelName, string apiKey)
+    {
+        var response = await GetResponseFromModel(prompt, modelName, apiKey);
+        return response ?? string.Empty;
     }
 }

@@ -4,6 +4,8 @@ public class OpportunityResponse
 {
     public int ID { get; set; }
     public string Title { get; set; }
+    public string ActionPlan { get; set; }
+    public DateTime? ActionPlanGeneratedAt { get; set; }
     public int LeadId { get; set; }
     public string LeadName { get; set; }
     public int? OwnerId { get; set; }

@@ -1,4 +1,5 @@
 using Application;
+using Domain.Interfaces;
 using Repository.Context;
 using Microsoft.EntityFrameworkCore;
 using Repository.Repositories;
@@ -21,10 +22,12 @@ builder.Services.AddScoped<IOwerApp, OwerApp>();
 builder.Services.AddScoped<ILeadApp, LeadApp>();
 builder.Services.AddScoped<IProductApp, ProductApp>();
 builder.Services.AddScoped<IOpportunityApp, OpportunityApp>();
+builder.Services.AddScoped<IOpportunityActionPlanApp, OpportunityActionPlanApp>();
 builder.Services.AddScoped<IInteractionApp, InteractionApp>();
 builder.Services.AddScoped<IAiConfigApp, AiConfigApp>();
 builder.Services.AddScoped<IApiKeyEncryptionService, ApiKeyEncryptionService>();
 builder.Services.AddScoped<IAiService, AiService>();
+builder.Services.AddScoped<IGenerativeAiService, AiService>();
 
 // Adicione as interfaces de banco de dados
 builder.Services.AddScoped<IUserRepo, UserRepository>();
