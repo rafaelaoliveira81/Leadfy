@@ -124,7 +124,7 @@ export function KanbanModal({
               </button>
             </div>
 
-            {/* Body — two columns */}
+            {/* Body — two columns: Lead and Opportunity side by side */}
             <div className={style.modalBody}>
               {/* Left */}
               <div className={style.modalSection}>
@@ -141,11 +141,11 @@ export function KanbanModal({
                     {leadDetail?.phoneNumber || "—"}
                   </span>
                 </div>
+              </div>
 
-                <h3
-                  className={style.modalSectionTitle}
-                  style={{ marginTop: 12 }}
-                >
+              {/* Right */}
+              <div className={style.modalSection}>
+                <h3 className={style.modalSectionTitle}>
                   Informações da Oportunidade
                 </h3>
                 <div className={style.modalField}>
@@ -167,8 +167,10 @@ export function KanbanModal({
                   </span>
                 </div>
               </div>
+            </div>
 
-              {/* Right */}
+            <div className={style.modalBody}>
+              {/* Products section */}
               <div className={style.modalSection}>
                 <h3 className={style.modalSectionTitle}>Produtos Vinculados</h3>
                 <div className={style.accordion}>
@@ -207,15 +209,6 @@ export function KanbanModal({
               </div>
             </div>
 
-            {/* Footer */}
-            <div className={style.modalFooter}>
-              Estado atual:{" "}
-              <strong style={{ color: stageInfo.accent }}>
-                {stageInfo.label || opportunity.stageName}
-              </strong>{" "}
-              — Criada em {formatDateShort(opportunity.createdAt)}
-            </div>
-
             {/* Interactions section */}
             <InteractionHistory
               historyOpen={historyOpen}
@@ -225,6 +218,15 @@ export function KanbanModal({
               onOpenAddModal={openAddModal}
               onOpenDetail={openDetailModal}
             />
+
+            {/* Footer */}
+            <div className={style.modalFooter}>
+              Estado atual:{" "}
+              <strong style={{ color: stageInfo.accent }}>
+                {stageInfo.label || opportunity.stageName}
+              </strong>{" "}
+              — Criada em {formatDateShort(opportunity.createdAt)}
+            </div>
           </div>
         </div>,
         document.body,
