@@ -19,5 +19,11 @@ public class UserConfig : IEntityTypeConfiguration<User>
         builder.Property(u => u.CreatedAt).IsRequired(true).ValueGeneratedOnAdd();
 
         builder.HasIndex(u => u.Email).IsUnique();
+
+        builder.HasOne(u => u.UserGroup)
+               .WithMany(g => g.Users)
+               .HasForeignKey(u => u.UserGroupId)
+               .IsRequired(false)
+               .OnDelete(DeleteBehavior.Restrict);
     }
 }

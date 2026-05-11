@@ -12,6 +12,10 @@ public class CRMContext : DbContext
     }
 
     public DbSet<User> Users { get; set; }
+    public DbSet<UserGroup> UserGroups { get; set; }
+    public DbSet<Permission> Permissions { get; set; }
+    public DbSet<UserGroupPermission> UserGroupPermissions { get; set; }
+    public DbSet<PasswordRecovery> PasswordRecoveries { get; set; }
     public DbSet<Ower> Owers { get; set; }
     public DbSet<Lead> Leads { get; set; }
     public DbSet<Product> Products { get; set; }
@@ -22,6 +26,10 @@ public class CRMContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfiguration(new UserConfig());
+        modelBuilder.ApplyConfiguration(new UserGroupConfig());
+        modelBuilder.ApplyConfiguration(new PermissionConfig());
+        modelBuilder.ApplyConfiguration(new UserGroupPermissionConfig());
+        modelBuilder.ApplyConfiguration(new PasswordRecoveryConfig());
         modelBuilder.ApplyConfiguration(new OwerConfig());
         modelBuilder.ApplyConfiguration(new LeadConfig());
         modelBuilder.ApplyConfiguration(new ProductConfig());

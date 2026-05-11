@@ -14,8 +14,17 @@ public class User
     public UserRole Role { get; set; } //required
     public bool IsActive { get; set; } //required and default true
     public DateTime CreatedAt { get; set; } //required and default current time
+
+    /// <summary>
+    /// Optional FK to UserGroup. Null for users migrated before group-based auth was introduced.
+    /// UserRole is kept for backward compatibility during transition.
+    /// </summary>
+    public int? UserGroupId { get; set; }
+    public UserGroup UserGroup { get; set; }
+
     public ICollection<Ower> Owers { get; set; } //Relacionamento 1:N com Ower
     public ICollection<Interaction> Interactions { get; set; } //Relacionamento 1:N com Interaction
+    public ICollection<PasswordRecovery> PasswordRecoveries { get; set; } //Relacionamento 1:N com PasswordRecovery
     
     /// <summary>
     /// Construtor padrão.
@@ -27,6 +36,7 @@ public class User
         CreatedAt = DateTime.UtcNow;
         Owers = new List<Ower>();
         Interactions = new List<Interaction>();
+        PasswordRecoveries = new List<PasswordRecovery>();
     }
 
     /// <summary>
