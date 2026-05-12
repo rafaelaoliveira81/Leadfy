@@ -1,10 +1,13 @@
 using Application;
+using Domain.Config;
 using Repository.Context;
 using Microsoft.EntityFrameworkCore;
 using Repository.Repositories;
 using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 
 // Configura o Swagger para incluir comentários XML
 builder.Services.AddSwaggerGen(c =>
@@ -16,6 +19,10 @@ builder.Services.AddSwaggerGen(c =>
 
 // Adicione serviços ao contêiner.
 builder.Services.AddScoped<IUserApp, UserApp>();
+builder.Services.AddScoped<IAuthenticationApp, AuthenticationApp>();
+builder.Services.AddScoped<IJwtApp, JwtApp>();
+builder.Services.AddScoped<IUserGroupPermissionApp, UserGroupPermissionApp>();
+builder.Services.AddScoped<IPermissionApp, PermissionApp>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IOwerApp, OwerApp>();
 builder.Services.AddScoped<ILeadApp, LeadApp>();
@@ -28,6 +35,10 @@ builder.Services.AddScoped<IAiService, AiService>();
 
 // Adicione as interfaces de banco de dados
 builder.Services.AddScoped<IUserRepo, UserRepository>();
+builder.Services.AddScoped<IUserGroupRepo, UserGroupRepo>();
+builder.Services.AddScoped<IPermissionRepo, PermissionRepo>();
+builder.Services.AddScoped<IUserGroupPermissionRepo, UserGroupPermissionRepo>();
+builder.Services.AddScoped<IPasswordRecoveryRepo, PasswordRecoveryRepo>();
 builder.Services.AddScoped<IOwerRepo, OwerRepo>();
 builder.Services.AddScoped<ILeadRepo, LeadRepo>();
 builder.Services.AddScoped<IProductRepo, ProductRepo>();

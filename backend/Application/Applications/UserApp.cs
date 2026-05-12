@@ -176,6 +176,7 @@ public class UserApp : IUserApp
         userEntity.Name = user.Name;
         userEntity.Email = user.Email;
         userEntity.Role = user.Role;
+        userEntity.UserGroupId = user.UserGroupId;
 
         await _userRepo.UpdateAsync(userEntity);
     }
