@@ -3,6 +3,7 @@ using System.Text;
 using Domain.Entities;
 using Domain.Enuns;
 using Domain.Interfaces;
+using Dominio.Enums;
 
 namespace Application;
 
@@ -55,7 +56,10 @@ public class OpportunityActionPlanApp : IOpportunityActionPlanApp
 
         var prompt = BuildPrompt(config, opportunity, interactions);
         var plainApiKey = _aiConfigApp.DecryptApiKey(config.ApiKeyHash);
-        var generatedActionPlan = await _generativeAiService.GenerateAsync(prompt, config.ModelName, plainApiKey);
+
+        var modelName = Enum.GetName(typeof(AiModelsEnum), config.Model);
+
+        var generatedActionPlan = await _generativeAiService.GenerateAsync(prompt, modelName, plainApiKey);
 
         if (string.IsNullOrWhiteSpace(generatedActionPlan))
             throw new InvalidOperationException("A IA não retornou um plano de ação válido.");

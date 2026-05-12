@@ -4,9 +4,6 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 
-/// <summary>
-/// Implementação do serviço de IA usando a API GitHub Models.
-/// </summary>
 public class AiService : IAiService, IGenerativeAiService
 {
     private readonly IConfiguration _config;
@@ -16,20 +13,14 @@ public class AiService : IAiService, IGenerativeAiService
         _config = config;
     }
 
-    /// <summary>
-    /// Envia o <paramref name="prompt"/> ao modelo especificado usando a <paramref name="apiKey"/> fornecida.
-    /// A URL base é lida de <c>GitHubModels:BaseUrl</c> nas configurações da aplicação.
-    /// </summary>
-    /// <exception cref="Exception">Lançada quando a API retorna um status de erro.</exception>
     public async Task<string?> GetResponseFromModel(string prompt, string modelName, string apiKey)
     {
-        var url = _config["GitHubModels:BaseUrl"]
-            ?? throw new InvalidOperationException("URL do GitHub Models não configurada (GitHubModels:BaseUrl).");
+        var url = _config["GitHubModels:BaseUrl"];
 
         using var httpClient = new HttpClient();
         httpClient.DefaultRequestHeaders.Authorization =
             new AuthenticationHeaderValue("Bearer", apiKey);
-        httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("Itera360App");
+        httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("CrmApp");
 
         var body = new StringContent(
             JsonSerializer.Serialize(new
@@ -58,9 +49,6 @@ public class AiService : IAiService, IGenerativeAiService
             .GetString();
     }
 
-    /// <summary>
-    /// Gera conteúdo textual usando o provedor configurado.
-    /// </summary>
     public async Task<string> GenerateAsync(string prompt, string modelName, string apiKey)
     {
         var response = await GetResponseFromModel(prompt, modelName, apiKey);

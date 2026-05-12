@@ -1,58 +1,25 @@
+using Dominio.Enums;
+
 namespace Domain.Entities;
 
-/// <summary>
-/// Configuração de IA para geração de planos de ação de conversão de leads.
-/// </summary>
 public class AiConfig
 {
     public int Id { get; private set; }
-
-    /// <summary>
-    /// Template do prompt enviado à IA. Suporta os placeholders
-    /// {{LeadName}}, {{LeadEmail}} e {{LeadPhone}}.
-    /// </summary>
-    public string PromptTemplate { get; private set; }
-
-    /// <summary>
-    /// Nome do modelo de IA a ser utilizado (ex: gpt-4.1, gpt-4o-mini, Meta-Llama-3.1-70B-Instruct).
-    /// </summary>
-    public string ModelName { get; private set; }
-
-    /// <summary>
-    /// Chave da API do GitHub Models armazenada de forma criptografada (AES-256).
-    /// </summary>
-    public string ApiKeyHash { get; private set; }
-
+    public string Title { get; set; }
+    public string PromptTemplate { get; set; }
+    public AiModelsEnum Model { get; set; }
+    public string ApiKeyHash { get; set; }
     public bool IsActive { get; private set; }
     public DateTime CreatedAt { get; private set; }
 
-    public AiConfig(string promptTemplate, string modelName, string apiKeyHash)
+    public AiConfig(string title, string promptTemplate, AiModelsEnum model, string apiKeyHash)
     {
+        Title = title;
         PromptTemplate = promptTemplate;
-        ModelName = modelName;
+        Model = model;
         ApiKeyHash = apiKeyHash;
         IsActive = true;
-
-        var brasiliaTimeZone = TimeZoneInfo.FindSystemTimeZoneById(
-            OperatingSystem.IsWindows()
-                ? "E. South America Standard Time"
-                : "America/Sao_Paulo");
-
-        CreatedAt = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, brasiliaTimeZone);
-    }
-
-    private AiConfig() { }
-
-    /// <summary>
-    /// Atualiza o template, o modelo e opcionalmente a chave de API.
-    /// Quando <paramref name="newApiKeyHash"/> for nulo ou vazio, a chave existente é mantida.
-    /// </summary>
-    public void Update(string promptTemplate, string modelName, string newApiKeyHash)
-    {
-        PromptTemplate = promptTemplate;
-        ModelName = modelName;
-        if (!string.IsNullOrWhiteSpace(newApiKeyHash))
-            ApiKeyHash = newApiKeyHash;
+        CreatedAt = DateTime.UtcNow;
     }
 
     public void Activate() => IsActive = true;

@@ -1,8 +1,8 @@
 using Application;
 using Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
-using Api.Models.AiConfig.Request;
-using Api.Models.AiConfig.Response;
+using Application.DTO;
+using Dominio.Enums;
 
 namespace Api.Controllers;
 
@@ -38,13 +38,12 @@ public class AiConfigController : ControllerBase
     [HttpPost]
     [ProducesResponseType(typeof(AiConfigResponse), 201)]
     [ProducesResponseType(400)]
-    public async Task<ActionResult> Add([FromBody] AiConfigSave request)
+    public async Task<ActionResult> Add([FromBody] AiConfigRequest request)
     {
         try
         {
-            var id = await _aiConfigApp.AddAsync(request.PromptTemplate, request.ModelName, request.ApiKey);
-            var config = await _aiConfigApp.GetByIdAsync(id);
-            return CreatedAtAction(nameof(GetById), new { id }, MapToResponse(config));
+            var id = await _aiConfigApp.AddAsync(request);
+            return Ok(id);
         }
         catch (ArgumentException ex)
         {
@@ -88,31 +87,6 @@ public class AiConfigController : ControllerBase
     }
 
     /// <summary>
-    /// Retorna a configuração de IA ativa mais recente.
-    /// </summary>
-    /// <returns>Configuração ativa ou 404 se nenhuma existir.</returns>
-    /// <response code="200">Configuração ativa encontrada.</response>
-    /// <response code="404">Nenhuma configuração ativa cadastrada.</response>
-    [HttpGet("ativa")]
-    [ProducesResponseType(typeof(AiConfigResponse), 200)]
-    [ProducesResponseType(404)]
-    public async Task<ActionResult> GetActive()
-    {
-        try
-        {
-            var config = await _aiConfigApp.GetActiveAsync();
-            if (config == null)
-                return NotFound(new { message = "Nenhuma configuração de IA ativa encontrada." });
-
-            return Ok(MapToResponse(config));
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new { message = ex.Message });
-        }
-    }
-
-    /// <summary>
     /// Retorna todas as configurações de IA cadastradas.
     /// </summary>
     /// <returns>Lista de configurações com as chaves mascaradas.</returns>
@@ -145,11 +119,11 @@ public class AiConfigController : ControllerBase
     [ProducesResponseType(204)]
     [ProducesResponseType(400)]
     [ProducesResponseType(404)]
-    public async Task<ActionResult> Update([FromRoute] int id, [FromBody] AiConfigUpdate request)
+    public async Task<ActionResult> Update([FromRoute] int id, [FromBody] AiConfigRequest request)
     {
         try
         {
-            await _aiConfigApp.UpdateAsync(id, request.PromptTemplate, request.ModelName, request.ApiKey);
+            await _aiConfigApp.UpdateAsync(id, request);
             return NoContent();
         }
         catch (ArgumentException ex)
@@ -256,48 +230,50 @@ public class AiConfigController : ControllerBase
         }
     }
 
-    /// <summary>
-    /// Gera um plano de ação para conversão do lead utilizando a configuração de IA informada.
-    /// </summary>
-    /// <param name="configId">ID da configuração de IA a ser utilizada.</param>
-    /// <param name="leadId">ID do lead para o qual o plano será gerado.</param>
-    /// <returns>Plano de ação gerado pela IA.</returns>
-    /// <remarks>
-    /// O template da configuração é preenchido com os dados do lead antes do envio ao modelo.
-    /// A chave de API é descriptografada internamente e nunca trafega para o cliente.
-    /// </remarks>
-    /// <response code="200">Plano de ação gerado com sucesso.</response>
-    /// <response code="404">Configuração ou lead não localizado.</response>
-    [HttpPost("{configId:int}/generate-action-plan/{leadId:int}")]
-    [ProducesResponseType(typeof(object), 200)]
-    [ProducesResponseType(404)]
-    public async Task<ActionResult> GenerateActionPlan([FromRoute] int configId, [FromRoute] int leadId)
-    {
-        try
-        {
-            var config = await _aiConfigApp.GetByIdAsync(configId);
-            var lead = await _leadApp.GetByIdAsync(leadId);
+    // /// <summary>
+    // /// Gera um plano de ação para conversão do lead utilizando a configuração de IA informada.
+    // /// </summary>
+    // /// <param name="configId">ID da configuração de IA a ser utilizada.</param>
+    // /// <param name="leadId">ID do lead para o qual o plano será gerado.</param>
+    // /// <returns>Plano de ação gerado pela IA.</returns>
+    // /// <remarks>
+    // /// O template da configuração é preenchido com os dados do lead antes do envio ao modelo.
+    // /// A chave de API é descriptografada internamente e nunca trafega para o cliente.
+    // /// </remarks>
+    // /// <response code="200">Plano de ação gerado com sucesso.</response>
+    // /// <response code="404">Configuração ou lead não localizado.</response>
+    // [HttpPost("{configId:int}/generate-action-plan/{leadId:int}")]
+    // [ProducesResponseType(typeof(object), 200)]
+    // [ProducesResponseType(404)]
+    // public async Task<ActionResult> GenerateActionPlan([FromRoute] int configId, [FromRoute] int leadId)
+    // {
+    //     try
+    //     {
+    //         var config = await _aiConfigApp.GetByIdAsync(configId);
+    //         var lead = await _leadApp.GetByIdAsync(leadId);
 
-            var prompt = _aiConfigApp.BuildPrompt(config, lead);
-            var plainApiKey = _aiConfigApp.DecryptApiKey(config.ApiKeyHash);
+    //         var prompt = _aiConfigApp.BuildPrompt(config, lead);
+    //         var plainApiKey = _aiConfigApp.DecryptApiKey(config.ApiKeyHash);
 
-            var actionPlan = await _aiService.GetResponseFromModel(prompt, config.ModelName, plainApiKey);
+    //         var modelName = Enum.GetName(typeof(AiModelsEnum), config.Model);
 
-            return Ok(new { leadId, configId, actionPlan });
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(new { message = ex.Message });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new { message = ex.Message });
-        }
-    }
+    //         var actionPlan = await _aiService.GetResponseFromModel(prompt, modelName, plainApiKey);
+
+    //         return Ok(new { leadId, configId, actionPlan });
+    //     }
+    //     catch (ArgumentException ex)
+    //     {
+    //         return BadRequest(new { message = ex.Message });
+    //     }
+    //     catch (KeyNotFoundException ex)
+    //     {
+    //         return NotFound(new { message = ex.Message });
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         return StatusCode(500, new { message = ex.Message });
+    //     }
+    // }
 
     #region Métodos auxiliares
 
@@ -306,11 +282,11 @@ public class AiConfigController : ControllerBase
         return new AiConfigResponse
         {
             Id = config.Id,
+            Title = config.Title,
             PromptTemplate = config.PromptTemplate,
-            ModelName = config.ModelName,
+            Model = (int)config.Model,
             ApiKeyMasked = MaskApiKey(config.ApiKeyHash),
             IsActive = config.IsActive,
-            Status = config.IsActive ? "Ativo" : "Inativo",
             CreatedAt = config.CreatedAt
         };
     }
