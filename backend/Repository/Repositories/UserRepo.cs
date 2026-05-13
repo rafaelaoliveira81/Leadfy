@@ -50,4 +50,23 @@ public class UserRepository : BaseRepo, IUserRepo
         _context.Users.Remove(user);
         await _context.SaveChangesAsync();
     }
+
+    /// <summary>
+    /// Returns an active user by email for JWT login.
+    /// Returns null when no active user matches the email.
+    /// </summary>
+    public async Task<User> GetByEmailWithGroupAsync(string emailUser)
+    {
+        return await _context.Users
+            .FirstOrDefaultAsync(u => u.Email == emailUser && u.IsActive);
+    }
+
+    /// <summary>
+    /// Returns an active user by ID. Returns null when the user is inactive.
+    /// </summary>
+    public async Task<User> GetActiveByIdAsync(int idUser)
+    {
+        return await _context.Users
+            .FirstOrDefaultAsync(u => u.ID == idUser && u.IsActive);
+    }
 }

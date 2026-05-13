@@ -9,7 +9,6 @@ export function UserFormModal({
   open,
   mode,
   user,
-  roles,
   onClose,
   onCreateSubmit,
   onUpdateSubmit,
@@ -54,7 +53,7 @@ export function UserFormModal({
       onConfirm={handleSubmit}
       isSubmitting={isSubmitting}
     >
-      <UserForm form={form} roles={roles} isEdit={isEdit} />
+      <UserForm form={form} isEdit={isEdit} />
     </Modal>
   );
 }

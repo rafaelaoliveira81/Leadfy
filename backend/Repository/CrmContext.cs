@@ -12,7 +12,9 @@ public class CRMContext : DbContext
     }
 
     public DbSet<User> Users { get; set; }
+
     public DbSet<Owner> Owners { get; set; }
+    public DbSet<PasswordRecovery> PasswordRecoveries { get; set; }
     public DbSet<Lead> Leads { get; set; }
     public DbSet<Product> Products { get; set; }
     public DbSet<Opportunity> Opportunities { get; set; }
@@ -23,6 +25,8 @@ public class CRMContext : DbContext
     {
         modelBuilder.ApplyConfiguration(new UserConfig());
         modelBuilder.ApplyConfiguration(new OwnerConfig());
+
+        modelBuilder.ApplyConfiguration(new PasswordRecoveryConfig());
         modelBuilder.ApplyConfiguration(new LeadConfig());
         modelBuilder.ApplyConfiguration(new ProductConfig());
         modelBuilder.ApplyConfiguration(new OpportunityConfig());
