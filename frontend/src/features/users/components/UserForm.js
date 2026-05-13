@@ -2,13 +2,12 @@ import style from './_userForm.module.css';
 
 /**
  * Formulário de criação/edição de usuário.
- * Campos: Name, Email, Role. Password apenas em criação. Nunca exibe isActive.
+ * Campos: Name e Email. Password apenas em criação. Nunca exibe isActive.
  * @param {object} props
  * @param {import('react-hook-form').UseFormReturn} props.form
- * @param {object[]} props.roles - Lista de roles para o select.
  * @param {boolean} props.isEdit - Se é edição (oculta campo de senha).
  */
-export function UserForm({ form, roles, isEdit }) {
+export function UserForm({ form, isEdit }) {
   const {
     register,
     formState: { errors },
@@ -41,25 +40,6 @@ export function UserForm({ form, roles, isEdit }) {
         />
         {errors.email && (
           <span className={style.fieldError}>{errors.email.message}</span>
-        )}
-      </div>
-
-      <div className={style.field}>
-        <label htmlFor="user-role">Perfil</label>
-        <select
-          id="user-role"
-          className={errors.idRole ? style.hasError : ''}
-          {...register('idRole')}
-        >
-          <option value="">Selecione um perfil</option>
-          {roles.map((r) => (
-            <option key={r.id} value={r.id}>
-              {r.displayName || r.name}
-            </option>
-          ))}
-        </select>
-        {errors.idRole && (
-          <span className={style.fieldError}>{errors.idRole.message}</span>
         )}
       </div>
 

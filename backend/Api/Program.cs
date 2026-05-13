@@ -1,6 +1,5 @@
 using System.Reflection;
 using System.Text;
-using Api.Shared.Authorization;
 using Api.Shared.Middleware;
 using Application;
 using Domain.Config;
@@ -58,8 +57,6 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddScoped<IUserApp, UserApp>();
 builder.Services.AddScoped<IAuthenticationApp, AuthenticationApp>();
 builder.Services.AddScoped<IJwtApp, JwtApp>();
-builder.Services.AddScoped<IUserGroupPermissionApp, UserGroupPermissionApp>();
-builder.Services.AddScoped<IPermissionApp, PermissionApp>();
 builder.Services.AddScoped<IPasswordRecoveryApp, PasswordRecoveryApp>();
 builder.Services.AddScoped<IEmailApp, EmailService>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
@@ -74,9 +71,6 @@ builder.Services.AddScoped<IAiService, AiService>();
 
 // Adicione as interfaces de banco de dados
 builder.Services.AddScoped<IUserRepo, UserRepository>();
-builder.Services.AddScoped<IUserGroupRepo, UserGroupRepo>();
-builder.Services.AddScoped<IPermissionRepo, PermissionRepo>();
-builder.Services.AddScoped<IUserGroupPermissionRepo, UserGroupPermissionRepo>();
 builder.Services.AddScoped<IPasswordRecoveryRepo, PasswordRecoveryRepo>();
 builder.Services.AddScoped<IOwerRepo, OwerRepo>();
 builder.Services.AddScoped<ILeadRepo, LeadRepo>();

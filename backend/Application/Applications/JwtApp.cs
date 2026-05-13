@@ -17,7 +17,7 @@ public class JwtApp : IJwtApp
         _jwtSettings = jwtOptions.Value;
     }
 
-    public string GenerateToken(User user, IReadOnlyCollection<string>? permissions = null)
+    public string GenerateToken(User user)
     {
         if (user == null)
             throw new ArgumentException("Usuário não pode ser vazio.");
@@ -31,17 +31,6 @@ public class JwtApp : IJwtApp
             new("nome", user.Name),
             new("email", user.Email)
         };
-
-        if (user.UserGroupId.HasValue)
-            claims.Add(new Claim("grupoDeUsuarioId", user.UserGroupId.Value.ToString()));
-
-        if (permissions != null)
-        {
-            foreach (var permission in permissions.Where(permission => !string.IsNullOrWhiteSpace(permission)).Distinct(StringComparer.OrdinalIgnoreCase))
-            {
-                claims.Add(new Claim("permissao", permission));
-            }
-        }
 
         var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Secret));
         var credentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);

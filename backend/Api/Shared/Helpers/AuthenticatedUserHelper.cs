@@ -25,19 +25,4 @@ public static class AuthenticatedUserHelper
     {
         return user?.FindFirstValue("nome");
     }
-
-    public static int? GetUserGroupId(ClaimsPrincipal user)
-    {
-        var claimValue = user?.FindFirstValue("grupoDeUsuarioId");
-        return int.TryParse(claimValue, out var userGroupId) ? userGroupId : null;
-    }
-
-    public static IReadOnlyCollection<string> GetPermissions(ClaimsPrincipal user)
-    {
-        return user?.FindAll("permissao")
-            .Select(claim => claim.Value)
-            .Where(permission => !string.IsNullOrWhiteSpace(permission))
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .ToArray() ?? Array.Empty<string>();
-    }
 }

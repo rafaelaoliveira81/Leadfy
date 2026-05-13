@@ -16,12 +16,10 @@ export function useUserForm({ mode, user, onSubmit }) {
     ? {
         name: user.name ?? '',
         email: user.email ?? '',
-        idRole: user.role?.id ?? '',
       }
     : {
         name: '',
         email: '',
-        idRole: '',
         password: '',
       };
 
@@ -34,7 +32,6 @@ export function useUserForm({ mode, user, onSubmit }) {
     const payload = {
       name: values.name.trim(),
       email: values.email.trim(),
-      idRole: Number(values.idRole),
     };
 
     if (isEdit && user) {

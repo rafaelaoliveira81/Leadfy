@@ -35,8 +35,7 @@ public class AutenticarController : ControllerBase
             Success = response.Success,
             Message = response.Message,
             Token = response.Token,
-            Name = response.Name,
-            Permissions = response.Permissions
+            Name = response.Name
         });
     }
 }

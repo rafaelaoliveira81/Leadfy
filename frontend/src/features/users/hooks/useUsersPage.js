@@ -11,7 +11,6 @@ import {
 export function useUsersPage() {
   // --- Dados brutos ---
   const [allUsers, setAllUsers] = useState([]);
-  const [roles, setRoles] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -56,19 +55,9 @@ export function useUsersPage() {
     }
   }, []);
 
-  const fetchRoles = useCallback(async () => {
-    try {
-      const data = await userAPI.GetRoles();
-      setRoles(Array.isArray(data) ? data : []);
-    } catch {
-      setRoles([]);
-    }
-  }, []);
-
   useEffect(() => {
     fetchUsers();
-    fetchRoles();
-  }, [fetchUsers, fetchRoles]);
+  }, [fetchUsers]);
 
   // --- Dados filtrados e paginados ---
   const filtered = useMemo(() => {
@@ -199,9 +188,6 @@ export function useUsersPage() {
     error,
     total,
     totalPages,
-
-    // Roles para select
-    roles,
 
     // Filtros
     search,

@@ -4,5 +4,5 @@ namespace Application;
 
 public interface IJwtApp
 {
-    string GenerateToken(User user, IReadOnlyCollection<string>? permissions = null);
+    string GenerateToken(User user);
 }

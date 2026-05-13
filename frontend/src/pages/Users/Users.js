@@ -18,7 +18,6 @@ export function Users() {
     error,
     total,
     totalPages,
-    roles,
     search,
     setSearch,
     statusFilter,
@@ -113,7 +112,6 @@ export function Users() {
           open={modal.open}
           mode={modal.mode}
           user={modal.user}
-          roles={roles}
           onClose={closeModal}
           onCreateSubmit={createUser}
           onUpdateSubmit={updateUser}

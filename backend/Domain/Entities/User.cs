@@ -1,5 +1,3 @@
-using Domain.Enuns;
-
 namespace Domain.Entities;
 
 /// <summary>
@@ -11,16 +9,8 @@ public class User
     public string Name { get; set; } //required
     public string Email { get; set; } //required and unique
     public string PasswordHash { get; private set; } //required
-    public UserRole Role { get; set; } //required
     public bool IsActive { get; set; } //required and default true
     public DateTime CreatedAt { get; set; } //required and default current time
-
-    /// <summary>
-    /// Optional FK to UserGroup. Null for users migrated before group-based auth was introduced.
-    /// UserRole is kept for backward compatibility during transition.
-    /// </summary>
-    public int? UserGroupId { get; set; }
-    public UserGroup UserGroup { get; set; }
 
     public ICollection<Ower> Owers { get; set; } //Relacionamento 1:N com Ower
     public ICollection<Interaction> Interactions { get; set; } //Relacionamento 1:N com Interaction
