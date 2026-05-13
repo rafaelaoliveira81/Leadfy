@@ -1,8 +1,4 @@
 using Domain.Entities;
-
-/// <summary>
-/// Contrato de acesso a dados para configurações de IA.
-/// </summary>
 public interface IAiConfigRepo
 {
     Task<int> AddAsync(AiConfig config);

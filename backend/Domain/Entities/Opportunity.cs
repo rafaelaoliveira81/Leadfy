@@ -20,37 +20,19 @@ public class Opportunity
     public DateTime CreatedAt { get; set; }
     public bool IsActive { get; set; }
     public int SortOrder { get; set; }
-
-    /// <summary>
-    /// Construtor padrão.
-    /// Inicializa a opportunity como ativa e define a data de criação.
-    /// </summary>
     public Opportunity()
     {
         IsActive = true;
         CreatedAt = DateTime.UtcNow;
     }
-
-    /// <summary>
-    /// Desativa a opportunity no sistema.
-    /// </summary>
     public void Deactivate()
     {
         IsActive = false;
     }
-
-    /// <summary>
-    /// Ativa a opportunity no sistema.
-    /// </summary>
     public void Activate()
     {
         IsActive = true;
     }
-
-    /// <summary>
-    /// Atualiza o plano de ação gerado para a opportunity.
-    /// </summary>
-    /// <param name="actionPlan">Conteúdo do plano de ação.</param>
     public void UpdateActionPlan(string actionPlan)
     {
         ActionPlan = actionPlan;

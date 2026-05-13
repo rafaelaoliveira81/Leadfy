@@ -7,9 +7,6 @@ using Dominio.Enums;
 
 namespace Application;
 
-/// <summary>
-/// Serviço de aplicação responsável por gerar e persistir planos de ação de opportunities.
-/// </summary>
 public class OpportunityActionPlanApp : IOpportunityActionPlanApp
 {
     private readonly IOpportunityRepo _opportunityRepo;
@@ -28,10 +25,6 @@ public class OpportunityActionPlanApp : IOpportunityActionPlanApp
         _aiConfigApp = aiConfigApp;
         _generativeAiService = generativeAiService;
     }
-
-    /// <summary>
-    /// Gera um plano de ação com base no contexto da opportunity e persiste o resultado.
-    /// </summary>
     public async Task<Opportunity> GenerateAsync(int opportunityId, int configId)
     {
         if (opportunityId <= 0)

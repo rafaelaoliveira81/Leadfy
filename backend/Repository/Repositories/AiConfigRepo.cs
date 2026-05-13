@@ -4,9 +4,6 @@ using Repository.Context;
 
 namespace Repository.Repositories;
 
-/// <summary>
-/// Repositório responsável pela persistência e consulta de configurações de IA.
-/// </summary>
 public class AiConfigRepo : BaseRepo, IAiConfigRepo
 {
     public AiConfigRepo(CRMContext context) : base(context) { }
