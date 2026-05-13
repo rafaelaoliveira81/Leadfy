@@ -1,13 +1,13 @@
-import { AppLayout } from '../../layouts/AppLayout/AppLayout';
-import { useToast } from '../../components/ui/Toast/Toast';
-import { Pagination } from '../../components/ui/Pagination/Pagination';
-import { OpportunityListHeader } from '../../features/opportunities/components/OpportunityListHeader';
-import { OpportunityFilters } from '../../features/opportunities/components/OpportunityFilters';
-import { OpportunityTable } from '../../features/opportunities/components/OpportunityTable';
-import { OpportunityFormModal } from '../../features/opportunities/components/OpportunityFormModal';
-import { OpportunityDeleteModal } from '../../features/opportunities/components/OpportunityDeleteModal';
-import { useOpportunitiesPage } from '../../features/opportunities/hooks/useOpportunitiesPage';
-import style from './_opportunities.module.css';
+import { AppLayout } from "../../layouts/AppLayout/AppLayout";
+import { useToast } from "../../components/ui/Toast/Toast";
+import { Pagination } from "../../components/ui/Pagination/Pagination";
+import { OpportunityListHeader } from "../../features/opportunities/components/OpportunityListHeader";
+import { OpportunityFilters } from "../../features/opportunities/components/OpportunityFilters";
+import { OpportunityTable } from "../../features/opportunities/components/OpportunityTable";
+import { OpportunityFormModal } from "../../features/opportunities/components/OpportunityFormModal";
+import { OpportunityDeleteModal } from "../../features/opportunities/components/OpportunityDeleteModal";
+import { useOpportunitiesPage } from "../../features/opportunities/hooks/useOpportunitiesPage";
+import style from "./_opportunities.module.css";
 
 export function Opportunities() {
   const addToast = useToast();
@@ -18,7 +18,7 @@ export function Opportunities() {
     total,
     totalPages,
     leads,
-    owers,
+    owners,
     products,
     search,
     setSearch,
@@ -47,21 +47,21 @@ export function Opportunities() {
       await toggleOpportunityStatus(opportunity);
       addToast(
         opportunity.isActive
-          ? 'Oportunidade desativada com sucesso!'
-          : 'Oportunidade ativada com sucesso!',
-        'success'
+          ? "Oportunidade desativada com sucesso!"
+          : "Oportunidade ativada com sucesso!",
+        "success",
       );
     } catch {
-      addToast('Erro ao alterar status da oportunidade.', 'error');
+      addToast("Erro ao alterar status da oportunidade.", "error");
     }
   };
 
   const handleDelete = async (opportunityId) => {
     try {
       await deleteOpportunity(opportunityId);
-      addToast('Oportunidade excluída com sucesso!', 'success');
+      addToast("Oportunidade excluída com sucesso!", "success");
     } catch {
-      addToast('Erro ao excluir oportunidade.', 'error');
+      addToast("Erro ao excluir oportunidade.", "error");
     }
   };
 
@@ -110,7 +110,7 @@ export function Opportunities() {
           mode={modal.mode}
           opportunity={modal.opportunity}
           leads={leads}
-          owers={owers}
+          owners={owners}
           products={products}
           onClose={closeModal}
           onCreateSubmit={createOpportunity}

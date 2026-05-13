@@ -1,12 +1,12 @@
-import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import opportunityAPI from '../../../services/opportunityApi';
-import leadAPI from '../../../services/leadApi';
-import owerAPI from '../../../services/owerApi';
-import productAPI from '../../../services/productApi';
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import opportunityAPI from "../../../services/opportunityApi";
+import leadAPI from "../../../services/leadApi";
+import ownerAPI from "../../../services/ownerApi";
+import productAPI from "../../../services/productApi";
 import {
   OPPORTUNITY_DEFAULT_PAGE_SIZE,
   OPPORTUNITY_SEARCH_DEBOUNCE_MS,
-} from '../constants/opportunity.constants';
+} from "../constants/opportunity.constants";
 
 /**
  * Hook de orquestração da tela de listagem de oportunidades.
@@ -15,23 +15,30 @@ export function useOpportunitiesPage() {
   // --- Dados brutos ---
   const [allOpportunities, setAllOpportunities] = useState([]);
   const [leads, setLeads] = useState([]);
-  const [owers, setOwers] = useState([]);
+  const [owners, setOwners] = useState([]);
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
   // --- Filtros ---
-  const [search, setSearch] = useState('');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
 
   // --- Paginação ---
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(OPPORTUNITY_DEFAULT_PAGE_SIZE);
 
   // --- Modal ---
-  const [modal, setModal] = useState({ open: false, mode: null, opportunity: null });
-  const [deleteModal, setDeleteModal] = useState({ open: false, opportunity: null });
+  const [modal, setModal] = useState({
+    open: false,
+    mode: null,
+    opportunity: null,
+  });
+  const [deleteModal, setDeleteModal] = useState({
+    open: false,
+    opportunity: null,
+  });
 
   // --- Debounce da busca ---
   const debounceRef = useRef(null);
@@ -53,7 +60,7 @@ export function useOpportunitiesPage() {
       const data = await opportunityAPI.GetAll();
       setAllOpportunities(Array.isArray(data) ? data : []);
     } catch (err) {
-      setError(err?.message || 'Erro ao carregar oportunidades.');
+      setError(err?.message || "Erro ao carregar oportunidades.");
       setAllOpportunities([]);
     } finally {
       setIsLoading(false);
@@ -62,17 +69,17 @@ export function useOpportunitiesPage() {
 
   const fetchRelatedData = useCallback(async () => {
     try {
-      const [leadsData, owersData, productsData] = await Promise.all([
+      const [leadsData, ownersData, productsData] = await Promise.all([
         leadAPI.GetAll({ isActive: true }),
-        owerAPI.GetAll({ isActive: true }),
+        ownerAPI.GetAll({ isActive: true }),
         productAPI.GetAll({ isActive: true }),
       ]);
       setLeads(Array.isArray(leadsData) ? leadsData : []);
-      setOwers(Array.isArray(owersData) ? owersData : []);
+      setOwners(Array.isArray(ownersData) ? ownersData : []);
       setProducts(Array.isArray(productsData) ? productsData : []);
     } catch {
       setLeads([]);
-      setOwers([]);
+      setOwners([]);
       setProducts([]);
     }
   }, []);
@@ -91,9 +98,9 @@ export function useOpportunitiesPage() {
       result = result.filter((o) => o.title?.toLowerCase().includes(term));
     }
 
-    if (statusFilter === 'active') {
+    if (statusFilter === "active") {
       result = result.filter((o) => o.isActive === true);
-    } else if (statusFilter === 'inactive') {
+    } else if (statusFilter === "inactive") {
       result = result.filter((o) => o.isActive === false);
     }
 
@@ -121,19 +128,19 @@ export function useOpportunitiesPage() {
   }, []);
 
   const handleClearFilters = useCallback(() => {
-    setSearch('');
-    setDebouncedSearch('');
-    setStatusFilter('all');
+    setSearch("");
+    setDebouncedSearch("");
+    setStatusFilter("all");
     setPage(1);
   }, []);
 
   // --- Modal ---
   const openCreateModal = useCallback(() => {
-    setModal({ open: true, mode: 'create', opportunity: null });
+    setModal({ open: true, mode: "create", opportunity: null });
   }, []);
 
   const openEditModal = useCallback((opportunity) => {
-    setModal({ open: true, mode: 'edit', opportunity });
+    setModal({ open: true, mode: "edit", opportunity });
   }, []);
 
   const closeModal = useCallback(() => {
@@ -155,7 +162,7 @@ export function useOpportunitiesPage() {
       closeModal();
       await fetchOpportunities();
     },
-    [closeModal, fetchOpportunities]
+    [closeModal, fetchOpportunities],
   );
 
   const updateOpportunity = useCallback(
@@ -164,7 +171,7 @@ export function useOpportunitiesPage() {
       closeModal();
       await fetchOpportunities();
     },
-    [closeModal, fetchOpportunities]
+    [closeModal, fetchOpportunities],
   );
 
   const toggleOpportunityStatus = useCallback(
@@ -176,7 +183,7 @@ export function useOpportunitiesPage() {
       }
       await fetchOpportunities();
     },
-    [fetchOpportunities]
+    [fetchOpportunities],
   );
 
   const deleteOpportunity = useCallback(
@@ -185,7 +192,7 @@ export function useOpportunitiesPage() {
       closeDeleteModal();
       await fetchOpportunities();
     },
-    [closeDeleteModal, fetchOpportunities]
+    [closeDeleteModal, fetchOpportunities],
   );
 
   return {
@@ -198,7 +205,7 @@ export function useOpportunitiesPage() {
 
     // Dados relacionados para selects
     leads,
-    owers,
+    owners,
     products,
 
     // Filtros

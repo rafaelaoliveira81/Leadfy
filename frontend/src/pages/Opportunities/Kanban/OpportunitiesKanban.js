@@ -25,7 +25,7 @@ export function OpportunitiesKanban() {
     closeCreateModal,
     createOpportunity,
     leads,
-    owers,
+    owners,
     products,
     refresh,
   } = useOpportunitiesKanbanPage();
@@ -87,7 +87,7 @@ export function OpportunitiesKanban() {
           mode="create"
           opportunity={{ stage: createModal.defaultStage }}
           leads={leads}
-          owers={owers}
+          owners={owners}
           products={products}
           onClose={closeCreateModal}
           onCreateSubmit={onCreateSubmit}

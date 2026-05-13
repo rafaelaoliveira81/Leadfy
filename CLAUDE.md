@@ -13,11 +13,13 @@ This is a full-stack sales CRM (Crm-Vendas) with a **React frontend** and a **.N
 ## Local Development Setup
 
 The root `.env` contains SQL Server credentials used by a local instance (or Docker container) on port 1433:
+
 ```
 Server=localhost,1433;Database=CrmVendasDb;User Id=sa;Password=SenhaForte@123;TrustServerCertificate=True;
 ```
 
 Start the stack:
+
 1. Ensure SQL Server is running on port 1433
 2. `cd backend && dotnet run --project Api` → API at `https://localhost:7287`
 3. `cd frontend && npm start` → App at `http://localhost:3000`
@@ -51,14 +53,14 @@ The Products feature (`frontend/src/features/products/`) is the canonical refere
 
 ## Domain Entities
 
-| Entity | Description |
-|--------|-------------|
-| `User` | System user with `UserRole` (Admin, Manager, SalesRepresentative, CustomerSupport, RegularUser) |
-| `Ower` | Associates a user to a CRM entity (ownership) |
-| `Lead` | Prospective customer |
-| `Product` | Product or service offered |
-| `Opportunity` | Sales negotiation linked to a Lead and Product, tracked through `OpportunityStage` |
-| `Interaction` | Activity/contact record tied to any CRM entity |
+| Entity        | Description                                                                                     |
+| ------------- | ----------------------------------------------------------------------------------------------- |
+| `User`        | System user with `UserRole` (Admin, Manager, SalesRepresentative, CustomerSupport, RegularUser) |
+| `Owner`       | Associates a user to a CRM entity (ownership)                                                   |
+| `Lead`        | Prospective customer                                                                            |
+| `Product`     | Product or service offered                                                                      |
+| `Opportunity` | Sales negotiation linked to a Lead and Product, tracked through `OpportunityStage`              |
+| `Interaction` | Activity/contact record tied to any CRM entity                                                  |
 
 `OpportunityStage` pipeline: `NewLead → Contacted → Qualified → ProposalSent → Negotiation → Won / Lost`
 

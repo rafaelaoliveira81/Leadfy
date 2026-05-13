@@ -50,14 +50,14 @@ src/
 
 ### Current features
 
-| Route | Feature |
-|-------|---------|
-| `/` | Home |
-| `/products` | Products CRUD |
-| `/leads` | Leads CRUD |
-| `/owners` | Owers (Owners) CRUD |
-| `/users` | Users CRUD |
-| `/opportunities` | Opportunities list |
+| Route                   | Feature                                           |
+| ----------------------- | ------------------------------------------------- |
+| `/`                     | Home                                              |
+| `/products`             | Products CRUD                                     |
+| `/leads`                | Leads CRUD                                        |
+| `/owners`               | Owners CRUD                                       |
+| `/users`                | Users CRUD                                        |
+| `/opportunities`        | Opportunities list                                |
 | `/opportunities/kanban` | Opportunities Kanban (drag-and-drop via @dnd-kit) |
 
 The Kanban feature lives under `src/features/opportunities/kanban/` with its own components, hooks, and constants. `KanbanProgress` is currently commented out.

@@ -1,6 +1,6 @@
-import { Modal } from '../../../components/ui/Modal/Modal';
-import { OpportunityForm } from './OpportunityForm';
-import { useOpportunityForm } from '../hooks/useOpportunityForm';
+import { Modal } from "../../../components/ui/Modal/Modal";
+import { OpportunityForm } from "./OpportunityForm";
+import { useOpportunityForm } from "../hooks/useOpportunityForm";
 
 /**
  * Modal de criação/edição de oportunidade.
@@ -10,14 +10,14 @@ export function OpportunityFormModal({
   mode,
   opportunity,
   leads,
-  owers,
+  owners,
   products,
   onClose,
   onCreateSubmit,
   onUpdateSubmit,
   addToast,
 }) {
-  const isEdit = mode === 'edit';
+  const isEdit = mode === "edit";
 
   const { form, handleSubmit, isSubmitting } = useOpportunityForm({
     mode,
@@ -26,25 +26,25 @@ export function OpportunityFormModal({
       ? async (id, data) => {
           try {
             await onUpdateSubmit(id, data);
-            addToast('Oportunidade atualizada com sucesso!', 'success');
+            addToast("Oportunidade atualizada com sucesso!", "success");
           } catch {
-            addToast('Erro ao atualizar oportunidade.', 'error');
+            addToast("Erro ao atualizar oportunidade.", "error");
           }
         }
       : async (data) => {
           try {
             await onCreateSubmit(data);
-            addToast('Oportunidade criada com sucesso!', 'success');
+            addToast("Oportunidade criada com sucesso!", "success");
           } catch {
-            addToast('Erro ao criar oportunidade.', 'error');
+            addToast("Erro ao criar oportunidade.", "error");
           }
         },
   });
 
-  const title = isEdit ? 'Editar Oportunidade' : 'Nova Oportunidade';
+  const title = isEdit ? "Editar Oportunidade" : "Nova Oportunidade";
   const subtitle = isEdit
-    ? 'Edite as informações da oportunidade selecionada.'
-    : 'Insira as informações para criar uma nova oportunidade.';
+    ? "Edite as informações da oportunidade selecionada."
+    : "Insira as informações para criar uma nova oportunidade.";
 
   return (
     <Modal
@@ -59,7 +59,7 @@ export function OpportunityFormModal({
       <OpportunityForm
         form={form}
         leads={leads}
-        owers={owers}
+        owners={owners}
         products={products}
       />
     </Modal>

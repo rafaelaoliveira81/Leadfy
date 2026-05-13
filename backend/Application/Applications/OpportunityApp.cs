@@ -7,13 +7,13 @@ public class OpportunityApp : IOpportunityApp
 {
     private readonly IOpportunityRepo _opportunityRepo;
     private readonly ILeadRepo _leadRepo;
-    private readonly IOwerRepo _owerRepo;
+    private readonly IOwnerRepo _ownerRepo;
     private readonly IProductRepo _productRepo;
-    public OpportunityApp(IOpportunityRepo opportunityRepo, ILeadRepo leadRepo, IOwerRepo owerRepo, IProductRepo productRepo)
+    public OpportunityApp(IOpportunityRepo opportunityRepo, ILeadRepo leadRepo, IOwnerRepo ownerRepo, IProductRepo productRepo)
     {
         _opportunityRepo = opportunityRepo;
         _leadRepo = leadRepo;
-        _owerRepo = owerRepo;
+        _ownerRepo = ownerRepo;
         _productRepo = productRepo;
     }
     public async Task<int> AddAsync(Opportunity opportunity)
@@ -155,13 +155,13 @@ public class OpportunityApp : IOpportunityApp
 
         return leadEntity;
     }
-    private async Task<Ower> ValidateOwnerExistsByIdAsync(int idOwner)
+    private async Task<Owner> ValidateOwnerExistsByIdAsync(int idOwner)
     {
-        var owerEntity = await _owerRepo.GetByIdAsync(idOwner);
-        if (owerEntity == null)
-            throw new KeyNotFoundException("Owner não localizado.");
+        var ownerEntity = await _ownerRepo.GetByIdAsync(idOwner);
+        if (ownerEntity == null)
+            throw new KeyNotFoundException("Responsável não localizado.");
 
-        return owerEntity;
+        return ownerEntity;
     }
     private async Task<Product> ValidateProductExistsByIdAsync(int idProduct)
     {

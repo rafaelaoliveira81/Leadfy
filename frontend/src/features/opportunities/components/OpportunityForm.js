@@ -1,15 +1,15 @@
-import { OPPORTUNITY_STAGE_OPTIONS } from '../constants/opportunity.constants';
-import style from './_opportunityForm.module.css';
+import { OPPORTUNITY_STAGE_OPTIONS } from "../constants/opportunity.constants";
+import style from "./_opportunityForm.module.css";
 
 /**
  * Formulário de criação/edição de oportunidade.
  * @param {object} props
  * @param {import('react-hook-form').UseFormReturn} props.form
  * @param {object[]} props.leads
- * @param {object[]} props.owers
+ * @param {object[]} props.owners
  * @param {object[]} props.products
  */
-export function OpportunityForm({ form, leads, owers, products }) {
+export function OpportunityForm({ form, leads, owners, products }) {
   const {
     register,
     formState: { errors },
@@ -22,9 +22,9 @@ export function OpportunityForm({ form, leads, owers, products }) {
         <input
           id="opp-title"
           type="text"
-          className={errors.title ? style.hasError : ''}
+          className={errors.title ? style.hasError : ""}
           placeholder="Título da oportunidade"
-          {...register('title')}
+          {...register("title")}
         />
         {errors.title && (
           <span className={style.fieldError}>{errors.title.message}</span>
@@ -36,8 +36,8 @@ export function OpportunityForm({ form, leads, owers, products }) {
           <label htmlFor="opp-lead">Lead</label>
           <select
             id="opp-lead"
-            className={errors.leadId ? style.hasError : ''}
-            {...register('leadId')}
+            className={errors.leadId ? style.hasError : ""}
+            {...register("leadId")}
           >
             <option value="">Selecione um lead</option>
             {leads.map((l) => (
@@ -55,11 +55,11 @@ export function OpportunityForm({ form, leads, owers, products }) {
           <label htmlFor="opp-owner">Responsável</label>
           <select
             id="opp-owner"
-            className={errors.ownerId ? style.hasError : ''}
-            {...register('ownerId')}
+            className={errors.ownerId ? style.hasError : ""}
+            {...register("ownerId")}
           >
             <option value="">Nenhum (opcional)</option>
-            {owers.map((o) => (
+            {owners.map((o) => (
               <option key={o.id} value={o.id}>
                 {o.name}
               </option>
@@ -76,8 +76,8 @@ export function OpportunityForm({ form, leads, owers, products }) {
           <label htmlFor="opp-product">Produto</label>
           <select
             id="opp-product"
-            className={errors.productId ? style.hasError : ''}
-            {...register('productId')}
+            className={errors.productId ? style.hasError : ""}
+            {...register("productId")}
           >
             <option value="">Selecione um produto</option>
             {products.map((p) => (
@@ -95,8 +95,8 @@ export function OpportunityForm({ form, leads, owers, products }) {
           <label htmlFor="opp-stage">Etapa</label>
           <select
             id="opp-stage"
-            className={errors.stage ? style.hasError : ''}
-            {...register('stage')}
+            className={errors.stage ? style.hasError : ""}
+            {...register("stage")}
           >
             {OPPORTUNITY_STAGE_OPTIONS.map((s) => (
               <option key={s.value} value={s.value}>
@@ -117,9 +117,9 @@ export function OpportunityForm({ form, leads, owers, products }) {
             id="opp-amount"
             type="text"
             inputMode="decimal"
-            className={errors.amount ? style.hasError : ''}
+            className={errors.amount ? style.hasError : ""}
             placeholder="0,00"
-            {...register('amount')}
+            {...register("amount")}
           />
           {errors.amount && (
             <span className={style.fieldError}>{errors.amount.message}</span>
@@ -131,11 +131,13 @@ export function OpportunityForm({ form, leads, owers, products }) {
           <input
             id="opp-date"
             type="date"
-            className={errors.expectedCloseDate ? style.hasError : ''}
-            {...register('expectedCloseDate')}
+            className={errors.expectedCloseDate ? style.hasError : ""}
+            {...register("expectedCloseDate")}
           />
           {errors.expectedCloseDate && (
-            <span className={style.fieldError}>{errors.expectedCloseDate.message}</span>
+            <span className={style.fieldError}>
+              {errors.expectedCloseDate.message}
+            </span>
           )}
         </div>
       </div>

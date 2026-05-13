@@ -1,10 +1,10 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { arrayMove } from '@dnd-kit/sortable';
-import opportunityAPI from '../../../../services/opportunityApi';
-import leadAPI from '../../../../services/leadApi';
-import owerAPI from '../../../../services/owerApi';
-import productAPI from '../../../../services/productApi';
-import { KANBAN_STAGES } from '../constants/kanban.constants';
+import { useState, useEffect, useCallback, useRef } from "react";
+import { arrayMove } from "@dnd-kit/sortable";
+import opportunityAPI from "../../../../services/opportunityApi";
+import leadAPI from "../../../../services/leadApi";
+import ownerAPI from "../../../../services/ownerApi";
+import productAPI from "../../../../services/productApi";
+import { KANBAN_STAGES } from "../constants/kanban.constants";
 
 /**
  * Agrupa oportunidades por stage (valor numérico do enum).
@@ -48,7 +48,9 @@ export function useOpportunitiesKanbanPage() {
   // --- Dados ---
   const [columns, setColumns] = useState(() => {
     const init = {};
-    KANBAN_STAGES.forEach((s) => { init[s.value] = []; });
+    KANBAN_STAGES.forEach((s) => {
+      init[s.value] = [];
+    });
     return init;
   });
   const [isLoading, setIsLoading] = useState(true);
@@ -56,17 +58,23 @@ export function useOpportunitiesKanbanPage() {
 
   // --- Related data for create modal ---
   const [leads, setLeads] = useState([]);
-  const [owers, setOwers] = useState([]);
+  const [owners, setOwners] = useState([]);
   const [products, setProducts] = useState([]);
 
   // --- DnD ---
   const [activeCard, setActiveCard] = useState(null);
 
   // --- Detail modal ---
-  const [detailModal, setDetailModal] = useState({ open: false, opportunity: null });
+  const [detailModal, setDetailModal] = useState({
+    open: false,
+    opportunity: null,
+  });
 
   // --- Create modal ---
-  const [createModal, setCreateModal] = useState({ open: false, defaultStage: 1 });
+  const [createModal, setCreateModal] = useState({
+    open: false,
+    defaultStage: 1,
+  });
 
   // Snapshot for optimistic revert
   const prevColumnsRef = useRef(null);
@@ -80,7 +88,7 @@ export function useOpportunitiesKanbanPage() {
       const list = Array.isArray(data) ? data : [];
       setColumns(groupByStage(list));
     } catch (err) {
-      setError(err?.message || 'Erro ao carregar oportunidades.');
+      setError(err?.message || "Erro ao carregar oportunidades.");
     } finally {
       setIsLoading(false);
     }
@@ -88,13 +96,13 @@ export function useOpportunitiesKanbanPage() {
 
   const fetchRelatedData = useCallback(async () => {
     try {
-      const [leadsData, owersData, productsData] = await Promise.all([
+      const [leadsData, ownersData, productsData] = await Promise.all([
         leadAPI.GetAll({ isActive: true }),
-        owerAPI.GetAll({ isActive: true }),
+        ownerAPI.GetAll({ isActive: true }),
         productAPI.GetAll({ isActive: true }),
       ]);
       setLeads(Array.isArray(leadsData) ? leadsData : []);
-      setOwers(Array.isArray(owersData) ? owersData : []);
+      setOwners(Array.isArray(ownersData) ? ownersData : []);
       setProducts(Array.isArray(productsData) ? productsData : []);
     } catch {
       /* silently fallback */
@@ -112,11 +120,13 @@ export function useOpportunitiesKanbanPage() {
       const { active } = event;
       const col = findColumnOfCard(columns, active.id);
       if (col) {
-        const card = columns[col].find((o) => String(o.id) === String(active.id));
+        const card = columns[col].find(
+          (o) => String(o.id) === String(active.id),
+        );
         setActiveCard(card || null);
       }
     },
-    [columns]
+    [columns],
   );
 
   const handleDragOver = useCallback(
@@ -137,14 +147,18 @@ export function useOpportunitiesKanbanPage() {
       setColumns((prev) => {
         const sourceItems = [...prev[activeCol]];
         const destItems = [...prev[overCol]];
-        const activeIndex = sourceItems.findIndex((o) => String(o.id) === String(active.id));
+        const activeIndex = sourceItems.findIndex(
+          (o) => String(o.id) === String(active.id),
+        );
         if (activeIndex === -1) return prev;
 
         const [movedCard] = sourceItems.splice(activeIndex, 1);
         movedCard.stage = Number(overCol);
 
         // Insere na posição do over, ou no final
-        const overIndex = destItems.findIndex((o) => String(o.id) === String(over.id));
+        const overIndex = destItems.findIndex(
+          (o) => String(o.id) === String(over.id),
+        );
         if (overIndex >= 0) {
           destItems.splice(overIndex, 0, movedCard);
         } else {
@@ -158,7 +172,7 @@ export function useOpportunitiesKanbanPage() {
         };
       });
     },
-    [columns]
+    [columns],
   );
 
   const handleDragEnd = useCallback(
@@ -181,9 +195,14 @@ export function useOpportunitiesKanbanPage() {
       if (activeCol === overCol) {
         setColumns((prev) => {
           const items = [...prev[activeCol]];
-          const oldIndex = items.findIndex((o) => String(o.id) === String(active.id));
-          const newIndex = items.findIndex((o) => String(o.id) === String(over.id));
-          if (oldIndex === -1 || newIndex === -1 || oldIndex === newIndex) return prev;
+          const oldIndex = items.findIndex(
+            (o) => String(o.id) === String(active.id),
+          );
+          const newIndex = items.findIndex(
+            (o) => String(o.id) === String(over.id),
+          );
+          if (oldIndex === -1 || newIndex === -1 || oldIndex === newIndex)
+            return prev;
 
           return {
             ...prev,
@@ -199,9 +218,8 @@ export function useOpportunitiesKanbanPage() {
 
         // Read current columns from state
         setColumns((current) => {
-          const affectedStages = activeCol === overCol
-            ? [activeCol]
-            : [activeCol, overCol];
+          const affectedStages =
+            activeCol === overCol ? [activeCol] : [activeCol, overCol];
 
           const items = [];
           affectedStages.forEach((stageKey) => {
@@ -229,7 +247,7 @@ export function useOpportunitiesKanbanPage() {
         }
       }
     },
-    [columns]
+    [columns],
   );
 
   // --- Stage change from modal ---
@@ -246,7 +264,7 @@ export function useOpportunitiesKanbanPage() {
         throw err;
       }
     },
-    [columns, fetchOpportunities]
+    [columns, fetchOpportunities],
   );
 
   // --- Modal handlers ---
@@ -273,7 +291,7 @@ export function useOpportunitiesKanbanPage() {
       closeCreateModal();
       await fetchOpportunities();
     },
-    [closeCreateModal, fetchOpportunities]
+    [closeCreateModal, fetchOpportunities],
   );
 
   return {
@@ -301,7 +319,7 @@ export function useOpportunitiesKanbanPage() {
 
     // Related data
     leads,
-    owers,
+    owners,
     products,
 
     // Refresh

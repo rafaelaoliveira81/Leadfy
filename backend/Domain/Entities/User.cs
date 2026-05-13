@@ -11,14 +11,14 @@ public class User
     public UserRole Role { get; set; }
     public bool IsActive { get; set; }
     public DateTime CreatedAt { get; set; }
-    public ICollection<Ower> Owers { get; set; }
+    public ICollection<Owner> Owners { get; set; }
     public ICollection<Interaction> Interactions { get; set; }
 
     public User()
     {
         IsActive = true;
         CreatedAt = DateTime.UtcNow;
-        Owers = new List<Ower>();
+        Owners = new List<Owner>();
         Interactions = new List<Interaction>();
     }
     public void SetPassword(string password, IPasswordHasher hasher)

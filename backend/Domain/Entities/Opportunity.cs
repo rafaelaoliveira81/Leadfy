@@ -11,7 +11,7 @@ public class Opportunity
     public int LeadId { get; set; }
     public Lead Lead { get; set; }
     public int? OwnerId { get; set; }
-    public Ower Owner { get; set; }
+    public Owner Owner { get; set; }
     public int ProductId { get; set; }
     public Product Product { get; set; }
     public OpportunityStage Stage { get; set; }
