@@ -9,15 +9,6 @@ export const userSchema = z.object({
     .string()
     .min(1, 'E-mail é obrigatório')
     .email('E-mail inválido'),
-  idRole: z
-    .union([z.string(), z.number()])
-    .refine(
-      (val) => {
-        const num = Number(val);
-        return !isNaN(num) && num > 0;
-      },
-      { message: 'Perfil é obrigatório' }
-    ),
 });
 
 export const userCreateSchema = userSchema.extend({

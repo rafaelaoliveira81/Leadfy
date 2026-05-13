@@ -175,7 +175,6 @@ public class UserApp : IUserApp
 
         userEntity.Name = user.Name;
         userEntity.Email = user.Email;
-        userEntity.Role = user.Role;
 
         await _userRepo.UpdateAsync(userEntity);
     }
@@ -284,9 +283,6 @@ public class UserApp : IUserApp
 
         if (string.IsNullOrWhiteSpace(user.Email))
             throw new ArgumentException("O e-mail do usuário deve ser informado.");
-
-        if (!Enum.IsDefined(typeof(UserRole), user.Role))
-            throw new ArgumentException("Tipo de usuário inválido.");
     }
 
     /// <summary>

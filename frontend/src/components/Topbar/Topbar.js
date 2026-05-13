@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import style from './_topbar.module.css';
 import { MdSearch, MdPerson, MdMenu } from 'react-icons/md';
 import { useNavigate } from 'react-router-dom';
+import { clearAuthSession } from '../../services/authStorage';
 
 export function Topbar({ onMenuToggle }) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -70,7 +71,8 @@ export function Topbar({ onMenuToggle }) {
               <button
                 onClick={() => {
                   setIsDropdownOpen(false);
-                  navigate('/login');
+                  clearAuthSession();
+                  navigate('/login', { replace: true });
                 }}
               >
                 Sair

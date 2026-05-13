@@ -12,8 +12,7 @@ public interface IUserRepo
     Task DeleteAsync(User user);
 
     /// <summary>
-    /// Returns the user with UserGroup, UserGroupPermissions and Permission loaded.
-    /// Use this overload for JWT login — avoids N+1 when building claims.
+    /// Returns an active user by email for JWT login.
     /// </summary>
     Task<User> GetByEmailWithGroupAsync(string emailUser);
 

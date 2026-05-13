@@ -53,7 +53,7 @@ const mapApiError = (error) => {
 const userAPI = {
     /**
      * Cria um novo usuário.
-     * @param {Object} userData - Dados do usuário (name, email, idRole, password).
+    * @param {Object} userData - Dados do usuário (name, email, password).
      * @returns {Promise<{id: number}>} ID do usuário criado.
      */
     async Create(userData) {
@@ -123,7 +123,7 @@ const userAPI = {
     /**
      * Atualiza um usuário existente.
      * @param {number} userId - ID do usuário a atualizar.
-     * @param {Object} userData - Dados atualizados (name, email, idRole).
+        * @param {Object} userData - Dados atualizados (name, email).
      * @returns {Promise<void>} Sem conteúdo na resposta (204).
      */
     async Update(userId, userData) {
@@ -187,19 +187,6 @@ const userAPI = {
         try {
             await HTTPClient.patch(`/users/${userId}/activate`);
             return;
-        } catch (error) {
-            return mapApiError(error);
-        }
-    },
-
-    /**
-     * Obtém os perfis (roles) disponíveis no sistema.
-     * @returns {Promise<UserRoleResponse[]>} Lista de roles disponíveis.
-     */
-    async GetRoles() {
-        try {
-            const response = await HTTPClient.get(`/users/roles`);
-            return response.data;
         } catch (error) {
             return mapApiError(error);
         }

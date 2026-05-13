@@ -2,7 +2,6 @@ import { useMemo } from 'react';
 import { DataTable } from '../../../components/ui/DataTable/DataTable';
 import { StatusBadge } from '../../../components/ui/StatusBadge/StatusBadge';
 import { UserRowActions } from './UserRowActions';
-import { formatRoleName } from '../mappers/user.mapper';
 
 /**
  * Tabela de usuários com colunas pré-configuradas.
@@ -22,11 +21,6 @@ export function UserTable({
     () => [
       { key: 'name', header: 'Nome' },
       { key: 'email', header: 'E-mail' },
-      {
-        key: 'role',
-        header: 'Perfil',
-        render: (value) => formatRoleName(value),
-      },
       {
         key: 'isActive',
         header: 'Status',

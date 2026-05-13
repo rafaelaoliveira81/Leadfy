@@ -117,16 +117,12 @@ public class UserRepository : BaseRepo, IUserRepo
     }
 
     /// <summary>
-    /// Returns the user with UserGroup, UserGroupPermissions and Permission loaded.
-    /// Use for JWT login — builds the full graph needed for claim generation in one query.
+    /// Returns an active user by email for JWT login.
     /// Returns null when no active user matches the email.
     /// </summary>
     public async Task<User> GetByEmailWithGroupAsync(string emailUser)
     {
         return await _context.Users
-            .Include(u => u.UserGroup)
-                .ThenInclude(g => g.UserGroupPermissions)
-                    .ThenInclude(ugp => ugp.Permission)
             .FirstOrDefaultAsync(u => u.Email == emailUser && u.IsActive);
     }
 
