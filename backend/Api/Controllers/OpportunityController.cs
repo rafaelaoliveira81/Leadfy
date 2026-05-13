@@ -12,14 +12,17 @@ using Domain.Enuns;
 public class OpportunityController : ControllerBase
 {
     private readonly IOpportunityApp _opportunityApp;
+    private readonly IOpportunityActionPlanApp _opportunityActionPlanApp;
 
     /// <summary>
     /// Inicializa uma nova instância do controller de opportunities.
     /// </summary>
     /// <param name="opportunityApp">Serviço de aplicação responsável pelas operações de opportunity.</param>
-    public OpportunityController(IOpportunityApp opportunityApp)
+    /// <param name="opportunityActionPlanApp">Serviço de aplicação responsável pela geração do plano de ação.</param>
+    public OpportunityController(IOpportunityApp opportunityApp, IOpportunityActionPlanApp opportunityActionPlanApp)
     {
         _opportunityApp = opportunityApp;
+        _opportunityActionPlanApp = opportunityActionPlanApp;
     }
 
     /// <summary>
@@ -91,6 +94,8 @@ public class OpportunityController : ControllerBase
             {
                 ID = opportunity.ID,
                 Title = opportunity.Title,
+                ActionPlan = opportunity.ActionPlan,
+                ActionPlanGeneratedAt = opportunity.ActionPlanGeneratedAt,
                 LeadId = opportunity.LeadId,
                 LeadName = opportunity.Lead?.Name,
                 OwnerId = opportunity.OwnerId,
@@ -168,6 +173,8 @@ public class OpportunityController : ControllerBase
             {
                 ID = o.ID,
                 Title = o.Title,
+                ActionPlan = o.ActionPlan,
+                ActionPlanGeneratedAt = o.ActionPlanGeneratedAt,
                 LeadId = o.LeadId,
                 LeadName = o.Lead?.Name,
                 OwnerId = o.OwnerId,
@@ -185,6 +192,48 @@ public class OpportunityController : ControllerBase
             });
 
             return Ok(opportunitiesResponse);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Gera um plano de ação para a opportunity informada usando a configuração de IA escolhida.
+    /// </summary>
+    /// <param name="id">Identificador da opportunity.</param>
+    /// <param name="request">Dados da requisição para geração do plano.</param>
+    /// <returns>Plano de ação gerado e persistido.</returns>
+    [HttpPost("{id:int}/generate-action-plan")]
+    [ProducesResponseType(typeof(OpportunityActionPlanResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult> GenerateActionPlan([FromRoute] int id, [FromBody] OpportunityActionPlanGenerate request)
+    {
+        try
+        {
+            var opportunity = await _opportunityActionPlanApp.GenerateAsync(id, request.ConfigId);
+
+            var response = new OpportunityActionPlanResponse
+            {
+                OpportunityId = opportunity.ID,
+                ConfigId = request.ConfigId,
+                Title = opportunity.Title,
+                ActionPlan = opportunity.ActionPlan,
+                ActionPlanGeneratedAt = opportunity.ActionPlanGeneratedAt
+            };
+
+            return Ok(response);
         }
         catch (ArgumentException ex)
         {

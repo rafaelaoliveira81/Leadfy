@@ -6,6 +6,8 @@ public class Opportunity
 {
     public int ID { get; set; }
     public string Title { get; set; }
+    public string ActionPlan { get; set; }
+    public DateTime? ActionPlanGeneratedAt { get; set; }
     public int LeadId { get; set; }
     public Lead Lead { get; set; }
     public int? OwnerId { get; set; }
@@ -43,5 +45,15 @@ public class Opportunity
     public void Activate()
     {
         IsActive = true;
+    }
+
+    /// <summary>
+    /// Atualiza o plano de ação gerado para a opportunity.
+    /// </summary>
+    /// <param name="actionPlan">Conteúdo do plano de ação.</param>
+    public void UpdateActionPlan(string actionPlan)
+    {
+        ActionPlan = actionPlan;
+        ActionPlanGeneratedAt = DateTime.UtcNow;
     }
 }
