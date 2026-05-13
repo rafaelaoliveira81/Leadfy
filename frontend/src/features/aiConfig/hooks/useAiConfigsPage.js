@@ -1,18 +1,18 @@
-import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import aiConfigApi from '../../../services/aiConfigApi';
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import aiConfigApi from "../../../services/aiConfigApi";
 import {
   AI_CONFIG_DEFAULT_PAGE_SIZE,
   AI_CONFIG_SEARCH_DEBOUNCE_MS,
-} from '../constants/aiConfig.constants';
+} from "../constants/aiConfig.constants";
 
 export function useAiConfigsPage() {
   const [allConfigs, setAllConfigs] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const [search, setSearch] = useState('');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
 
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(AI_CONFIG_DEFAULT_PAGE_SIZE);
@@ -38,7 +38,7 @@ export function useAiConfigsPage() {
       const data = await aiConfigApi.GetAll();
       setAllConfigs(Array.isArray(data) ? data : []);
     } catch (err) {
-      setError(err?.message || 'Erro ao carregar configurações de IA.');
+      setError(err?.message || "Erro ao carregar configurações de IA.");
       setAllConfigs([]);
     } finally {
       setIsLoading(false);
@@ -54,12 +54,12 @@ export function useAiConfigsPage() {
 
     if (debouncedSearch) {
       const term = debouncedSearch.toLowerCase();
-      result = result.filter((c) => c.modelName?.toLowerCase().includes(term));
+      result = result.filter((c) => c.title?.toLowerCase().includes(term));
     }
 
-    if (statusFilter === 'active') {
+    if (statusFilter === "active") {
       result = result.filter((c) => c.isActive === true);
-    } else if (statusFilter === 'inactive') {
+    } else if (statusFilter === "inactive") {
       result = result.filter((c) => c.isActive === false);
     }
 
@@ -86,18 +86,18 @@ export function useAiConfigsPage() {
   }, []);
 
   const handleClearFilters = useCallback(() => {
-    setSearch('');
-    setDebouncedSearch('');
-    setStatusFilter('all');
+    setSearch("");
+    setDebouncedSearch("");
+    setStatusFilter("all");
     setPage(1);
   }, []);
 
   const openCreateModal = useCallback(() => {
-    setModal({ open: true, mode: 'create', config: null });
+    setModal({ open: true, mode: "create", config: null });
   }, []);
 
   const openEditModal = useCallback((config) => {
-    setModal({ open: true, mode: 'edit', config });
+    setModal({ open: true, mode: "edit", config });
   }, []);
 
   const closeModal = useCallback(() => {
@@ -118,7 +118,7 @@ export function useAiConfigsPage() {
       closeModal();
       await fetchConfigs();
     },
-    [closeModal, fetchConfigs]
+    [closeModal, fetchConfigs],
   );
 
   const updateConfig = useCallback(
@@ -127,7 +127,7 @@ export function useAiConfigsPage() {
       closeModal();
       await fetchConfigs();
     },
-    [closeModal, fetchConfigs]
+    [closeModal, fetchConfigs],
   );
 
   const toggleConfigStatus = useCallback(
@@ -139,7 +139,7 @@ export function useAiConfigsPage() {
       }
       await fetchConfigs();
     },
-    [fetchConfigs]
+    [fetchConfigs],
   );
 
   const deleteConfig = useCallback(
@@ -148,7 +148,7 @@ export function useAiConfigsPage() {
       closeDeleteModal();
       await fetchConfigs();
     },
-    [closeDeleteModal, fetchConfigs]
+    [closeDeleteModal, fetchConfigs],
   );
 
   return {

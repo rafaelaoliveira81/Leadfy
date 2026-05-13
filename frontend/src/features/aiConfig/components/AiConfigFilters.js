@@ -1,7 +1,7 @@
-import { MdSearch } from 'react-icons/md';
-import { Button } from '../../../components/ui/Button/Button';
-import { AI_CONFIG_STATUS_OPTIONS } from '../constants/aiConfig.constants';
-import style from './_aiConfigFilters.module.css';
+import { MdSearch } from "react-icons/md";
+import { Button } from "../../../components/ui/Button/Button";
+import { AI_CONFIG_STATUS_OPTIONS } from "../constants/aiConfig.constants";
+import style from "./_aiConfigFilters.module.css";
 
 export function AiConfigFilters({
   search,
@@ -18,7 +18,7 @@ export function AiConfigFilters({
         <input
           type="text"
           className={style.searchInput}
-          placeholder="Filtrar por modelo..."
+          placeholder="Filtrar por título..."
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
           aria-label="Filtrar por nome do modelo"

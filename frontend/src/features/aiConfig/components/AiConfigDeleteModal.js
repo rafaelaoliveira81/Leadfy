@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { Modal } from '../../../components/ui/Modal/Modal';
-import style from './_aiConfigDeleteModal.module.css';
+import { useState } from "react";
+import { Modal } from "../../../components/ui/Modal/Modal";
+import style from "./_aiConfigDeleteModal.module.css";
 
 export function AiConfigDeleteModal({ open, config, onClose, onConfirm }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -28,8 +28,8 @@ export function AiConfigDeleteModal({ open, config, onClose, onConfirm }) {
     >
       <div className={style.content}>
         <p className={style.message}>
-          Tem certeza que deseja excluir a configuração do modelo{' '}
-          <strong>{config?.modelName}</strong>?
+          Tem certeza que deseja excluir a configuração{" "}
+          <strong>{config?.title}</strong>?
         </p>
         <p className={style.warning}>Esta ação não pode ser desfeita.</p>
       </div>

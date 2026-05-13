@@ -1,5 +1,8 @@
-import { AI_CONFIG_MODEL_SUGGESTIONS, AI_CONFIG_PROMPT_PLACEHOLDERS } from '../constants/aiConfig.constants';
-import style from './_aiConfigForm.module.css';
+import {
+  AI_CONFIG_MODEL_SUGGESTIONS,
+  AI_CONFIG_PROMPT_PLACEHOLDERS,
+} from "../constants/aiConfig.constants";
+import style from "./_aiConfigForm.module.css";
 
 export function AiConfigForm({ form, isEdit }) {
   const {
@@ -10,14 +13,28 @@ export function AiConfigForm({ form, isEdit }) {
   return (
     <div className={style.form}>
       <div className={style.field}>
+        <label htmlFor="ai-title">Título</label>
+        <input
+          id="ai-title"
+          type="text"
+          className={errors.title ? style.hasError : ""}
+          placeholder="Ex: Configuração GPT-4.1 — Vendas"
+          {...register("title")}
+        />
+        {errors.title && (
+          <span className={style.fieldError}>{errors.title.message}</span>
+        )}
+      </div>
+
+      <div className={style.field}>
         <label htmlFor="ai-model-name">Modelo de IA</label>
         <input
           id="ai-model-name"
           type="text"
           list="ai-model-suggestions"
-          className={errors.modelName ? style.hasError : ''}
+          className={errors.modelName ? style.hasError : ""}
           placeholder="Ex: gpt-4.1"
-          {...register('modelName')}
+          {...register("modelName")}
         />
         <datalist id="ai-model-suggestions">
           {AI_CONFIG_MODEL_SUGGESTIONS.map((m) => (
@@ -33,17 +50,21 @@ export function AiConfigForm({ form, isEdit }) {
         <label htmlFor="ai-prompt-template">Template do Prompt</label>
         <textarea
           id="ai-prompt-template"
-          className={errors.promptTemplate ? style.hasError : ''}
+          className={errors.promptTemplate ? style.hasError : ""}
           placeholder="Ex: Você é um assistente de vendas. Crie um plano de ação para converter o lead {{LeadName}}..."
-          {...register('promptTemplate')}
+          {...register("promptTemplate")}
         />
         {errors.promptTemplate && (
-          <span className={style.fieldError}>{errors.promptTemplate.message}</span>
+          <span className={style.fieldError}>
+            {errors.promptTemplate.message}
+          </span>
         )}
         <p className={style.hint}>
-          Placeholders disponíveis:{' '}
+          Placeholders disponíveis:{" "}
           {AI_CONFIG_PROMPT_PLACEHOLDERS.map((p) => (
-            <code key={p} className={style.placeholder}>{p}</code>
+            <code key={p} className={style.placeholder}>
+              {p}
+            </code>
           ))}
         </p>
       </div>
@@ -57,14 +78,18 @@ export function AiConfigForm({ form, isEdit }) {
           id="ai-api-key"
           type="password"
           autoComplete="new-password"
-          className={errors.apiKey ? style.hasError : ''}
-          placeholder={isEdit ? 'Deixe em branco para manter a chave atual' : 'ghp_...'}
-          {...register('apiKey')}
+          className={errors.apiKey ? style.hasError : ""}
+          placeholder={
+            isEdit ? "Deixe em branco para manter a chave atual" : "ghp_..."
+          }
+          {...register("apiKey")}
         />
         {errors.apiKey && (
           <span className={style.fieldError}>{errors.apiKey.message}</span>
         )}
-        <p className={style.hint}>A chave é armazenada de forma criptografada e nunca é exibida.</p>
+        <p className={style.hint}>
+          A chave é armazenada de forma criptografada e nunca é exibida.
+        </p>
       </div>
     </div>
   );

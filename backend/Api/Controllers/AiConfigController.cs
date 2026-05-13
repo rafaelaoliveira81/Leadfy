@@ -87,6 +87,32 @@ public class AiConfigController : ControllerBase
     }
 
     /// <summary>
+    /// Retorna a configuração de IA ativa.
+    /// </summary>
+    /// <returns>Configuração ativa com a chave mascarada.</returns>
+    /// <response code="200">Configuração ativa encontrada.</response>
+    /// <response code="404">Nenhuma configuração ativa localizada.</response>
+    [HttpGet("ativa")]
+    [ProducesResponseType(typeof(AiConfigResponse), 200)]
+    [ProducesResponseType(404)]
+    public async Task<ActionResult> GetActive()
+    {
+        try
+        {
+            var config = await _aiConfigApp.GetActiveAsync();
+            return Ok(MapToResponse(config));
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = ex.Message });
+        }
+    }
+
+    /// <summary>
     /// Retorna todas as configurações de IA cadastradas.
     /// </summary>
     /// <returns>Lista de configurações com as chaves mascaradas.</returns>

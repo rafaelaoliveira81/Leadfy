@@ -51,6 +51,7 @@ public class AiConfigApp : IAiConfigApp
         if (!string.IsNullOrWhiteSpace(request.ApiKey))
             config.ApiKeyHash = _encryption.Encrypt(request.ApiKey.Trim());
 
+        config.Title = request.Title.Trim();
         config.Model = (AiModelsEnum)request.Model;
         config.PromptTemplate = request.PromptTemplate.Trim();
 
