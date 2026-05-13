@@ -1,3 +1,7 @@
+using Api.Shared.Authorization;
+using Api.Shared.Helpers;
+using Application;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Models.Response;
 using Models.Request;
@@ -9,17 +13,21 @@ using Domain.Enuns;
 /// </summary>
 [ApiController]
 [Route("api/users")]
+[Authorize]
 public class UserController : ControllerBase
 {
     private readonly IUserApp _userApp;
+    private readonly IPermissionApp _permissionApp;
 
     /// <summary>
     /// Inicializa uma nova instância do controller de usuários.
     /// </summary>
     /// <param name="userApp">Serviço de aplicação responsável pelas operações de usuário.</param>
-    public UserController(IUserApp userApp)
+    /// <param name="permissionApp">Serviço de aplicação responsável pela validação de permissões.</param>
+    public UserController(IUserApp userApp, IPermissionApp permissionApp)
     {
         _userApp = userApp;
+        _permissionApp = permissionApp;
     }
 
     /// <summary>
@@ -36,6 +44,7 @@ public class UserController : ControllerBase
     /// e delega o processo de cadastro para a camada de aplicação.
     /// </remarks>
     [HttpPost]
+    [AuthorizePermission(PermissionEnum.Admin, PermissionEnum.Manager)]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -74,6 +83,8 @@ public class UserController : ControllerBase
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
     [HttpGet("{id:int}")]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -81,6 +92,12 @@ public class UserController : ControllerBase
     {
         try
         {
+            if (!TryGetCurrentUserId(out var currentUserId))
+                return Unauthorized(new { message = "Usuário não autenticado." });
+
+            if (currentUserId != id && !await HasUserManagementPermissionAsync())
+                return Forbid();
+
             var userRepository = await _userApp.GetByIdAsync(id);
 
             var userResponse = new UserResponse()
@@ -120,6 +137,7 @@ public class UserController : ControllerBase
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
     [HttpGet("email/{email}")]
+    [AuthorizePermission(PermissionEnum.Admin, PermissionEnum.Manager)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -172,6 +190,7 @@ public class UserController : ControllerBase
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
     [HttpGet]
+    [AuthorizePermission(PermissionEnum.Admin, PermissionEnum.Manager)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -237,6 +256,7 @@ public class UserController : ControllerBase
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
     [HttpPut("{id:int}")]
+    [AuthorizePermission(PermissionEnum.Admin, PermissionEnum.Manager)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -284,6 +304,7 @@ public class UserController : ControllerBase
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
     [HttpPatch("{id:int}/password")]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -293,6 +314,12 @@ public class UserController : ControllerBase
     {
         try
         {
+            if (!TryGetCurrentUserId(out var currentUserId))
+                return Unauthorized(new { message = "Usuário não autenticado." });
+
+            if (currentUserId != id && !await HasUserManagementPermissionAsync())
+                return Forbid();
+
             await _userApp.UpdatePasswordAsync(id, request.CurrentPassword, request.NewPassword);
 
             return NoContent();
@@ -325,6 +352,7 @@ public class UserController : ControllerBase
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
     [HttpDelete("{id:int}")]
+    [AuthorizePermission(PermissionEnum.Admin, PermissionEnum.Manager)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -356,6 +384,7 @@ public class UserController : ControllerBase
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
     [HttpPatch("{id:int}/deactivate")]
+    [AuthorizePermission(PermissionEnum.Admin, PermissionEnum.Manager)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -387,6 +416,7 @@ public class UserController : ControllerBase
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
     [HttpPatch("{id:int}/activate")]
+    [AuthorizePermission(PermissionEnum.Admin, PermissionEnum.Manager)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -419,6 +449,7 @@ public class UserController : ControllerBase
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
     [HttpGet("roles")]
+    [AuthorizePermission(PermissionEnum.Admin, PermissionEnum.Manager)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public IActionResult GetAvailableRoles()
@@ -448,5 +479,29 @@ public class UserController : ControllerBase
         {
             return StatusCode(500, new { message = ex.Message });
         }
+    }
+
+    private bool TryGetCurrentUserId(out int userId)
+    {
+        userId = 0;
+
+        try
+        {
+            userId = AuthenticatedUserHelper.GetRequiredUserId(User);
+            return userId > 0;
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return false;
+        }
+    }
+
+    private async Task<bool> HasUserManagementPermissionAsync()
+    {
+        if (!TryGetCurrentUserId(out var currentUserId))
+            return false;
+
+        return await _permissionApp.CheckPermissionAsync(currentUserId, PermissionEnum.Admin)
+            || await _permissionApp.CheckPermissionAsync(currentUserId, PermissionEnum.Manager);
     }
 }

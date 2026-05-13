@@ -8,4 +8,5 @@ public interface IUserGroupPermissionApp
     Task<IReadOnlyCollection<string>> GetPermissionNamesAsync(User user);
     Task<IEnumerable<UserGroupPermission>> GetByUserGroupIdAsync(int userGroupId);
     Task<bool> CheckPermissionAsync(int userGroupId, PermissionEnum permission);
+    Task UpdateGroupPermissionsAsync(int userGroupId, IReadOnlyCollection<int> permissionIds);
 }
