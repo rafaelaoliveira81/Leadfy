@@ -76,6 +76,12 @@ export function useOpportunitiesKanbanPage() {
     defaultStage: 1,
   });
 
+  // --- Action Plan modal ---
+  const [actionPlanModal, setActionPlanModal] = useState({
+    open: false,
+    opportunity: null,
+  });
+
   // Snapshot for optimistic revert
   const prevColumnsRef = useRef(null);
 
@@ -284,6 +290,46 @@ export function useOpportunitiesKanbanPage() {
     setCreateModal({ open: false, defaultStage: 1 });
   }, []);
 
+  // --- Action plan modal handlers ---
+  const openActionPlanModal = useCallback((opportunity) => {
+    setActionPlanModal({ open: true, opportunity });
+  }, []);
+
+  const closeActionPlanModal = useCallback(() => {
+    setActionPlanModal({ open: false, opportunity: null });
+  }, []);
+
+  const handleActionPlanGenerated = useCallback((result) => {
+    setColumns((prev) => {
+      const next = { ...prev };
+      for (const stageKey of Object.keys(next)) {
+        next[stageKey] = next[stageKey].map((opp) =>
+          opp.id === result.opportunityId
+            ? {
+                ...opp,
+                actionPlan: result.actionPlan,
+                actionPlanGeneratedAt: result.actionPlanGeneratedAt,
+              }
+            : opp,
+        );
+      }
+      // Keep action plan modal opportunity in sync
+      setActionPlanModal((prev) =>
+        prev.opportunity?.id === result.opportunityId
+          ? {
+              ...prev,
+              opportunity: {
+                ...prev.opportunity,
+                actionPlan: result.actionPlan,
+                actionPlanGeneratedAt: result.actionPlanGeneratedAt,
+              },
+            }
+          : prev,
+      );
+      return next;
+    });
+  }, []);
+
   // --- Create submit ---
   const createOpportunity = useCallback(
     async (data) => {
@@ -316,6 +362,12 @@ export function useOpportunitiesKanbanPage() {
     openCreateModal,
     closeCreateModal,
     createOpportunity,
+
+    // Action plan modal
+    actionPlanModal,
+    openActionPlanModal,
+    closeActionPlanModal,
+    handleActionPlanGenerated,
 
     // Related data
     leads,

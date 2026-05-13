@@ -1,13 +1,19 @@
-import { useDroppable } from '@dnd-kit/core';
+import { useDroppable } from "@dnd-kit/core";
 import {
   SortableContext,
   verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
-import { MdAdd } from 'react-icons/md';
-import { KanbanCard } from './KanbanCard';
-import style from './_kanban.module.css';
+} from "@dnd-kit/sortable";
+import { MdAdd } from "react-icons/md";
+import { KanbanCard } from "./KanbanCard";
+import style from "./_kanban.module.css";
 
-export function KanbanColumn({ stage, items, onCardClick, onAddClick }) {
+export function KanbanColumn({
+  stage,
+  items,
+  onCardClick,
+  onAddClick,
+  onActionPlanClick,
+}) {
   const { setNodeRef, isOver } = useDroppable({ id: String(stage.value) });
 
   const sortableIds = items.map((o) => String(o.id));
@@ -18,7 +24,10 @@ export function KanbanColumn({ stage, items, onCardClick, onAddClick }) {
       style={isOver ? { boxShadow: `0 0 0 2px ${stage.accent}` } : undefined}
     >
       <div className={style.columnHeader}>
-        <div className={style.columnAccent} style={{ background: stage.accent }} />
+        <div
+          className={style.columnAccent}
+          style={{ background: stage.accent }}
+        />
         <div className={style.columnTitleRow}>
           <span className={style.columnTitle}>{stage.label}</span>
           <span className={style.columnCount}>{items.length}</span>
@@ -33,12 +42,20 @@ export function KanbanColumn({ stage, items, onCardClick, onAddClick }) {
       </div>
 
       <div className={style.columnCards} ref={setNodeRef}>
-        <SortableContext items={sortableIds} strategy={verticalListSortingStrategy}>
+        <SortableContext
+          items={sortableIds}
+          strategy={verticalListSortingStrategy}
+        >
           {items.length === 0 ? (
             <div className={style.columnEmpty}>Nenhuma oportunidade</div>
           ) : (
             items.map((opp) => (
-              <KanbanCard key={opp.id} opportunity={opp} onClick={onCardClick} />
+              <KanbanCard
+                key={opp.id}
+                opportunity={opp}
+                onClick={onCardClick}
+                onActionPlanClick={onActionPlanClick}
+              />
             ))
           )}
         </SortableContext>

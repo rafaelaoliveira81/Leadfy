@@ -84,7 +84,9 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  transition: border-color 0.2s, background-color 0.2s;
+  transition:
+    border-color 0.2s,
+    background-color 0.2s;
 }
 
 .userBtn:hover {

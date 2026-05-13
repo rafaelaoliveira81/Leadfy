@@ -1,15 +1,15 @@
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import { MdCalendarToday } from 'react-icons/md';
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { MdCalendarToday, MdAutoAwesome } from "react-icons/md";
 import {
   formatCurrency,
   formatDateShort,
   getInitials,
   KANBAN_STAGE_BY_VALUE,
-} from '../constants/kanban.constants';
-import style from './_kanban.module.css';
+} from "../constants/kanban.constants";
+import style from "./_kanban.module.css";
 
-export function KanbanCard({ opportunity, onClick }) {
+export function KanbanCard({ opportunity, onClick, onActionPlanClick }) {
   const {
     attributes,
     listeners,
@@ -30,13 +30,13 @@ export function KanbanCard({ opportunity, onClick }) {
     <div
       ref={setNodeRef}
       style={dragStyle}
-      className={`${style.card} ${isDragging ? style.cardDragging : ''}`}
+      className={`${style.card} ${isDragging ? style.cardDragging : ""}`}
       onClick={() => onClick(opportunity)}
       {...attributes}
       {...listeners}
     >
       <h4 className={style.cardTitle}>{opportunity.title}</h4>
-      <p className={style.cardClient}>{opportunity.leadName || '—'}</p>
+      <p className={style.cardClient}>{opportunity.leadName || "—"}</p>
       <p className={style.cardAmount}>{formatCurrency(opportunity.amount)}</p>
 
       <div className={style.cardDateRow}>
@@ -48,18 +48,37 @@ export function KanbanCard({ opportunity, onClick }) {
         <span
           className={style.cardBadge}
           style={{
-            backgroundColor: stageInfo.accent ? `${stageInfo.accent}22` : '#edf2f4',
-            color: stageInfo.accent || '#2b2d42',
+            backgroundColor: stageInfo.accent
+              ? `${stageInfo.accent}22`
+              : "#edf2f4",
+            color: stageInfo.accent || "#2b2d42",
           }}
         >
           {stageInfo.label || opportunity.stageName}
         </span>
 
-        {opportunity.ownerName && (
-          <div className={style.cardAvatar} title={opportunity.ownerName}>
-            {getInitials(opportunity.ownerName)}
-          </div>
-        )}
+        <div className={style.cardFooterRight}>
+          <button
+            className={`${style.cardActionPlanBtn} ${opportunity.actionPlan ? style.cardActionPlanBtnActive : ""}`}
+            title={
+              opportunity.actionPlan
+                ? "Ver / Regenerar Plano de Ação"
+                : "Gerar Plano de Ação"
+            }
+            onClick={(e) => {
+              e.stopPropagation();
+              if (onActionPlanClick) onActionPlanClick(opportunity);
+            }}
+          >
+            <MdAutoAwesome />
+          </button>
+
+          {opportunity.ownerName && (
+            <div className={style.cardAvatar} title={opportunity.ownerName}>
+              {getInitials(opportunity.ownerName)}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

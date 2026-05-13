@@ -5,12 +5,12 @@ import {
   useSensor,
   useSensors,
   closestCorners,
-} from '@dnd-kit/core';
-import { KANBAN_STAGES } from '../constants/kanban.constants';
-import { KanbanColumn } from './KanbanColumn';
-import { KanbanCard } from './KanbanCard';
-import { KanbanProgress } from './KanbanProgress';
-import style from './_kanban.module.css';
+} from "@dnd-kit/core";
+import { KANBAN_STAGES } from "../constants/kanban.constants";
+import { KanbanColumn } from "./KanbanColumn";
+import { KanbanCard } from "./KanbanCard";
+import { KanbanProgress } from "./KanbanProgress";
+import style from "./_kanban.module.css";
 
 export function KanbanBoard({
   columns,
@@ -22,13 +22,16 @@ export function KanbanBoard({
   onDragEnd,
   onCardClick,
   onAddClick,
+  onActionPlanClick,
 }) {
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
   );
 
   if (isLoading) {
-    return <div className={style.loadingWrapper}>Carregando oportunidades...</div>;
+    return (
+      <div className={style.loadingWrapper}>Carregando oportunidades...</div>
+    );
   }
 
   return (
@@ -52,13 +55,18 @@ export function KanbanBoard({
               items={columns[stage.value] || []}
               onCardClick={onCardClick}
               onAddClick={onAddClick}
+              onActionPlanClick={onActionPlanClick}
             />
           ))}
         </div>
 
         <DragOverlay>
           {activeCard ? (
-            <KanbanCard opportunity={activeCard} onClick={() => {}} />
+            <KanbanCard
+              opportunity={activeCard}
+              onClick={() => {}}
+              onActionPlanClick={() => {}}
+            />
           ) : null}
         </DragOverlay>
       </DndContext>
