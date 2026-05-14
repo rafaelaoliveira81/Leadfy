@@ -95,7 +95,7 @@ export function useOpportunitiesPage() {
 
     if (debouncedSearch) {
       const term = debouncedSearch.toLowerCase();
-      result = result.filter((o) => o.title?.toLowerCase().includes(term));
+      result = result.filter((o) => o.leadName?.toLowerCase().includes(term));
     }
 
     if (statusFilter === "active") {

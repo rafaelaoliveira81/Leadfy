@@ -46,7 +46,7 @@ const mapApiError = (error) => {
 const opportunityAPI = {
   /**
    * Cria uma nova oportunidade.
-   * @param {Object} opportunityData - Dados da oportunidade (title, leadId, ownerId, productId, stage, amount, expectedCloseDate).
+   * @param {Object} opportunityData - Dados da oportunidade (leadId, ownerId, productId, stage, amount, expectedCloseDate).
    * @returns {Promise<{id: number}>} ID da oportunidade criada.
    */
   async Create(opportunityData) {
@@ -76,7 +76,6 @@ const opportunityAPI = {
    * Lista oportunidades com filtros opcionais.
    * @param {Object} options - Opções de filtro.
    * @param {boolean} [options.isActive] - Filtrar por status de ativação (opcional).
-   * @param {string} [options.title] - Filtrar por título contendo o valor (opcional).
    * @returns {Promise<OpportunityResponse[]>} Lista de oportunidades.
    */
   async GetAll(options = {}) {
@@ -85,8 +84,6 @@ const opportunityAPI = {
 
       if (options.isActive !== undefined && options.isActive !== null) {
         params.append("isActive", options.isActive);
-      } else if (options.title) {
-        params.append("title", options.title);
       }
 
       const queryString = params.toString();
@@ -104,7 +101,7 @@ const opportunityAPI = {
   /**
    * Atualiza uma oportunidade existente.
    * @param {number} opportunityId - ID da oportunidade a atualizar.
-   * @param {Object} opportunityData - Dados atualizados (title, leadId, ownerId, productId, stage, amount, expectedCloseDate).
+   * @param {Object} opportunityData - Dados atualizados (leadId, ownerId, productId, stage, amount, expectedCloseDate).
    * @returns {Promise<void>} Sem conteúdo na resposta (204).
    */
   async Update(opportunityId, opportunityData) {

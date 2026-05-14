@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { Modal } from '../../../components/ui/Modal/Modal';
-import style from './_opportunityDeleteModal.module.css';
+import { useState } from "react";
+import { Modal } from "../../../components/ui/Modal/Modal";
+import style from "./_opportunityDeleteModal.module.css";
 
 /**
  * Modal de confirmação para exclusão de oportunidade.
@@ -36,12 +36,9 @@ export function OpportunityDeleteModal({
     >
       <div className={style.content}>
         <p className={style.message}>
-          Tem certeza que deseja excluir a oportunidade{' '}
-          <strong>{opportunity?.title}</strong>?
+          Tem certeza que deseja excluir a oportunidade selecionada?
         </p>
-        <p className={style.warning}>
-          Esta ação não pode ser desfeita.
-        </p>
+        <p className={style.warning}>Esta ação não pode ser desfeita.</p>
       </div>
     </Modal>
   );

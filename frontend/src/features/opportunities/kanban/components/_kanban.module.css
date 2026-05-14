@@ -345,11 +345,37 @@
   border-bottom: 1px solid #edf2f4;
 }
 
+.modalHeaderActions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
 .modalTitle {
   font-size: 18px;
   font-weight: 600;
   color: #2b2d42;
   margin: 0;
+}
+
+.modalDeleteBtn {
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: #8d99ae;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+.modalDeleteBtn:hover {
+  background-color: #fde8ec;
+  color: #ef233c;
 }
 
 .modalCloseBtn {

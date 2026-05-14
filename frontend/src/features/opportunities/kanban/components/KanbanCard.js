@@ -35,7 +35,6 @@ export function KanbanCard({ opportunity, onClick }) {
       {...attributes}
       {...listeners}
     >
-      <h4 className={style.cardTitle}>{opportunity.title}</h4>
       <p className={style.cardClient}>{opportunity.leadName || "—"}</p>
       <p className={style.cardAmount}>{formatCurrency(opportunity.amount)}</p>
 

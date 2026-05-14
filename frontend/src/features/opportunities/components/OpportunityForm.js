@@ -17,20 +17,6 @@ export function OpportunityForm({ form, leads, owners, products }) {
 
   return (
     <div className={style.form}>
-      <div className={style.field}>
-        <label htmlFor="opp-title">Título</label>
-        <input
-          id="opp-title"
-          type="text"
-          className={errors.title ? style.hasError : ""}
-          placeholder="Título da oportunidade"
-          {...register("title")}
-        />
-        {errors.title && (
-          <span className={style.fieldError}>{errors.title.message}</span>
-        )}
-      </div>
-
       <div className={style.row}>
         <div className={style.field}>
           <label htmlFor="opp-lead">Lead</label>

@@ -1,7 +1,11 @@
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { opportunitySchema } from '../schemas/opportunity.schema';
-import { amountToNumber, amountToFormValue, dateToInputValue } from '../mappers/opportunity.mapper';
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { opportunitySchema } from "../schemas/opportunity.schema";
+import {
+  amountToNumber,
+  amountToFormValue,
+  dateToInputValue,
+} from "../mappers/opportunity.mapper";
 
 /**
  * Hook do formulário de criação/edição de oportunidade.
@@ -11,27 +15,26 @@ import { amountToNumber, amountToFormValue, dateToInputValue } from '../mappers/
  * @param {(data: object) => Promise<void>} options.onSubmit - Callback de submit.
  */
 export function useOpportunityForm({ mode, opportunity, onSubmit }) {
-  const isEdit = mode === 'edit';
+  const isEdit = mode === "edit";
 
-  const defaultValues = isEdit && opportunity
-    ? {
-        title: opportunity.title ?? '',
-        leadId: opportunity.leadId ?? '',
-        ownerId: opportunity.ownerId ?? '',
-        productId: opportunity.productId ?? '',
-        stage: opportunity.stage ?? 0,
-        amount: amountToFormValue(opportunity.amount),
-        expectedCloseDate: dateToInputValue(opportunity.expectedCloseDate),
-      }
-    : {
-        title: '',
-        leadId: '',
-        ownerId: '',
-        productId: '',
-        stage: '0',
-        amount: '',
-        expectedCloseDate: '',
-      };
+  const defaultValues =
+    isEdit && opportunity
+      ? {
+          leadId: opportunity.leadId ?? "",
+          ownerId: opportunity.ownerId ?? "",
+          productId: opportunity.productId ?? "",
+          stage: opportunity.stage ?? 0,
+          amount: amountToFormValue(opportunity.amount),
+          expectedCloseDate: dateToInputValue(opportunity.expectedCloseDate),
+        }
+      : {
+          leadId: "",
+          ownerId: "",
+          productId: "",
+          stage: "0",
+          amount: "",
+          expectedCloseDate: "",
+        };
 
   const form = useForm({
     resolver: zodResolver(opportunitySchema),
@@ -40,7 +43,6 @@ export function useOpportunityForm({ mode, opportunity, onSubmit }) {
 
   const handleSubmit = form.handleSubmit(async (values) => {
     const payload = {
-      title: values.title.trim(),
       leadId: Number(values.leadId),
       ownerId: values.ownerId ? Number(values.ownerId) : null,
       productId: Number(values.productId),

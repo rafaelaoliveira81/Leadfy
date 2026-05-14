@@ -73,7 +73,6 @@ export function ActionPlanModal({ open, opportunity, onClose, onGenerated }) {
         <div className={style.modalHeader}>
           <div>
             <h2 className={style.modalTitle}>Plano de Ação</h2>
-            <p className={style.actionPlanSubtitle}>{opportunity.title}</p>
           </div>
           <button
             className={style.modalCloseBtn}

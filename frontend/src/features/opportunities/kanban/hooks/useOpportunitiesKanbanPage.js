@@ -316,6 +316,15 @@ export function useOpportunitiesKanbanPage() {
     [closeCreateModal, fetchOpportunities],
   );
 
+  // --- Delete submit ---
+  const deleteOpportunity = useCallback(
+    async (id) => {
+      await opportunityAPI.Delete(id);
+      await fetchOpportunities();
+    },
+    [fetchOpportunities],
+  );
+
   return {
     columns,
     isLoading,
@@ -338,6 +347,9 @@ export function useOpportunitiesKanbanPage() {
     openCreateModal,
     closeCreateModal,
     createOpportunity,
+
+    // Delete
+    deleteOpportunity,
 
     // Action plan callback
     handleActionPlanGenerated,

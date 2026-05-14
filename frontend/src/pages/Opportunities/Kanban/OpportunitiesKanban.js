@@ -1,14 +1,21 @@
+import { useState } from "react";
 import { AppLayout } from "../../../layouts/AppLayout/AppLayout";
 import { useToast } from "../../../components/ui/Toast/Toast";
 import { KanbanBoard } from "../../../features/opportunities/kanban/components/KanbanBoard";
 import { KanbanListHeader } from "../../../features/opportunities/kanban/components/KanbanListHeader";
 import { KanbanModal } from "../../../features/opportunities/kanban/components/KanbanModal";
 import { OpportunityFormModal } from "../../../features/opportunities/components/OpportunityFormModal";
+import { OpportunityDeleteModal } from "../../../features/opportunities/components/OpportunityDeleteModal";
 import { useOpportunitiesKanbanPage } from "../../../features/opportunities/kanban/hooks/useOpportunitiesKanbanPage";
 import style from "../../../features/opportunities/kanban/components/_kanban.module.css";
 
 export function OpportunitiesKanban() {
   const addToast = useToast();
+  const [deleteModal, setDeleteModal] = useState({
+    open: false,
+    opportunity: null,
+  });
+
   const {
     columns,
     isLoading,
@@ -25,6 +32,7 @@ export function OpportunitiesKanban() {
     openCreateModal,
     closeCreateModal,
     createOpportunity,
+    deleteOpportunity,
     handleActionPlanGenerated,
     leads,
     owners,
@@ -42,11 +50,21 @@ export function OpportunitiesKanban() {
   };
 
   const onCreateSubmit = async (data) => {
+    await createOpportunity(data);
+  };
+
+  const onDeleteRequest = (opportunity) => {
+    closeDetailModal();
+    setDeleteModal({ open: true, opportunity });
+  };
+
+  const onDeleteConfirm = async (id) => {
     try {
-      await createOpportunity(data);
-      addToast("Oportunidade criada com sucesso!", "success");
+      await deleteOpportunity(id);
+      setDeleteModal({ open: false, opportunity: null });
+      addToast("Oportunidade excluída com sucesso!", "success");
     } catch {
-      addToast("Erro ao criar oportunidade.", "error");
+      addToast("Erro ao excluir oportunidade.", "error");
     }
   };
 
@@ -73,6 +91,7 @@ export function OpportunitiesKanban() {
         onClose={closeDetailModal}
         onStageChange={onStageChange}
         onAfterInteraction={refresh}
+        onDeleteRequest={onDeleteRequest}
         onActionPlanGenerated={(result) => {
           handleActionPlanGenerated(result);
           addToast("Plano de ação gerado com sucesso!", "success");
@@ -93,6 +112,13 @@ export function OpportunitiesKanban() {
           addToast={addToast}
         />
       )}
+
+      <OpportunityDeleteModal
+        open={deleteModal.open}
+        opportunity={deleteModal.opportunity}
+        onClose={() => setDeleteModal({ open: false, opportunity: null })}
+        onConfirm={onDeleteConfirm}
+      />
     </AppLayout>
   );
 }

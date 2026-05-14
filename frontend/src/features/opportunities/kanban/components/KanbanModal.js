@@ -1,6 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
-import { MdClose, MdExpandMore, MdAutoAwesome } from "react-icons/md";
+import {
+  MdClose,
+  MdExpandMore,
+  MdAutoAwesome,
+  MdDeleteOutline,
+} from "react-icons/md";
 import { Button } from "../../../../components/ui/Button/Button";
 import {
   KANBAN_STAGES,
@@ -24,6 +29,7 @@ export function KanbanModal({
   onStageChange,
   onAfterInteraction,
   onActionPlanGenerated,
+  onDeleteRequest,
 }) {
   const [leadDetail, setLeadDetail] = useState(null);
   const [selectedStage, setSelectedStage] = useState(null);
@@ -150,19 +156,31 @@ export function KanbanModal({
           onClick={handleOverlayClick}
           role="dialog"
           aria-modal="true"
-          aria-label={opportunity.title}
+          aria-label={opportunity.leadName}
         >
           <div className={style.modalContent}>
             {/* Header */}
             <div className={style.modalHeader}>
-              <h2 className={style.modalTitle}>{opportunity.title}</h2>
-              <button
-                className={style.modalCloseBtn}
-                onClick={onClose}
-                aria-label="Fechar"
-              >
-                <MdClose />
-              </button>
+              <h2 className={style.modalTitle}>{opportunity.leadName}</h2>
+              <div className={style.modalHeaderActions}>
+                {onDeleteRequest && (
+                  <button
+                    className={style.modalDeleteBtn}
+                    onClick={() => onDeleteRequest(opportunity)}
+                    aria-label="Excluir oportunidade"
+                    title="Excluir oportunidade"
+                  >
+                    <MdDeleteOutline />
+                  </button>
+                )}
+                <button
+                  className={style.modalCloseBtn}
+                  onClick={onClose}
+                  aria-label="Fechar"
+                >
+                  <MdClose />
+                </button>
+              </div>
             </div>
 
             {/* Body — two columns: Lead and Opportunity side by side */}
