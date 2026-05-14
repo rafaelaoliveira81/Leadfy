@@ -17,9 +17,29 @@
   padding: 24px;
 }
 
+/* ── Mobile hamburger ── */
+.mobileMenuBtn {
+  display: none;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  font-size: 1.5rem;
+  color: #2b2d42;
+  cursor: pointer;
+  padding: 8px;
+  align-items: center;
+  justify-content: center;
+  margin: 16px 0 0 16px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
 @media (max-width: 768px) {
   .main,
   .main.collapsed {
     margin-left: 0;
+  }
+
+  .mobileMenuBtn {
+    display: flex;
   }
 }

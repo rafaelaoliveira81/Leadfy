@@ -1,3 +1,4 @@
+import { useState, useRef, useEffect } from "react";
 import style from "./_sidebar.module.css";
 import { RiTeamFill } from "react-icons/ri";
 import {
@@ -8,17 +9,18 @@ import {
   MdMenuOpen,
   MdMenu,
   MdClose,
-  MdTrendingUp,
   MdViewKanban,
   MdSmartToy,
+  MdPerson,
 } from "react-icons/md";
 import { SidebarItem } from "../SidebarItem/SidebarItem";
+import { useNavigate } from "react-router-dom";
+import { getAuthSession, clearAuthSession } from "../../services/authStorage";
 
 const menuItems = [
   { texto: "Dashboard", link: "/dashboard", logo: <MdOutlineDashboard /> },
   { texto: "Kanban", link: "/opportunities/kanban", logo: <MdViewKanban /> },
   { texto: "Leads", link: "/leads", logo: <MdPersonSearch /> },
-  // { texto: 'Oportunidades', link: '/opportunities', logo: <MdTrendingUp /> },
   { texto: "Produtos", link: "/products", logo: <MdShoppingCart /> },
   { texto: "Responsáveis", link: "/owners", logo: <RiTeamFill /> },
   { texto: "Usuários", link: "/users", logo: <MdPeople /> },
@@ -31,6 +33,29 @@ export function Sidebar({
   isMobileOpen,
   onCloseMobile,
 }) {
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+  const navigate = useNavigate();
+  const session = getAuthSession();
+  const userName = session?.name || "Usuário";
+
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setIsDropdownOpen(false);
+      }
+    }
+    function handleEscape(e) {
+      if (e.key === "Escape") setIsDropdownOpen(false);
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, []);
+
   return (
     <>
       {isMobileOpen && (
@@ -73,6 +98,46 @@ export function Sidebar({
             />
           ))}
         </nav>
+
+        {/* ── User section ── */}
+        <div className={style.userSection} ref={dropdownRef}>
+          {isDropdownOpen && (
+            <ul className={style.userDropdown} role="menu">
+              <li role="menuitem">
+                <button
+                  onClick={() => {
+                    setIsDropdownOpen(false);
+                    navigate("/profile");
+                  }}
+                >
+                  Perfil
+                </button>
+              </li>
+              <li role="menuitem">
+                <button
+                  onClick={() => {
+                    setIsDropdownOpen(false);
+                    clearAuthSession();
+                    navigate("/login", { replace: true });
+                  }}
+                >
+                  Sair
+                </button>
+              </li>
+            </ul>
+          )}
+          <button
+            className={style.userBtn}
+            onClick={() => setIsDropdownOpen((prev) => !prev)}
+            aria-label="Menu do usuário"
+            aria-expanded={isDropdownOpen}
+          >
+            <span className={style.userIcon}>
+              <MdPerson />
+            </span>
+            <span className={style.userName}>{userName}</span>
+          </button>
+        </div>
       </aside>
     </>
   );

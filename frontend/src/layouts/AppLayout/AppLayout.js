@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import style from './_appLayout.module.css';
-import { Sidebar } from '../../components/Sidebar/Sidebar';
-import { Topbar } from '../../components/Topbar/Topbar';
+import { useState } from "react";
+import style from "./_appLayout.module.css";
+import { Sidebar } from "../../components/Sidebar/Sidebar";
+import { MdMenu } from "react-icons/md";
 
 export function AppLayout({ children }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -15,11 +15,15 @@ export function AppLayout({ children }) {
         isMobileOpen={isMobileOpen}
         onCloseMobile={() => setIsMobileOpen(false)}
       />
-      <div className={`${style.main} ${isCollapsed ? style.collapsed : ''}`}>
-        <Topbar onMenuToggle={() => setIsMobileOpen(true)} />
-        <div className={style.pageContent}>
-          {children}
-        </div>
+      <div className={`${style.main} ${isCollapsed ? style.collapsed : ""}`}>
+        <button
+          className={style.mobileMenuBtn}
+          onClick={() => setIsMobileOpen(true)}
+          aria-label="Abrir menu"
+        >
+          <MdMenu />
+        </button>
+        <div className={style.pageContent}>{children}</div>
       </div>
     </div>
   );
