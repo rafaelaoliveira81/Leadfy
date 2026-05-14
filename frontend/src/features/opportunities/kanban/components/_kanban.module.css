@@ -3,7 +3,8 @@
 .boardWrapper {
   padding: 24px;
   min-height: calc(100vh - 64px);
-  background-color: #edf2f4;
+  background-color: #fffaf9;
+  border-radius: 12px;
 }
 
 .boardHeader {

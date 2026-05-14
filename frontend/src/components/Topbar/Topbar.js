@@ -1,8 +1,8 @@
-import { useState, useRef, useEffect } from 'react';
-import style from './_topbar.module.css';
-import { MdSearch, MdPerson, MdMenu } from 'react-icons/md';
-import { useNavigate } from 'react-router-dom';
-import { clearAuthSession } from '../../services/authStorage';
+import { useState, useRef, useEffect } from "react";
+import style from "./_topbar.module.css";
+import { MdSearch, MdPerson, MdMenu } from "react-icons/md";
+import { useNavigate } from "react-router-dom";
+import { clearAuthSession } from "../../services/authStorage";
 
 export function Topbar({ onMenuToggle }) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -16,13 +16,13 @@ export function Topbar({ onMenuToggle }) {
       }
     }
     function handleEscape(e) {
-      if (e.key === 'Escape') setIsDropdownOpen(false);
+      if (e.key === "Escape") setIsDropdownOpen(false);
     }
-    document.addEventListener('mousedown', handleClickOutside);
-    document.addEventListener('keydown', handleEscape);
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEscape);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('keydown', handleEscape);
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
     };
   }, []);
 
@@ -35,16 +35,6 @@ export function Topbar({ onMenuToggle }) {
       >
         <MdMenu />
       </button>
-
-      <div className={style.searchWrapper}>
-        <MdSearch className={style.searchIcon} />
-        <input
-          type="text"
-          className={style.searchInput}
-          placeholder="Pesquisar..."
-          aria-label="Pesquisar"
-        />
-      </div>
 
       <div className={style.userMenu} ref={dropdownRef}>
         <button
@@ -61,7 +51,7 @@ export function Topbar({ onMenuToggle }) {
               <button
                 onClick={() => {
                   setIsDropdownOpen(false);
-                  navigate('/profile');
+                  navigate("/profile");
                 }}
               >
                 Perfil
@@ -72,7 +62,7 @@ export function Topbar({ onMenuToggle }) {
                 onClick={() => {
                   setIsDropdownOpen(false);
                   clearAuthSession();
-                  navigate('/login', { replace: true });
+                  navigate("/login", { replace: true });
                 }}
               >
                 Sair

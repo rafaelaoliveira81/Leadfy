@@ -1,6 +1,7 @@
 import { AppLayout } from "../../../layouts/AppLayout/AppLayout";
 import { useToast } from "../../../components/ui/Toast/Toast";
 import { KanbanBoard } from "../../../features/opportunities/kanban/components/KanbanBoard";
+import { KanbanListHeader } from "../../../features/opportunities/kanban/components/KanbanListHeader";
 import { KanbanModal } from "../../../features/opportunities/kanban/components/KanbanModal";
 import { OpportunityFormModal } from "../../../features/opportunities/components/OpportunityFormModal";
 import { useOpportunitiesKanbanPage } from "../../../features/opportunities/kanban/hooks/useOpportunitiesKanbanPage";
@@ -51,16 +52,8 @@ export function OpportunitiesKanban() {
 
   return (
     <AppLayout>
+      <KanbanListHeader />
       <div className={style.boardWrapper}>
-        <div className={style.boardHeader}>
-          <div>
-            <h1 className={style.boardTitle}>Kanban de Oportunidades</h1>
-            {/* <p className={style.boardSubtitle}>
-              Gerencie o funil de vendas arrastando os cards entre as colunas.
-            </p> */}
-          </div>
-        </div>
-
         <KanbanBoard
           columns={columns}
           isLoading={isLoading}
