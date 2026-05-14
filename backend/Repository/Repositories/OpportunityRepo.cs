@@ -24,15 +24,6 @@ public class OpportunityRepo : BaseRepo, IOpportunityRepo
             .Include(o => o.Product)
             .FirstOrDefaultAsync(o => o.ID == idOpportunity);
     }
-    public async Task<IEnumerable<Opportunity>> GetByTitleContainingAsync(string titleOpportunity)
-    {
-        return await _context.Opportunities
-            .Where(o => EF.Functions.Like(o.Title, $"%{titleOpportunity}%"))
-            .Include(o => o.Lead)
-            .Include(o => o.Owner)
-            .Include(o => o.Product)
-            .ToListAsync();
-    }
     public async Task<IEnumerable<Opportunity>> GetAllAsync()
     {
         return await _context.Opportunities

@@ -12,10 +12,6 @@ public class OpportunityConfig : IEntityTypeConfiguration<Opportunity>
 
               builder.HasKey(o => o.ID);
 
-              builder.Property(o => o.Title)
-                     .IsRequired()
-                     .HasMaxLength(150);
-
               builder.Property(o => o.ActionPlan)
                      .HasColumnType("nvarchar(max)")
                      .IsRequired(false);

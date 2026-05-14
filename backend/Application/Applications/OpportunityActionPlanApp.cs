@@ -76,7 +76,6 @@ public class OpportunityActionPlanApp : IOpportunityActionPlanApp
             .Replace("{{LeadName}}", lead?.Name ?? string.Empty)
             .Replace("{{LeadEmail}}", lead?.Email ?? string.Empty)
             .Replace("{{LeadPhone}}", lead?.PhoneNumber ?? string.Empty)
-            .Replace("{{OpportunityTitle}}", opportunity.Title ?? string.Empty)
             .Replace("{{OpportunityAmount}}", opportunity.Amount.ToString("C", culture))
             .Replace("{{OpportunityStage}}", opportunity.Stage.ToString())
             .Replace("{{OpportunityExpectedCloseDate}}", opportunity.ExpectedCloseDate.ToString("dd/MM/yyyy", culture))
@@ -86,7 +85,6 @@ public class OpportunityActionPlanApp : IOpportunityActionPlanApp
         prompt.AppendLine(promptTemplate.Trim());
         prompt.AppendLine();
         prompt.AppendLine("Contexto da oportunidade:");
-        prompt.AppendLine($"- Titulo: {opportunity.Title}");
         prompt.AppendLine($"- Stage atual: {opportunity.Stage}");
         prompt.AppendLine($"- Valor: {opportunity.Amount.ToString("C", culture)}");
         prompt.AppendLine($"- Fechamento previsto: {opportunity.ExpectedCloseDate.ToString("dd/MM/yyyy", culture)}");

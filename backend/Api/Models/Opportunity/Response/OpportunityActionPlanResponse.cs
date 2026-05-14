@@ -16,11 +16,6 @@ public class OpportunityActionPlanResponse
     public int ConfigId { get; set; }
 
     /// <summary>
-    /// Título da opportunity.
-    /// </summary>
-    public string Title { get; set; }
-
-    /// <summary>
     /// Plano de ação gerado e persistido.
     /// </summary>
     public string ActionPlan { get; set; }

@@ -44,7 +44,6 @@ public class OpportunityController : ControllerBase
         {
             var opportunity = new Opportunity
             {
-                Title = opportunityRequest.Title,
                 LeadId = opportunityRequest.LeadId,
                 OwnerId = opportunityRequest.OwnerId,
                 ProductId = opportunityRequest.ProductId,
@@ -93,7 +92,6 @@ public class OpportunityController : ControllerBase
             var opportunityResponse = new OpportunityResponse
             {
                 ID = opportunity.ID,
-                Title = opportunity.Title,
                 ActionPlan = opportunity.ActionPlan,
                 ActionPlanGeneratedAt = opportunity.ActionPlanGeneratedAt,
                 LeadId = opportunity.LeadId,
@@ -125,10 +123,9 @@ public class OpportunityController : ControllerBase
     }
 
     /// <summary>
-    /// Obtém opportunities cadastradas. Permite filtrar por status, título, lead ou owner.
+    /// Obtém opportunities cadastradas. Permite filtrar por status, lead ou owner.
     /// </summary>
     /// <param name="isActive">Filtra por status de ativação (opcional).</param>
-    /// <param name="title">Filtra por título contendo o valor (opcional).</param>
     /// <param name="leadId">Filtra por lead específico (opcional).</param>
     /// <param name="ownerId">Filtra por owner específico (opcional).</param>
     /// <returns>
@@ -142,7 +139,7 @@ public class OpportunityController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> Get([FromQuery] bool? isActive, [FromQuery] string title, [FromQuery] int? leadId, [FromQuery] int? ownerId)
+    public async Task<ActionResult> Get([FromQuery] bool? isActive, [FromQuery] int? leadId, [FromQuery] int? ownerId)
     {
         try
         {
@@ -151,10 +148,6 @@ public class OpportunityController : ControllerBase
             if (isActive.HasValue)
             {
                 opportunities = await _opportunityApp.GetAllByStatusAsync(isActive.Value);
-            }
-            else if (!string.IsNullOrWhiteSpace(title))
-            {
-                opportunities = await _opportunityApp.GetByTitleContainingAsync(title);
             }
             else if (leadId.HasValue && leadId > 0)
             {
@@ -172,7 +165,6 @@ public class OpportunityController : ControllerBase
             var opportunitiesResponse = opportunities.Select(o => new OpportunityResponse
             {
                 ID = o.ID,
-                Title = o.Title,
                 ActionPlan = o.ActionPlan,
                 ActionPlanGeneratedAt = o.ActionPlanGeneratedAt,
                 LeadId = o.LeadId,
@@ -228,7 +220,6 @@ public class OpportunityController : ControllerBase
             {
                 OpportunityId = opportunity.ID,
                 ConfigId = request.ConfigId,
-                Title = opportunity.Title,
                 ActionPlan = opportunity.ActionPlan,
                 ActionPlanGeneratedAt = opportunity.ActionPlanGeneratedAt
             };
@@ -272,7 +263,6 @@ public class OpportunityController : ControllerBase
             var opportunity = new Opportunity
             {
                 ID = id,
-                Title = opportunityRequest.Title,
                 LeadId = opportunityRequest.LeadId,
                 OwnerId = opportunityRequest.OwnerId,
                 ProductId = opportunityRequest.ProductId,

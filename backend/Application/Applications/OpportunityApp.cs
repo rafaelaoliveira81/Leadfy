@@ -26,20 +26,6 @@ public class OpportunityApp : IOpportunityApp
     {
         return await ValidateOpportunityExistsByIdAsync(idOpportunity);
     }
-    public async Task<IEnumerable<Opportunity>> GetByTitleContainingAsync(string titleOpportunity)
-    {
-        if (string.IsNullOrWhiteSpace(titleOpportunity))
-            throw new ArgumentException("Título da opportunity não pode ser vazio.");
-
-        titleOpportunity = titleOpportunity.Trim();
-
-        var opportunityEntity = await _opportunityRepo.GetByTitleContainingAsync(titleOpportunity);
-
-        if (opportunityEntity == null || !opportunityEntity.Any())
-            throw new KeyNotFoundException("Opportunity não localizada.");
-
-        return opportunityEntity;
-    }
     public async Task<IEnumerable<Opportunity>> GetAllAsync()
     {
         return await _opportunityRepo.GetAllAsync();
@@ -66,7 +52,6 @@ public class OpportunityApp : IOpportunityApp
             opportunityEntity.Amount != opportunity.Amount)
             throw new ArgumentException("Amount não pode ser atualizado após a stage ProposalSent.");
 
-        opportunityEntity.Title = opportunity.Title;
         opportunityEntity.LeadId = opportunity.LeadId;
         opportunityEntity.OwnerId = opportunity.OwnerId;
         opportunityEntity.ProductId = opportunity.ProductId;
@@ -106,12 +91,6 @@ public class OpportunityApp : IOpportunityApp
     {
         if (opportunity == null)
             throw new ArgumentException("Opportunity não pode ser vazia.");
-
-        if (string.IsNullOrWhiteSpace(opportunity.Title))
-            throw new ArgumentException("O título da opportunity deve ser informado.");
-
-        if (opportunity.Title.Length > 150)
-            throw new ArgumentException("O título da opportunity não pode exceder 150 caracteres.");
 
         if (!Enum.IsDefined(typeof(OpportunityStage), opportunity.Stage))
             throw new ArgumentException("A stage da opportunity é inválida.");
