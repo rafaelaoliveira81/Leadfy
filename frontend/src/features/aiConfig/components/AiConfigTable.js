@@ -7,6 +7,7 @@ import { formatCreatedAt, truncatePrompt } from "../mappers/aiConfig.mapper";
 export function AiConfigTable({
   items,
   isLoading,
+  models = [],
   onEdit,
   onToggleStatus,
   onDelete,
@@ -17,7 +18,14 @@ export function AiConfigTable({
   const columns = useMemo(
     () => [
       { key: "title", header: "Título" },
-      { key: "modelName", header: "Modelo" },
+      {
+        key: "model",
+        header: "Modelo",
+        render: (value) => {
+          const found = models.find((m) => m.id === value);
+          return found ? found.label : value;
+        },
+      },
       {
         key: "promptTemplate",
         header: "Template do Prompt",
@@ -53,7 +61,7 @@ export function AiConfigTable({
         ),
       },
     ],
-    [onEdit, onToggleStatus, onDelete],
+    [onEdit, onToggleStatus, onDelete, models],
   );
 
   return (

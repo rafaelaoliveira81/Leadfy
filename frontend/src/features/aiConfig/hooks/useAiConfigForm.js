@@ -13,13 +13,13 @@ export function useAiConfigForm({ mode, config, onSubmit }) {
       ? {
           title: config.title ?? "",
           promptTemplate: config.promptTemplate ?? "",
-          modelName: config.modelName ?? "",
+          model: config.model ?? "",
           apiKey: "",
         }
       : {
           title: "",
           promptTemplate: "",
-          modelName: "",
+          model: "",
           apiKey: "",
         };
 
@@ -32,7 +32,7 @@ export function useAiConfigForm({ mode, config, onSubmit }) {
     const payload = {
       title: values.title.trim(),
       promptTemplate: values.promptTemplate.trim(),
-      modelName: values.modelName.trim(),
+      model: Number(values.model),
     };
 
     if (values.apiKey && values.apiKey.trim()) {

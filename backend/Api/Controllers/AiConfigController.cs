@@ -2,6 +2,7 @@ using Application;
 using Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Application.DTO;
+using Application.Extensions;
 using Dominio.Enums;
 
 namespace Api.Controllers;
@@ -26,6 +27,20 @@ public class AiConfigController : ControllerBase
         _aiConfigApp = aiConfigApp;
         _leadApp = leadApp;
         _aiService = aiService;
+    }
+
+    /// <summary>
+    /// Retorna a lista de modelos de IA disponíveis.
+    /// </summary>
+    /// <returns>Lista de modelos com id e label.</returns>
+    /// <response code="200">Lista retornada com sucesso.</response>
+    [HttpGet("models")]
+    [ProducesResponseType(200)]
+    public ActionResult GetModels()
+    {
+        var models = Enum.GetValues<AiModelsEnum>()
+            .Select(m => new { id = (int)m, label = m.GetDescription() });
+        return Ok(models);
     }
 
     /// <summary>

@@ -10,6 +10,8 @@ export function useAiConfigsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const [models, setModels] = useState([]);
+
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -48,6 +50,12 @@ export function useAiConfigsPage() {
   useEffect(() => {
     fetchConfigs();
   }, [fetchConfigs]);
+
+  useEffect(() => {
+    aiConfigApi.GetModels().then((data) => {
+      if (Array.isArray(data)) setModels(data);
+    });
+  }, []);
 
   const filtered = useMemo(() => {
     let result = allConfigs;
@@ -157,6 +165,7 @@ export function useAiConfigsPage() {
     error,
     total,
     totalPages,
+    models,
 
     search,
     setSearch,

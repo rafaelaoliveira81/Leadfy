@@ -1,13 +1,13 @@
-import { AppLayout } from '../../layouts/AppLayout/AppLayout';
-import { useToast } from '../../components/ui/Toast/Toast';
-import { Pagination } from '../../components/ui/Pagination/Pagination';
-import { AiConfigListHeader } from '../../features/aiConfig/components/AiConfigListHeader';
-import { AiConfigFilters } from '../../features/aiConfig/components/AiConfigFilters';
-import { AiConfigTable } from '../../features/aiConfig/components/AiConfigTable';
-import { AiConfigFormModal } from '../../features/aiConfig/components/AiConfigFormModal';
-import { AiConfigDeleteModal } from '../../features/aiConfig/components/AiConfigDeleteModal';
-import { useAiConfigsPage } from '../../features/aiConfig/hooks/useAiConfigsPage';
-import style from './_aiConfig.module.css';
+import { AppLayout } from "../../layouts/AppLayout/AppLayout";
+import { useToast } from "../../components/ui/Toast/Toast";
+import { Pagination } from "../../components/ui/Pagination/Pagination";
+import { AiConfigListHeader } from "../../features/aiConfig/components/AiConfigListHeader";
+import { AiConfigFilters } from "../../features/aiConfig/components/AiConfigFilters";
+import { AiConfigTable } from "../../features/aiConfig/components/AiConfigTable";
+import { AiConfigFormModal } from "../../features/aiConfig/components/AiConfigFormModal";
+import { AiConfigDeleteModal } from "../../features/aiConfig/components/AiConfigDeleteModal";
+import { useAiConfigsPage } from "../../features/aiConfig/hooks/useAiConfigsPage";
+import style from "./_aiConfig.module.css";
 
 export function AiConfig() {
   const addToast = useToast();
@@ -17,6 +17,7 @@ export function AiConfig() {
     error,
     total,
     totalPages,
+    models,
     search,
     setSearch,
     statusFilter,
@@ -44,21 +45,21 @@ export function AiConfig() {
       await toggleConfigStatus(config);
       addToast(
         config.isActive
-          ? 'Configuração desativada com sucesso!'
-          : 'Configuração ativada com sucesso!',
-        'success'
+          ? "Configuração desativada com sucesso!"
+          : "Configuração ativada com sucesso!",
+        "success",
       );
     } catch {
-      addToast('Erro ao alterar status da configuração.', 'error');
+      addToast("Erro ao alterar status da configuração.", "error");
     }
   };
 
   const handleDelete = async (id) => {
     try {
       await deleteConfig(id);
-      addToast('Configuração excluída com sucesso!', 'success');
+      addToast("Configuração excluída com sucesso!", "success");
     } catch {
-      addToast('Erro ao excluir configuração.', 'error');
+      addToast("Erro ao excluir configuração.", "error");
     }
   };
 
@@ -81,6 +82,7 @@ export function AiConfig() {
         <AiConfigTable
           items={items}
           isLoading={isLoading}
+          models={models}
           onEdit={openEditModal}
           onToggleStatus={handleToggleStatus}
           onDelete={openDeleteModal}
@@ -106,6 +108,7 @@ export function AiConfig() {
           open={modal.open}
           mode={modal.mode}
           config={modal.config}
+          models={models}
           onClose={closeModal}
           onCreateSubmit={createConfig}
           onUpdateSubmit={updateConfig}

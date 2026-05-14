@@ -4,6 +4,7 @@ using Domain.Entities;
 using Domain.Enuns;
 using Domain.Interfaces;
 using Dominio.Enums;
+using Application.Extensions;
 
 namespace Application;
 
@@ -50,7 +51,7 @@ public class OpportunityActionPlanApp : IOpportunityActionPlanApp
         var prompt = BuildPrompt(config, opportunity, interactions);
         var plainApiKey = _aiConfigApp.DecryptApiKey(config.ApiKeyHash);
 
-        var modelName = Enum.GetName(typeof(AiModelsEnum), config.Model);
+        var modelName = config.Model.GetDescription();
 
         var generatedActionPlan = await _generativeAiService.GenerateAsync(prompt, modelName, plainApiKey);
 

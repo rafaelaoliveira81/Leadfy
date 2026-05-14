@@ -1,10 +1,7 @@
-import {
-  AI_CONFIG_MODEL_SUGGESTIONS,
-  AI_CONFIG_PROMPT_PLACEHOLDERS,
-} from "../constants/aiConfig.constants";
+import { AI_CONFIG_PROMPT_PLACEHOLDERS } from "../constants/aiConfig.constants";
 import style from "./_aiConfigForm.module.css";
 
-export function AiConfigForm({ form, isEdit }) {
+export function AiConfigForm({ form, isEdit, models = [] }) {
   const {
     register,
     formState: { errors },
@@ -27,22 +24,21 @@ export function AiConfigForm({ form, isEdit }) {
       </div>
 
       <div className={style.field}>
-        <label htmlFor="ai-model-name">Modelo de IA</label>
-        <input
-          id="ai-model-name"
-          type="text"
-          list="ai-model-suggestions"
-          className={errors.modelName ? style.hasError : ""}
-          placeholder="Ex: gpt-4.1"
-          {...register("modelName")}
-        />
-        <datalist id="ai-model-suggestions">
-          {AI_CONFIG_MODEL_SUGGESTIONS.map((m) => (
-            <option key={m} value={m} />
+        <label htmlFor="ai-model">Modelo de IA</label>
+        <select
+          id="ai-model"
+          className={errors.model ? style.hasError : ""}
+          {...register("model", { valueAsNumber: true })}
+        >
+          <option value="">Selecione um modelo</option>
+          {models.map((m) => (
+            <option key={m.id} value={m.id}>
+              {m.label}
+            </option>
           ))}
-        </datalist>
-        {errors.modelName && (
-          <span className={style.fieldError}>{errors.modelName.message}</span>
+        </select>
+        {errors.model && (
+          <span className={style.fieldError}>{errors.model.message}</span>
         )}
       </div>
 

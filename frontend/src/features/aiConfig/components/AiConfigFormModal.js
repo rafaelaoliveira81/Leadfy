@@ -1,17 +1,18 @@
-import { Modal } from '../../../components/ui/Modal/Modal';
-import { AiConfigForm } from './AiConfigForm';
-import { useAiConfigForm } from '../hooks/useAiConfigForm';
+import { Modal } from "../../../components/ui/Modal/Modal";
+import { AiConfigForm } from "./AiConfigForm";
+import { useAiConfigForm } from "../hooks/useAiConfigForm";
 
 export function AiConfigFormModal({
   open,
   mode,
   config,
+  models = [],
   onClose,
   onCreateSubmit,
   onUpdateSubmit,
   addToast,
 }) {
-  const isEdit = mode === 'edit';
+  const isEdit = mode === "edit";
 
   const { form, handleSubmit, isSubmitting } = useAiConfigForm({
     mode,
@@ -20,17 +21,17 @@ export function AiConfigFormModal({
       ? async (id, data) => {
           try {
             await onUpdateSubmit(id, data);
-            addToast('Configuração atualizada com sucesso!', 'success');
+            addToast("Configuração atualizada com sucesso!", "success");
           } catch {
-            addToast('Erro ao atualizar configuração.', 'error');
+            addToast("Erro ao atualizar configuração.", "error");
           }
         }
       : async (data) => {
           try {
             await onCreateSubmit(data);
-            addToast('Configuração criada com sucesso!', 'success');
+            addToast("Configuração criada com sucesso!", "success");
           } catch {
-            addToast('Erro ao criar configuração.', 'error');
+            addToast("Erro ao criar configuração.", "error");
           }
         },
   });
@@ -39,17 +40,17 @@ export function AiConfigFormModal({
     <Modal
       open={open}
       onClose={onClose}
-      title={isEdit ? 'Editar Configuração de IA' : 'Nova Configuração de IA'}
+      title={isEdit ? "Editar Configuração de IA" : "Nova Configuração de IA"}
       subtitle={
         isEdit
-          ? 'Edite o modelo, template e, opcionalmente, a chave de API.'
-          : 'Defina o modelo, o template do prompt e a chave de API.'
+          ? "Edite o modelo, template e, opcionalmente, a chave de API."
+          : "Defina o modelo, o template do prompt e a chave de API."
       }
       confirmLabel="Salvar"
       onConfirm={handleSubmit}
       isSubmitting={isSubmitting}
     >
-      <AiConfigForm form={form} isEdit={isEdit} />
+      <AiConfigForm form={form} isEdit={isEdit} models={models} />
     </Modal>
   );
 }
