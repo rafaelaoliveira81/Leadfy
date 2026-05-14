@@ -1,6 +1,6 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { MdCalendarToday, MdAutoAwesome } from "react-icons/md";
+import { MdCalendarToday } from "react-icons/md";
 import {
   formatCurrency,
   formatDateShort,
@@ -9,7 +9,7 @@ import {
 } from "../constants/kanban.constants";
 import style from "./_kanban.module.css";
 
-export function KanbanCard({ opportunity, onClick, onActionPlanClick }) {
+export function KanbanCard({ opportunity, onClick }) {
   const {
     attributes,
     listeners,
@@ -57,28 +57,11 @@ export function KanbanCard({ opportunity, onClick, onActionPlanClick }) {
           {stageInfo.label || opportunity.stageName}
         </span>
 
-        <div className={style.cardFooterRight}>
-          <button
-            className={`${style.cardActionPlanBtn} ${opportunity.actionPlan ? style.cardActionPlanBtnActive : ""}`}
-            title={
-              opportunity.actionPlan
-                ? "Ver / Regenerar Plano de Ação"
-                : "Gerar Plano de Ação"
-            }
-            onClick={(e) => {
-              e.stopPropagation();
-              if (onActionPlanClick) onActionPlanClick(opportunity);
-            }}
-          >
-            <MdAutoAwesome />
-          </button>
-
-          {opportunity.ownerName && (
-            <div className={style.cardAvatar} title={opportunity.ownerName}>
-              {getInitials(opportunity.ownerName)}
-            </div>
-          )}
-        </div>
+        {opportunity.ownerName && (
+          <div className={style.cardAvatar} title={opportunity.ownerName}>
+            {getInitials(opportunity.ownerName)}
+          </div>
+        )}
       </div>
     </div>
   );

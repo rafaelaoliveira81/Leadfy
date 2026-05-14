@@ -22,7 +22,6 @@ export function KanbanBoard({
   onDragEnd,
   onCardClick,
   onAddClick,
-  onActionPlanClick,
 }) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -55,18 +54,13 @@ export function KanbanBoard({
               items={columns[stage.value] || []}
               onCardClick={onCardClick}
               onAddClick={onAddClick}
-              onActionPlanClick={onActionPlanClick}
             />
           ))}
         </div>
 
         <DragOverlay>
           {activeCard ? (
-            <KanbanCard
-              opportunity={activeCard}
-              onClick={() => {}}
-              onActionPlanClick={() => {}}
-            />
+            <KanbanCard opportunity={activeCard} onClick={() => {}} />
           ) : null}
         </DragOverlay>
       </DndContext>

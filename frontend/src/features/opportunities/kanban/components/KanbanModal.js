@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
-import { MdClose, MdExpandMore } from "react-icons/md";
+import { MdClose, MdExpandMore, MdAutoAwesome } from "react-icons/md";
 import { Button } from "../../../../components/ui/Button/Button";
 import {
   KANBAN_STAGES,
@@ -9,6 +9,8 @@ import {
   formatDateShort,
 } from "../constants/kanban.constants";
 import leadAPI from "../../../../services/leadApi";
+import aiConfigApi from "../../../../services/aiConfigApi";
+import opportunityAPI from "../../../../services/opportunityApi";
 import { useInteractions } from "../hooks/useInteractions";
 import { InteractionHistory } from "./InteractionHistory";
 import { InteractionAddModal } from "./InteractionAddModal";
@@ -21,11 +23,21 @@ export function KanbanModal({
   onClose,
   onStageChange,
   onAfterInteraction,
+  onActionPlanGenerated,
 }) {
   const [leadDetail, setLeadDetail] = useState(null);
   const [selectedStage, setSelectedStage] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [productOpen, setProductOpen] = useState(false);
+
+  // --- Action Plan state ---
+  const [aiConfigs, setAiConfigs] = useState([]);
+  const [selectedConfigId, setSelectedConfigId] = useState("");
+  const [localActionPlan, setLocalActionPlan] = useState(null);
+  const [localActionPlanGeneratedAt, setLocalActionPlanGeneratedAt] =
+    useState(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generateError, setGenerateError] = useState(null);
 
   const {
     interactions,
@@ -57,12 +69,20 @@ export function KanbanModal({
     if (!open || !opportunity) return;
     setSelectedStage(opportunity.stage);
     setLeadDetail(null);
+    setLocalActionPlan(opportunity.actionPlan || null);
+    setLocalActionPlanGeneratedAt(opportunity.actionPlanGeneratedAt || null);
+    setSelectedConfigId("");
+    setGenerateError(null);
 
     if (opportunity.leadId) {
       leadAPI.GetById(opportunity.leadId).then((data) => {
         if (data && !data.type) setLeadDetail(data);
       });
     }
+
+    aiConfigApi.GetAll().then((data) => {
+      if (Array.isArray(data)) setAiConfigs(data);
+    });
   }, [open, opportunity]);
 
   const handleKeyDown = useCallback(
@@ -98,6 +118,27 @@ export function KanbanModal({
       onClose();
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleGenerate = async () => {
+    if (!selectedConfigId) return;
+    setIsGenerating(true);
+    setGenerateError(null);
+    try {
+      const result = await opportunityAPI.GenerateActionPlan(
+        opportunity.id,
+        Number(selectedConfigId),
+      );
+      if (result?.type)
+        throw new Error(result.message || "Erro ao gerar plano.");
+      setLocalActionPlan(result.actionPlan);
+      setLocalActionPlanGeneratedAt(result.actionPlanGeneratedAt);
+      if (onActionPlanGenerated) onActionPlanGenerated(result);
+    } catch (err) {
+      setGenerateError(err?.message || "Erro ao gerar plano de ação.");
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -207,6 +248,64 @@ export function KanbanModal({
                   )}
                 </div>
               </div>
+            </div>
+
+            {/* Action Plan section */}
+            <div className={style.actionPlanSection}>
+              <h3 className={style.modalSectionTitle}>Plano de Ação com IA</h3>
+
+              <div className={style.actionPlanControls}>
+                <select
+                  className={style.actionPlanSelect}
+                  value={selectedConfigId}
+                  onChange={(e) => setSelectedConfigId(e.target.value)}
+                  disabled={isGenerating}
+                >
+                  <option value="">Selecione a configuração de IA</option>
+                  {aiConfigs.map((cfg) => (
+                    <option key={cfg.id} value={cfg.id}>
+                      {cfg.title}
+                    </option>
+                  ))}
+                </select>
+
+                <Button
+                  onClick={handleGenerate}
+                  disabled={isGenerating || !selectedConfigId}
+                >
+                  <MdAutoAwesome style={{ marginRight: 6 }} />
+                  {isGenerating
+                    ? "Gerando…"
+                    : localActionPlan
+                      ? "Novo Plano"
+                      : "Gerar Plano"}
+                </Button>
+              </div>
+
+              {generateError && (
+                <p className={style.actionPlanError}>{generateError}</p>
+              )}
+
+              {localActionPlan ? (
+                <>
+                  <p className={style.actionPlanGeneratedAt}>
+                    Gerado em:{" "}
+                    {localActionPlanGeneratedAt
+                      ? new Date(localActionPlanGeneratedAt).toLocaleString(
+                          "pt-BR",
+                        )
+                      : "—"}
+                  </p>
+                  <div className={style.actionPlanText}>{localActionPlan}</div>
+                </>
+              ) : (
+                !generateError && (
+                  <p className={style.actionPlanEmpty}>
+                    Nenhum plano gerado. Selecione uma configuração e clique em
+                    Gerar Plano.
+                  </p>
+                )
+              )}
             </div>
 
             {/* Interactions section */}

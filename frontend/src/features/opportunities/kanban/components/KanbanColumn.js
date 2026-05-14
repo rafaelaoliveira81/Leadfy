@@ -7,13 +7,7 @@ import { MdAdd } from "react-icons/md";
 import { KanbanCard } from "./KanbanCard";
 import style from "./_kanban.module.css";
 
-export function KanbanColumn({
-  stage,
-  items,
-  onCardClick,
-  onAddClick,
-  onActionPlanClick,
-}) {
+export function KanbanColumn({ stage, items, onCardClick, onAddClick }) {
   const { setNodeRef, isOver } = useDroppable({ id: String(stage.value) });
 
   const sortableIds = items.map((o) => String(o.id));
@@ -54,7 +48,6 @@ export function KanbanColumn({
                 key={opp.id}
                 opportunity={opp}
                 onClick={onCardClick}
-                onActionPlanClick={onActionPlanClick}
               />
             ))
           )}

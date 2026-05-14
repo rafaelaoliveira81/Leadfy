@@ -2,7 +2,6 @@ import { AppLayout } from "../../../layouts/AppLayout/AppLayout";
 import { useToast } from "../../../components/ui/Toast/Toast";
 import { KanbanBoard } from "../../../features/opportunities/kanban/components/KanbanBoard";
 import { KanbanModal } from "../../../features/opportunities/kanban/components/KanbanModal";
-import { ActionPlanModal } from "../../../features/opportunities/kanban/components/ActionPlanModal";
 import { OpportunityFormModal } from "../../../features/opportunities/components/OpportunityFormModal";
 import { useOpportunitiesKanbanPage } from "../../../features/opportunities/kanban/hooks/useOpportunitiesKanbanPage";
 import style from "../../../features/opportunities/kanban/components/_kanban.module.css";
@@ -25,9 +24,6 @@ export function OpportunitiesKanban() {
     openCreateModal,
     closeCreateModal,
     createOpportunity,
-    actionPlanModal,
-    openActionPlanModal,
-    closeActionPlanModal,
     handleActionPlanGenerated,
     leads,
     owners,
@@ -75,7 +71,6 @@ export function OpportunitiesKanban() {
           onDragEnd={handleDragEnd}
           onCardClick={openDetailModal}
           onAddClick={openCreateModal}
-          onActionPlanClick={openActionPlanModal}
         />
       </div>
 
@@ -85,13 +80,7 @@ export function OpportunitiesKanban() {
         onClose={closeDetailModal}
         onStageChange={onStageChange}
         onAfterInteraction={refresh}
-      />
-
-      <ActionPlanModal
-        open={actionPlanModal.open}
-        opportunity={actionPlanModal.opportunity}
-        onClose={closeActionPlanModal}
-        onGenerated={(result) => {
+        onActionPlanGenerated={(result) => {
           handleActionPlanGenerated(result);
           addToast("Plano de ação gerado com sucesso!", "success");
         }}

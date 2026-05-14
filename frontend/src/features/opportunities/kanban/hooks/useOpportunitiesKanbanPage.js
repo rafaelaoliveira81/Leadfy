@@ -77,10 +77,7 @@ export function useOpportunitiesKanbanPage() {
   });
 
   // --- Action Plan modal ---
-  const [actionPlanModal, setActionPlanModal] = useState({
-    open: false,
-    opportunity: null,
-  });
+  // (state removido — seção integrada no KanbanModal)
 
   // Snapshot for optimistic revert
   const prevColumnsRef = useRef(null);
@@ -290,15 +287,7 @@ export function useOpportunitiesKanbanPage() {
     setCreateModal({ open: false, defaultStage: 1 });
   }, []);
 
-  // --- Action plan modal handlers ---
-  const openActionPlanModal = useCallback((opportunity) => {
-    setActionPlanModal({ open: true, opportunity });
-  }, []);
-
-  const closeActionPlanModal = useCallback(() => {
-    setActionPlanModal({ open: false, opportunity: null });
-  }, []);
-
+  // --- Action plan card update ---
   const handleActionPlanGenerated = useCallback((result) => {
     setColumns((prev) => {
       const next = { ...prev };
@@ -313,19 +302,6 @@ export function useOpportunitiesKanbanPage() {
             : opp,
         );
       }
-      // Keep action plan modal opportunity in sync
-      setActionPlanModal((prev) =>
-        prev.opportunity?.id === result.opportunityId
-          ? {
-              ...prev,
-              opportunity: {
-                ...prev.opportunity,
-                actionPlan: result.actionPlan,
-                actionPlanGeneratedAt: result.actionPlanGeneratedAt,
-              },
-            }
-          : prev,
-      );
       return next;
     });
   }, []);
@@ -363,10 +339,7 @@ export function useOpportunitiesKanbanPage() {
     closeCreateModal,
     createOpportunity,
 
-    // Action plan modal
-    actionPlanModal,
-    openActionPlanModal,
-    closeActionPlanModal,
+    // Action plan callback
     handleActionPlanGenerated,
 
     // Related data
