@@ -28,27 +28,14 @@ public class OpportunityActionPlanApp : IOpportunityActionPlanApp
     }
     public async Task<Opportunity> GenerateAsync(int opportunityId, int configId)
     {
-        if (opportunityId <= 0)
-            throw new ArgumentException("A opportunity informada é inválida.");
+        var opportunity = await GetOpportunityAsync(opportunityId);
 
-        if (configId <= 0)
-            throw new ArgumentException("A configuração de IA informada é inválida.");
+        var config = await GetAiConfig(configId);
 
-        var opportunity = await _opportunityRepo.GetByIdAsync(opportunityId);
-
-        if (opportunity == null)
-            throw new KeyNotFoundException("Opportunity não localizada.");
-
-        var config = await _aiConfigApp.GetByIdAsync(configId);
-
-        if (!config.IsActive)
-            throw new ArgumentException("A configuração de IA informada está inativa.");
-
-        var interactions = (await _interactionRepo.GetByOpportunityIdAsync(opportunityId))
-            .Take(3)
-            .ToList();
+        var interactions = (await _interactionRepo.GetLastInteractionsByOpportunityIdAsync(opportunityId)).ToList();
 
         var prompt = BuildPrompt(config, opportunity, interactions);
+
         var plainApiKey = _aiConfigApp.DecryptApiKey(config.ApiKeyHash);
 
         var modelName = config.Model.GetDescription();
@@ -65,6 +52,30 @@ public class OpportunityActionPlanApp : IOpportunityActionPlanApp
         return opportunity;
     }
 
+    private async Task<AiConfig> GetAiConfig(int configId)
+    {
+        if (configId <= 0)
+            throw new ArgumentException("A configuração de IA informada é inválida.");
+
+        var config = await _aiConfigApp.GetByIdAsync(configId);
+
+        if (!config.IsActive)
+            throw new ArgumentException("A configuração de IA informada está inativa.");
+        return config;
+    }
+
+    private async Task<Opportunity> GetOpportunityAsync(int opportunityId)
+    {
+        if (opportunityId <= 0)
+            throw new ArgumentException("A opportunity informada é inválida.");
+
+        var opportunity = await _opportunityRepo.GetByIdAsync(opportunityId);
+
+        if (opportunity == null)
+            throw new KeyNotFoundException("Opportunity não localizada.");
+        return opportunity;
+    }
+
     private static string BuildPrompt(AiConfig config, Opportunity opportunity, IEnumerable<Interaction> interactions)
     {
         var culture = new CultureInfo("pt-BR");
@@ -72,14 +83,7 @@ public class OpportunityActionPlanApp : IOpportunityActionPlanApp
         var product = opportunity.Product;
         var interactionList = interactions.ToList();
 
-        var promptTemplate = config.PromptTemplate
-            .Replace("{{LeadName}}", lead?.Name ?? string.Empty)
-            .Replace("{{LeadEmail}}", lead?.Email ?? string.Empty)
-            .Replace("{{LeadPhone}}", lead?.PhoneNumber ?? string.Empty)
-            .Replace("{{OpportunityAmount}}", opportunity.Amount.ToString("C", culture))
-            .Replace("{{OpportunityStage}}", opportunity.Stage.ToString())
-            .Replace("{{OpportunityExpectedCloseDate}}", opportunity.ExpectedCloseDate.ToString("dd/MM/yyyy", culture))
-            .Replace("{{ProductName}}", product?.Name ?? string.Empty);
+        var promptTemplate = config.PromptTemplate;
 
         var prompt = new StringBuilder();
         prompt.AppendLine(promptTemplate.Trim());
@@ -92,9 +96,8 @@ public class OpportunityActionPlanApp : IOpportunityActionPlanApp
         prompt.AppendLine();
         prompt.AppendLine("Dados do lead vinculado:");
         prompt.AppendLine($"- Nome: {lead?.Name ?? "Nao informado"}");
-        prompt.AppendLine($"- Email: {lead?.Email ?? "Nao informado"}");
-        prompt.AppendLine($"- Telefone: {lead?.PhoneNumber ?? "Nao informado"}");
         prompt.AppendLine();
+        prompt.AppendLine("Data Atual: " + DateTime.Now.ToString("dd/MM/yyyy HH:mm", culture));
         prompt.AppendLine("Ultimas 3 interacoes registradas:");
 
         if (!interactionList.Any())
@@ -107,31 +110,23 @@ public class OpportunityActionPlanApp : IOpportunityActionPlanApp
             {
                 prompt.AppendLine($"- Data: {interaction.InteractionDate.ToString("dd/MM/yyyy HH:mm", culture)}");
                 prompt.AppendLine($"  Descricao: {interaction.Description}");
-                prompt.AppendLine($"  Usuario: {interaction.User?.Name ?? "Nao informado"}");
-                prompt.AppendLine($"  Stage origem: {GetStageName(interaction.FromStage)}");
-                prompt.AppendLine($"  Stage destino: {GetStageName(interaction.ToStage)}");
-                prompt.AppendLine($"  Proximo contato: {FormatNextContactDate(interaction.NextContactDate, culture)}");
             }
         }
 
         prompt.AppendLine();
-        prompt.AppendLine("Gere um plano de acao pratico, objetivo e acionavel para os proximos passos do processo comercial.");
+        prompt.AppendLine();
+        prompt.AppendLine("Instruções de saída:");
+        prompt.AppendLine("Com base no contexto da oportunidade e nas interações anteriores, gere uma mensagem comercial personalizada para enviar ao lead pelo WhatsApp.");
+        prompt.AppendLine("O objetivo principal da mensagem é converter o lead em cliente.");
+        prompt.AppendLine("Sempre conduza a mensagem para fechamento ou avanço claro da negociação.");
+        prompt.AppendLine("A mensagem deve:");
+        prompt.AppendLine("- Ser natural, persuasiva e profissional;");
+        prompt.AppendLine("- Considerar o estágio atual da oportunidade;");
+        prompt.AppendLine("- Levar em conta as objeções ou interesses demonstrados nas interações;");
+        prompt.AppendLine("- Incentivar uma próxima ação clara (resposta, reunião, fechamento ou follow-up);");
+        prompt.AppendLine("- Ser objetiva e pronta para envio;");
+        prompt.AppendLine("- Não explicar o raciocínio, retornar apenas a mensagem final.");
 
         return prompt.ToString();
-    }
-
-    private static string GetStageName(int? stage)
-    {
-        if (!stage.HasValue || !Enum.IsDefined(typeof(OpportunityStage), stage.Value))
-            return "Nao informado";
-
-        return ((OpportunityStage)stage.Value).ToString();
-    }
-
-    private static string FormatNextContactDate(DateTime? nextContactDate, CultureInfo culture)
-    {
-        return nextContactDate.HasValue
-            ? nextContactDate.Value.ToString("dd/MM/yyyy HH:mm", culture)
-            : "Nao informado";
     }
 }

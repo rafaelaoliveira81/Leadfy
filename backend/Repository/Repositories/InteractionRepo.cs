@@ -32,10 +32,24 @@ public class InteractionRepo : BaseRepo, IInteractionRepo
             .ThenByDescending(i => i.CreatedAt)
             .ToListAsync();
     }
-    public async Task<IEnumerable<Interaction>> GetByOpportunityIdAsync(int opportunityId)
+    public async Task<IEnumerable<Interaction>> GetAllByOpportunityIdAsync(int opportunityId)
     {
         return await GetByCrmEntityAsync(CrmEntityType.Opportunity, opportunityId);
     }
+
+    public async Task<IEnumerable<Interaction>> GetLastInteractionsByOpportunityIdAsync(int opportunityId)
+    {
+        return await _context.Interactions
+            .Where(i =>
+                i.CrmEntityType == CrmEntityType.Opportunity &&
+                i.CrmEntityId == opportunityId)
+            .Include(i => i.User)
+            .OrderByDescending(i => i.InteractionDate)
+            .ThenByDescending(i => i.CreatedAt)
+            .Take(3)
+            .ToListAsync();
+    }
+
     public async Task UpdateAsync(Interaction interaction)
     {
         _context.Interactions.Update(interaction);
