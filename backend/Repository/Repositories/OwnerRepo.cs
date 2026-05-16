@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Dapper;
 using Domain.Entities;
 using Repository.Context;
 
@@ -11,45 +12,62 @@ public class OwnerRepo : BaseRepo, IOwnerRepo
     }
     public async Task<int> AddAsync(Owner owner)
     {
-        _context.Owners.Add(owner);
-        await _context.SaveChangesAsync();
+        var query = "sp_CreateOwner";
+        var parameters = new
+        {
+            Name = owner.Name,
+            UserID = owner.UserID
+        };
 
-        return owner.ID;
+        using (var connection = GetConnection())
+        {
+            return await connection.ExecuteScalarAsync<int>(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
+        }
     }
     public async Task<Owner> GetByIdAsync(int idOwner)
     {
-        return await _context.Owners
-            .Include(u => u.User)
-            .FirstOrDefaultAsync(o => o.ID == idOwner);
+        var query = "sp_GetOwnerById";
+        var parameters = new { ID = idOwner };
+
+        using (var connection = GetConnection())
+        {
+            return await connection.QueryFirstOrDefaultAsync<Owner>(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
+        }
     }
-    public async Task<IEnumerable<Owner>> GetByNameContainingAsync(string nameOwner)
+    public async Task<IEnumerable<Owner>> GetAllAsync(bool? statusOwner)
     {
-        return await _context.Owners
-            .Where(o => EF.Functions.Like(o.Name, $"%{nameOwner}%"))
-            .Include(u => u.User)
-            .ToListAsync();
-    }
-    public async Task<IEnumerable<Owner>> GetAllAsync()
-    {
-        return await _context.Owners
-            .Include(u => u.User)
-            .ToListAsync();
-    }
-    public async Task<IEnumerable<Owner>> GetAllByStatusAsync(bool statusOwner)
-    {
-        return await _context.Owners
-            .Where(o => o.IsActive == statusOwner)
-            .Include(u => u.User)
-            .ToListAsync();
+        var query = "sp_GetAllOwners";
+        var parameters = new { IsActive = statusOwner };
+
+        using (var connection = GetConnection())
+        {
+            return await connection.QueryAsync<Owner>(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
+        }
     }
     public async Task UpdateAsync(Owner owner)
     {
-        _context.Owners.Update(owner);
-        await _context.SaveChangesAsync();
+        var query = "sp_UpdateOwner";
+        var parameters = new
+        {
+            ID = owner.ID,
+            Name = owner.Name,
+            UserID = owner.UserID,
+            IsActive = owner.IsActive
+        };
+
+        using (var connection = GetConnection())
+        {
+            await connection.ExecuteAsync(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
+        }
     }
     public async Task DeleteAsync(Owner owner)
     {
-        _context.Owners.Remove(owner);
-        await _context.SaveChangesAsync();
+        var query = "sp_DeleteOwner";
+        var parameters = new { ID = owner.ID };
+
+        using (var connection = GetConnection())
+        {
+            await connection.ExecuteAsync(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
+        }
     }
 }
