@@ -47,7 +47,7 @@ public class InteractionApp : IInteractionApp
     {
         await ValidateOpportunityExistsAsync(opportunityId);
 
-        return await _interactionRepo.GetByOpportunityIdAsync(opportunityId);
+        return await _interactionRepo.GetByCrmEntityAsync((CrmEntityType)1, opportunityId);
     }
     public async Task DeleteAsync(int idInteraction)
     {

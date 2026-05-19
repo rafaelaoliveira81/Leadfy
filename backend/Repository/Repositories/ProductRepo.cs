@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Dapper;
 using Domain.Entities;
 using Repository.Context;
 
@@ -11,15 +12,28 @@ public class ProductRepo : BaseRepo, IProductRepo
     }
     public async Task<int> AddAsync(Product product)
     {
-        _context.Products.Add(product);
-        await _context.SaveChangesAsync();
+        var query = "sp_CreateProduct";
+        var parameters = new
+        {
+            Name = product.Name,
+            Description = product.Description,
+            Price = product.Price
+        };
 
-        return product.Id;
+        using (var connection = GetConnection())
+        {
+            return await connection.ExecuteScalarAsync<int>(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
+        }
     }
     public async Task<Product> GetByIdAsync(int idProduct)
     {
-        return await _context.Products
-            .FirstOrDefaultAsync(p => p.Id == idProduct);
+        var query = "sp_GetProductById";
+        var parameters = new { ID = idProduct };
+
+        using (var connection = GetConnection())
+        {
+            return await connection.QueryFirstOrDefaultAsync<Product>(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
+        }
     }
     public async Task<IEnumerable<Product>> GetByNameContainingAsync(string nameProduct)
     {
@@ -33,18 +47,39 @@ public class ProductRepo : BaseRepo, IProductRepo
     }
     public async Task<IEnumerable<Product>> GetAllByStatusAsync(bool statusProduct)
     {
-        return await _context.Products
-            .Where(p => p.IsActive == statusProduct)
-            .ToListAsync();
+        var query = "sp_GetAllProducts";
+        var parameters = new { IsActive = statusProduct };
+
+        using (var connection = GetConnection())
+        {
+            return await connection.QueryAsync<Product>(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
+        }
     }
     public async Task UpdateAsync(Product product)
     {
-        _context.Products.Update(product);
-        await _context.SaveChangesAsync();
+        var query = "sp_UpdateProduct";
+        var parameters = new
+        {
+            ID = product.Id,
+            Name = product.Name,
+            Description = product.Description,
+            Price = product.Price,
+            IsActive = product.IsActive
+        };
+
+        using (var connection = GetConnection())
+        {
+            await connection.ExecuteAsync(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
+        }
     }
     public async Task DeleteAsync(Product product)
     {
-        _context.Products.Remove(product);
-        await _context.SaveChangesAsync();
+        var query = "sp_DeleteProduct";
+        var parameters = new { ID = product.Id };
+
+        using (var connection = GetConnection())
+        {
+            await connection.ExecuteAsync(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
+        }
     }
 }

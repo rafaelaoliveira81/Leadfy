@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Dapper;
 using Domain.Entities;
 using Repository.Context;
 
@@ -9,20 +10,41 @@ public class UserRepository : BaseRepo, IUserRepo
     public UserRepository(CRMContext context) : base(context)
     {
     }
+
     public async Task<int> AddAsync(User user)
     {
-        _context.Users.Add(user);
-        await _context.SaveChangesAsync();
+        var query = "sp_CreateUser";
+        var parameters = new
+        {
+            Name = user.Name,
+            Email = user.Email,
+            PasswordHash = user.PasswordHash
+        };
 
-        return user.ID;
+        using (var connection = GetConnection())
+        {
+            return await connection.ExecuteScalarAsync<int>(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
+        }
     }
     public async Task<User> GetByIdAsync(int idUser)
     {
-        return await _context.Users.FindAsync(idUser);
+        var query = "sp_GetUserById";
+        var parameters = new { ID = idUser };
+
+        using (var connection = GetConnection())
+        {
+            return await connection.QueryFirstOrDefaultAsync<User>(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
+        }
     }
     public async Task<User> GetByEmailAsync(string emailUser)
     {
-        return await _context.Users.FirstOrDefaultAsync(u => u.Email == emailUser);
+        var query = "sp_GetUserByEmail";
+        var parameters = new { Email = emailUser };
+
+        using (var connection = GetConnection())
+        {
+            return await connection.QueryFirstOrDefaultAsync<User>(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
+        }
     }
     public async Task<IEnumerable<User>> GetByNameContainingAsync(string nameUser)
     {
@@ -36,19 +58,40 @@ public class UserRepository : BaseRepo, IUserRepo
     }
     public async Task<IEnumerable<User>> GetAllByStatusAsync(bool statusUser)
     {
-        return await _context.Users
-            .Where(u => u.IsActive == statusUser)
-            .ToListAsync();
+        var query = "sp_GetAllUsers";
+        var parameters = new { IsActive = statusUser };
+
+        using (var connection = GetConnection())
+        {
+            return await connection.QueryAsync<User>(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
+        }
     }
     public async Task UpdateAsync(User user)
     {
-        _context.Users.Update(user);
-        await _context.SaveChangesAsync();
+        var query = "sp_UpdateUser";
+        var parameters = new
+        {
+            ID = user.ID,
+            Name = user.Name,
+            Email = user.Email,
+            PasswordHash = user.PasswordHash,
+            IsActive = user.IsActive
+        };
+
+        using (var connection = GetConnection())
+        {
+            await connection.ExecuteAsync(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
+        }
     }
     public async Task DeleteAsync(User user)
     {
-        _context.Users.Remove(user);
-        await _context.SaveChangesAsync();
+        var query = "sp_DeleteUser";
+        var parameters = new { ID = user.ID };
+
+        using (var connection = GetConnection())
+        {
+            await connection.ExecuteAsync(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
+        }
     }
 
     /// <summary>

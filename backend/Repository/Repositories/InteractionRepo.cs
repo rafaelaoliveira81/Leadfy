@@ -1,6 +1,7 @@
 using Domain.Entities;
 using Domain.Enuns;
 using Microsoft.EntityFrameworkCore;
+using Dapper;
 using Repository.Context;
 
 namespace Repository.Repositories;
@@ -12,16 +13,33 @@ public class InteractionRepo : BaseRepo, IInteractionRepo
     }
     public async Task<int> AddAsync(Interaction interaction)
     {
-        _context.Interactions.Add(interaction);
-        await _context.SaveChangesAsync();
+        var query = "sp_CreateInteraction";
+        var parameters = new
+        {
+            CrmEntityId = interaction.CrmEntityId,
+            CrmEntityType = (int)interaction.CrmEntityType,
+            FromStage = (int?)interaction.FromStage,
+            ToStage = (int?)interaction.ToStage,
+            Description = interaction.Description,
+            UserID = interaction.UserId,
+            NextContactDate = interaction.NextContactDate,
+            InteractionDate = interaction.InteractionDate
+        };
 
-        return interaction.Id;
+        using (var connection = GetConnection())
+        {
+            return await connection.ExecuteScalarAsync<int>(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
+        }
     }
     public async Task<Interaction> GetByIdAsync(int idInteraction)
     {
-        return await _context.Interactions
-            .Include(i => i.User)
-            .FirstOrDefaultAsync(i => i.Id == idInteraction);
+        var query = "sp_GetInteractionById";
+        var parameters = new { ID = idInteraction };
+
+        using (var connection = GetConnection())
+        {
+            return await connection.QueryFirstOrDefaultAsync<Interaction>(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
+        }
     }
     public async Task<IEnumerable<Interaction>> GetByCrmEntityAsync(CrmEntityType crmEntityType, int crmEntityId)
     {
@@ -52,12 +70,33 @@ public class InteractionRepo : BaseRepo, IInteractionRepo
 
     public async Task UpdateAsync(Interaction interaction)
     {
-        _context.Interactions.Update(interaction);
-        await _context.SaveChangesAsync();
+        var query = "sp_UpdateInteraction";
+        var parameters = new
+        {
+            ID = interaction.Id,
+            CrmEntityId = interaction.CrmEntityId,
+            CrmEntityType = (int)interaction.CrmEntityType,
+            FromStage = (int?)interaction.FromStage,
+            ToStage = (int?)interaction.ToStage,
+            Description = interaction.Description,
+            UserID = interaction.UserId,
+            NextContactDate = interaction.NextContactDate,
+            InteractionDate = interaction.InteractionDate
+        };
+
+        using (var connection = GetConnection())
+        {
+            await connection.ExecuteAsync(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
+        }
     }
     public async Task DeleteAsync(Interaction interaction)
     {
-        _context.Interactions.Remove(interaction);
-        await _context.SaveChangesAsync();
+        var query = "sp_DeleteInteraction";
+        var parameters = new { ID = interaction.Id };
+
+        using (var connection = GetConnection())
+        {
+            await connection.ExecuteAsync(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
+        }
     }
 }

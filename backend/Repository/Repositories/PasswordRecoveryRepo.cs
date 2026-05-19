@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Dapper;
 using Domain.Entities;
 using Repository.Context;
 
@@ -17,14 +18,30 @@ public class PasswordRecoveryRepo : BaseRepo, IPasswordRecoveryRepo
 
     public async Task<int> AddAsync(PasswordRecovery passwordRecovery)
     {
-        _context.PasswordRecoveries.Add(passwordRecovery);
-        await _context.SaveChangesAsync();
-        return passwordRecovery.ID;
+        var query = "sp_CreatePasswordRecovery";
+        var parameters = new
+        {
+            UserId = passwordRecovery.UserId,
+            Email = passwordRecovery.Email,
+            Token = passwordRecovery.Token,
+            ExpiresAt = passwordRecovery.ExpiresAt
+        };
+
+        using (var connection = GetConnection())
+        {
+            return await connection.ExecuteScalarAsync<int>(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
+        }
     }
 
     public async Task<PasswordRecovery> GetByIdAsync(int id)
     {
-        return await _context.PasswordRecoveries.FindAsync(id);
+        var query = "sp_GetPasswordRecoveryById";
+        var parameters = new { ID = id };
+
+        using (var connection = GetConnection())
+        {
+            return await connection.QueryFirstOrDefaultAsync<PasswordRecovery>(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
+        }
     }
 
     /// <summary>
@@ -52,13 +69,31 @@ public class PasswordRecoveryRepo : BaseRepo, IPasswordRecoveryRepo
 
     public async Task UpdateAsync(PasswordRecovery passwordRecovery)
     {
-        _context.PasswordRecoveries.Update(passwordRecovery);
-        await _context.SaveChangesAsync();
+        var query = "sp_UpdatePasswordRecovery";
+        var parameters = new
+        {
+            ID = passwordRecovery.ID,
+            UserId = passwordRecovery.UserId,
+            Email = passwordRecovery.Email,
+            Token = passwordRecovery.Token,
+            ExpiresAt = passwordRecovery.ExpiresAt,
+            IsActive = passwordRecovery.IsActive
+        };
+
+        using (var connection = GetConnection())
+        {
+            await connection.ExecuteAsync(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
+        }
     }
 
     public async Task DeleteAsync(PasswordRecovery passwordRecovery)
     {
-        _context.PasswordRecoveries.Remove(passwordRecovery);
-        await _context.SaveChangesAsync();
+        var query = "sp_DeletePasswordRecovery";
+        var parameters = new { ID = passwordRecovery.ID };
+
+        using (var connection = GetConnection())
+        {
+            await connection.ExecuteAsync(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
+        }
     }
 }

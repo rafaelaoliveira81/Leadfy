@@ -21,27 +21,10 @@ public class OwnerApp : IOwnerApp
     {
         return await ValidateOwnerExistsByIdAsync(idOwner);
     }
-    public async Task<IEnumerable<Owner>> GetByNameContainingAsync(string nameOwner)
+
+    public async Task<IEnumerable<Owner>> GetAllAsync(bool? statusOwner)
     {
-        if (string.IsNullOrWhiteSpace(nameOwner))
-            throw new ArgumentException("Nome do responsável não pode ser vazio.");
-
-        nameOwner = nameOwner.Trim();
-
-        var ownerEntity = await _ownerRepo.GetByNameContainingAsync(nameOwner);
-
-        if (ownerEntity == null || !ownerEntity.Any())
-            throw new KeyNotFoundException("Responsável não localizado.");
-
-        return ownerEntity;
-    }
-    public async Task<IEnumerable<Owner>> GetAllAsync()
-    {
-        return await _ownerRepo.GetAllAsync();
-    }
-    public async Task<IEnumerable<Owner>> GetAllByStatusAsync(bool statusOwner)
-    {
-        return await _ownerRepo.GetAllByStatusAsync(statusOwner);
+        return await _ownerRepo.GetAllAsync(statusOwner);
     }
     public async Task UpdateAsync(Owner owner)
     {

@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Dapper;
 using Domain.Entities;
 using Repository.Context;
 
@@ -10,15 +11,30 @@ public class AiConfigRepo : BaseRepo, IAiConfigRepo
 
     public async Task<int> AddAsync(AiConfig config)
     {
-        _context.AiConfigs.Add(config);
-        await _context.SaveChangesAsync();
-        return config.Id;
+        var query = "sp_CreateAiConfig";
+        var parameters = new
+        {
+            Title = config.Title,
+            PromptTemplate = config.PromptTemplate,
+            ApiKeyHash = config.ApiKeyHash,
+            Model = (int)config.Model
+        };
+
+        using (var connection = GetConnection())
+        {
+            return await connection.ExecuteScalarAsync<int>(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
+        }
     }
 
     public async Task<AiConfig> GetByIdAsync(int id)
     {
-        return await _context.AiConfigs
-            .FirstOrDefaultAsync(c => c.Id == id);
+        var query = "sp_GetAiConfigById";
+        var parameters = new { ID = id };
+
+        using (var connection = GetConnection())
+        {
+            return await connection.QueryFirstOrDefaultAsync<AiConfig>(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
+        }
     }
 
     public async Task<AiConfig> GetActiveAsync()
@@ -31,19 +47,41 @@ public class AiConfigRepo : BaseRepo, IAiConfigRepo
 
     public async Task<IEnumerable<AiConfig>> GetAllAsync()
     {
-        return await _context.AiConfigs
-            .OrderByDescending(c => c.CreatedAt)
-            .ToListAsync();
+        var query = "sp_GetAllAiConfigs";
+        var parameters = new { IsActive = (bool?)null };
+
+        using (var connection = GetConnection())
+        {
+            return await connection.QueryAsync<AiConfig>(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
+        }
     }
     public async Task UpdateAsync(AiConfig config)
     {
-        _context.AiConfigs.Update(config);
-        await _context.SaveChangesAsync();
+        var query = "sp_UpdateAiConfig";
+        var parameters = new
+        {
+            ID = config.Id,
+            Title = config.Title,
+            PromptTemplate = config.PromptTemplate,
+            ApiKeyHash = config.ApiKeyHash,
+            Model = (int)config.Model,
+            IsActive = config.IsActive
+        };
+
+        using (var connection = GetConnection())
+        {
+            await connection.ExecuteAsync(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
+        }
     }
 
     public async Task DeleteAsync(AiConfig config)
     {
-        _context.AiConfigs.Remove(config);
-        await _context.SaveChangesAsync();
+        var query = "sp_DeleteAiConfig";
+        var parameters = new { ID = config.Id };
+
+        using (var connection = GetConnection())
+        {
+            await connection.ExecuteAsync(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
+        }
     }
 }

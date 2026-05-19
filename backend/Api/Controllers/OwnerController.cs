@@ -119,24 +119,13 @@ public class OwnerController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> Get([FromQuery] bool? isActive, [FromQuery] string name)
+    public async Task<ActionResult> Get([FromQuery] bool? isActive)
     {
         try
         {
             IEnumerable<Owner> owners;
 
-            if (isActive.HasValue)
-            {
-                owners = await _ownerApp.GetAllByStatusAsync(isActive.Value);
-            }
-            else if (!string.IsNullOrWhiteSpace(name))
-            {
-                owners = await _ownerApp.GetByNameContainingAsync(name);
-            }
-            else
-            {
-                owners = await _ownerApp.GetAllAsync();
-            }
+            owners = await _ownerApp.GetAllAsync(isActive.Value);
 
             var ownersResponse = owners.Select(o => new OwnerResponse
             {

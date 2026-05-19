@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Dapper;
 using Domain.Entities;
 using Repository.Context;
 
@@ -11,18 +12,34 @@ public class OpportunityRepo : BaseRepo, IOpportunityRepo
     }
     public async Task<int> AddAsync(Opportunity opportunity)
     {
-        _context.Opportunities.Add(opportunity);
-        await _context.SaveChangesAsync();
+        var query = "sp_CreateOpportunity";
+        var parameters = new
+        {
+            ActionPlan = opportunity.ActionPlan,
+            ActionPlanGeneratedAt = opportunity.ActionPlanGeneratedAt,
+            LeadId = opportunity.LeadId,
+            OwnerId = opportunity.OwnerId,
+            ProductId = opportunity.ProductId,
+            Stage = (int)opportunity.Stage,
+            Amount = opportunity.Amount,
+            ExpectedCloseDate = opportunity.ExpectedCloseDate,
+            SortOrder = opportunity.SortOrder
+        };
 
-        return opportunity.ID;
+        using (var connection = GetConnection())
+        {
+            return await connection.ExecuteScalarAsync<int>(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
+        }
     }
     public async Task<Opportunity> GetByIdAsync(int idOpportunity)
     {
-        return await _context.Opportunities
-            .Include(o => o.Lead)
-            .Include(o => o.Owner)
-            .Include(o => o.Product)
-            .FirstOrDefaultAsync(o => o.ID == idOpportunity);
+        var query = "sp_GetOpportunityById";
+        var parameters = new { ID = idOpportunity };
+
+        using (var connection = GetConnection())
+        {
+            return await connection.QueryFirstOrDefaultAsync<Opportunity>(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
+        }
     }
     public async Task<IEnumerable<Opportunity>> GetAllAsync()
     {
@@ -36,14 +53,13 @@ public class OpportunityRepo : BaseRepo, IOpportunityRepo
     }
     public async Task<IEnumerable<Opportunity>> GetAllByStatusAsync(bool statusOpportunity)
     {
-        return await _context.Opportunities
-            .Where(o => o.IsActive == statusOpportunity)
-            .Include(o => o.Lead)
-            .Include(o => o.Owner)
-            .Include(o => o.Product)
-            .OrderBy(o => o.Stage)
-            .ThenBy(o => o.SortOrder)
-            .ToListAsync();
+        var query = "sp_GetAllOpportunities";
+        var parameters = new { IsActive = statusOpportunity };
+
+        using (var connection = GetConnection())
+        {
+            return await connection.QueryAsync<Opportunity>(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
+        }
     }
     public async Task<IEnumerable<Opportunity>> GetByLeadIdAsync(int leadId)
     {
@@ -65,12 +81,35 @@ public class OpportunityRepo : BaseRepo, IOpportunityRepo
     }
     public async Task UpdateAsync(Opportunity opportunity)
     {
-        _context.Opportunities.Update(opportunity);
-        await _context.SaveChangesAsync();
+        var query = "sp_UpdateOpportunity";
+        var parameters = new
+        {
+            ID = opportunity.ID,
+            ActionPlan = opportunity.ActionPlan,
+            ActionPlanGeneratedAt = opportunity.ActionPlanGeneratedAt,
+            LeadId = opportunity.LeadId,
+            OwnerId = opportunity.OwnerId,
+            ProductId = opportunity.ProductId,
+            Stage = (int)opportunity.Stage,
+            Amount = opportunity.Amount,
+            ExpectedCloseDate = opportunity.ExpectedCloseDate,
+            IsActive = opportunity.IsActive,
+            SortOrder = opportunity.SortOrder
+        };
+
+        using (var connection = GetConnection())
+        {
+            await connection.ExecuteAsync(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
+        }
     }
     public async Task DeleteAsync(Opportunity opportunity)
     {
-        _context.Opportunities.Remove(opportunity);
-        await _context.SaveChangesAsync();
+        var query = "sp_DeleteOpportunity";
+        var parameters = new { ID = opportunity.ID };
+
+        using (var connection = GetConnection())
+        {
+            await connection.ExecuteAsync(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
+        }
     }
 }

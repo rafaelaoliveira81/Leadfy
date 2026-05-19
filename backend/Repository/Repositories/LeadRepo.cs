@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Dapper;
 using Domain.Entities;
 using Repository.Context;
 
@@ -11,15 +12,28 @@ public class LeadRepo : BaseRepo, ILeadRepo
     }
     public async Task<int> AddAsync(Lead lead)
     {
-        _context.Leads.Add(lead);
-        await _context.SaveChangesAsync();
+        var query = "sp_CreateLead";
+        var parameters = new
+        {
+            Name = lead.Name,
+            Email = lead.Email,
+            PhoneNumber = lead.PhoneNumber
+        };
 
-        return lead.Id;
+        using (var connection = GetConnection())
+        {
+            return await connection.ExecuteScalarAsync<int>(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
+        }
     }
     public async Task<Lead> GetByIdAsync(int idLead)
     {
-        return await _context.Leads
-            .FirstOrDefaultAsync(l => l.Id == idLead);
+        var query = "sp_GetLeadById";
+        var parameters = new { Id = idLead };
+
+        using (var connection = GetConnection())
+        {
+            return await connection.QueryFirstOrDefaultAsync<Lead>(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
+        }
     }
     public async Task<IEnumerable<Lead>> GetByNameContainingAsync(string nameLead)
     {
@@ -33,18 +47,39 @@ public class LeadRepo : BaseRepo, ILeadRepo
     }
     public async Task<IEnumerable<Lead>> GetAllByStatusAsync(bool statusLead)
     {
-        return await _context.Leads
-            .Where(l => l.IsActive == statusLead)
-            .ToListAsync();
+        var query = "sp_GetAllLeads";
+        var parameters = new { IsActive = statusLead };
+
+        using (var connection = GetConnection())
+        {
+            return await connection.QueryAsync<Lead>(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
+        }
     }
     public async Task UpdateAsync(Lead lead)
     {
-        _context.Leads.Update(lead);
-        await _context.SaveChangesAsync();
+        var query = "sp_UpdateLead";
+        var parameters = new
+        {
+            Id = lead.Id,
+            Name = lead.Name,
+            Email = lead.Email,
+            PhoneNumber = lead.PhoneNumber,
+            IsActive = lead.IsActive
+        };
+
+        using (var connection = GetConnection())
+        {
+            await connection.ExecuteAsync(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
+        }
     }
     public async Task DeleteAsync(Lead lead)
     {
-        _context.Leads.Remove(lead);
-        await _context.SaveChangesAsync();
+        var query = "sp_DeleteLead";
+        var parameters = new { Id = lead.Id };
+
+        using (var connection = GetConnection())
+        {
+            await connection.ExecuteAsync(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
+        }
     }
 }

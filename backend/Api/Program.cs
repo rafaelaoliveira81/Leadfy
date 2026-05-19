@@ -113,11 +113,16 @@ builder.Services.AddCors(options =>
     });
 });
 
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+if (string.IsNullOrWhiteSpace(connectionString))
+{
+    throw new InvalidOperationException(
+        "ConnectionStrings:DefaultConnection não foi configurada. Defina em appsettings.json, appsettings.{Environment}.json ou variável de ambiente.");
+}
 
 // Adicione o serviço de banco de dados
 builder.Services.AddDbContext<CRMContext>(options =>
-    options.UseSqlServer(
-        builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(connectionString));
 
 builder.Services.AddEndpointsApiExplorer();
 

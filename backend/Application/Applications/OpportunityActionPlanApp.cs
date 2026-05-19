@@ -1,9 +1,6 @@
 using System.Globalization;
 using System.Text;
 using Domain.Entities;
-using Domain.Enuns;
-using Domain.Interfaces;
-using Dominio.Enums;
 using Application.Extensions;
 
 namespace Application;
@@ -45,7 +42,8 @@ public class OpportunityActionPlanApp : IOpportunityActionPlanApp
         if (string.IsNullOrWhiteSpace(generatedActionPlan))
             throw new InvalidOperationException("A IA não retornou um plano de ação válido.");
 
-        opportunity.UpdateActionPlan(generatedActionPlan.Trim());
+        opportunity.ActionPlan = generatedActionPlan.Trim();
+        opportunity.ActionPlanGeneratedAt = DateTime.UtcNow;
 
         await _opportunityRepo.UpdateAsync(opportunity);
 

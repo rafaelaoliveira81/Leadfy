@@ -1,8 +1,6 @@
 using Application.DTO;
 using Domain.Entities;
 
-namespace Application;
-
 public interface IPasswordRecoveryApp
 {
     Task RequestPasswordRecoveryAsync(ForgotPasswordRequest request);

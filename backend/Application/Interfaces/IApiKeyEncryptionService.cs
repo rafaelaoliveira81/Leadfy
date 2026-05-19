@@ -1,5 +1,3 @@
-namespace Application;
-
 public interface IApiKeyEncryptionService
 {
     string Encrypt(string plainText);

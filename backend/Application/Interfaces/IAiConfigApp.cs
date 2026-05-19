@@ -1,8 +1,6 @@
 using Application.DTO;
 using Domain.Entities;
 
-namespace Application;
-
 public interface IAiConfigApp
 {
     Task<int> AddAsync(AiConfigRequest request);
