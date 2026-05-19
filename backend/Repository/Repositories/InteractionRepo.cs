@@ -1,5 +1,4 @@
 using Domain.Entities;
-using Domain.Enuns;
 using Microsoft.EntityFrameworkCore;
 using Dapper;
 using Repository.Context;

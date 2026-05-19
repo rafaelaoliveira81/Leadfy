@@ -5,11 +5,6 @@ using Repository.Context;
 
 namespace Repository.Repositories;
 
-/// <summary>
-/// Repository responsible for persisting and querying password recovery requests.
-/// The Application layer owns the business rules (expiration, single-use, cooldown).
-/// Contains only data access logic — no business rules.
-/// </summary>
 public class PasswordRecoveryRepo : BaseRepo, IPasswordRecoveryRepo
 {
     public PasswordRecoveryRepo(CRMContext context) : base(context)
@@ -43,22 +38,12 @@ public class PasswordRecoveryRepo : BaseRepo, IPasswordRecoveryRepo
             return await connection.QueryFirstOrDefaultAsync<PasswordRecovery>(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
         }
     }
-
-    /// <summary>
-    /// Returns the recovery record for the given token.
-    /// Active and inactive records are both returned so the Application layer can
-    /// detect already-consumed tokens and return appropriate error messages.
-    /// </summary>
     public async Task<PasswordRecovery> GetByTokenAsync(string token)
     {
         return await _context.PasswordRecoveries
             .FirstOrDefaultAsync(pr => pr.Token == token);
     }
 
-    /// <summary>
-    /// Returns the most recent recovery request for the given email.
-    /// Used to enforce the minimum interval between password recovery requests.
-    /// </summary>
     public async Task<PasswordRecovery> GetLatestByEmailAsync(string email)
     {
         return await _context.PasswordRecoveries
