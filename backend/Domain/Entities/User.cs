@@ -20,24 +20,12 @@ public class User
         Interactions = new List<Interaction>();
         PasswordRecoveries = new List<PasswordRecovery>();
     }
+    public void Deactivate() => IsActive = false;
+    public void Activate() => IsActive = true;
     public void SetPassword(string password, IPasswordHasher hasher)
-    {
-        PasswordHash = hasher.Hash(password);
-    }
+        => PasswordHash = hasher.Hash(password);
     public bool VerifyPassword(string password, IPasswordHasher hasher)
-    {
-        return hasher.Verify(PasswordHash, password);
-    }
+        => hasher.Verify(PasswordHash, password);
     public void ChangePassword(string currentPassword, string newPassword, IPasswordHasher hasher)
-    {
-        PasswordHash = hasher.Hash(newPassword);
-    }
-    public void Deactivate()
-    {
-        IsActive = false;
-    }
-    public void Activate()
-    {
-        IsActive = true;
-    }
+        => PasswordHash = hasher.Hash(newPassword);
 }

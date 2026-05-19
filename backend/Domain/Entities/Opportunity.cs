@@ -32,9 +32,4 @@ public class Opportunity
     {
         IsActive = true;
     }
-    public void UpdateActionPlan(string actionPlan)
-    {
-        ActionPlan = actionPlan;
-        ActionPlanGeneratedAt = DateTime.UtcNow;
-    }
 }
