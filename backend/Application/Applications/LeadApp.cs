@@ -1,3 +1,4 @@
+using Application.DTO;
 using Domain.Entities;
 using System.Text.RegularExpressions;
 
@@ -10,57 +11,51 @@ public class LeadApp : ILeadApp
     {
         _leadRepo = leadRepo;
     }
-    public async Task<int> AddAsync(Lead lead)
+    public async Task<int> AddAsync(LeadRequest request)
     {
-        await ValidateLeadInformation(lead);
+        await ValidateLeadInformation(request);
+
+        var lead = MapToLeadRequest(request);
 
         return await _leadRepo.AddAsync(lead);
     }
-    public async Task<Lead> GetByIdAsync(int idLead)
+
+    public async Task<LeadResponse> GetByIdAsync(int idLead)
     {
-        return await ValidateLeadExistsByIdAsync(idLead);
+        var lead = await ValidateLeadExistsByIdAsync(idLead);
+
+        return MapToLeadResponse(lead);
     }
-    public async Task<IEnumerable<Lead>> GetByNameContainingAsync(string nameLead)
+
+    public async Task<IEnumerable<LeadResponse>> GetAllAsync(bool? statusLead)
     {
-        if (string.IsNullOrWhiteSpace(nameLead))
-            throw new ArgumentException("Nome do lead não pode ser vazio.");
+        var lead = await _leadRepo.GetAllAsync(statusLead);
 
-        nameLead = nameLead.Trim();
+        var response = lead.Select(l => MapToLeadResponse(l)).ToList();
 
-        var leadEntity = await _leadRepo.GetByNameContainingAsync(nameLead);
-
-        if (leadEntity == null || !leadEntity.Any())
-            throw new KeyNotFoundException("Lead não localizado.");
-
-        return leadEntity;
+        return response;
     }
-    public async Task<IEnumerable<Lead>> GetAllAsync()
+
+    public async Task UpdateAsync(LeadRequest request)
     {
-        return await _leadRepo.GetAllAsync();
-    }
-    public async Task<IEnumerable<Lead>> GetAllByStatusAsync(bool statusLead)
-    {
-        return await _leadRepo.GetAllByStatusAsync(statusLead);
-    }
-    public async Task UpdateAsync(Lead lead)
-    {
-        var leadEntity = await ValidateLeadExistsByIdAsync(lead.Id);
+        var lead = await ValidateLeadExistsByIdAsync(request.Id);
 
-        await ValidateLeadInformation(lead);
+        await ValidateLeadInformation(request);
 
-        leadEntity.Name = lead.Name;
-        leadEntity.Email = lead.Email;
-        leadEntity.PhoneNumber = lead.PhoneNumber;
-        leadEntity.IsActive = lead.IsActive;
-
-        await _leadRepo.UpdateAsync(leadEntity);
+        lead.Name = lead.Name;
+        lead.Email = lead.Email;
+        lead.PhoneNumber = lead.PhoneNumber;
+        
+        await _leadRepo.UpdateAsync(lead);
     }
+
     public async Task DeleteAsync(int idLead)
     {
         var leadEntity = await ValidateLeadExistsByIdAsync(idLead);
 
         await _leadRepo.DeleteAsync(leadEntity);
     }
+
     public async Task DeactivateAsync(int idLead)
     {
         var leadEntity = await ValidateLeadExistsByIdAsync(idLead);
@@ -69,6 +64,7 @@ public class LeadApp : ILeadApp
 
         await _leadRepo.UpdateAsync(leadEntity);
     }
+    
     public async Task ActivateAsync(int idLead)
     {
         var leadEntity = await ValidateLeadExistsByIdAsync(idLead);
@@ -79,7 +75,7 @@ public class LeadApp : ILeadApp
     }
 
     #region Métodos auxiliares
-    private async Task ValidateLeadInformation(Lead lead)
+    private async Task ValidateLeadInformation(LeadRequest lead)
     {
         if (lead == null)
             throw new ArgumentException("Lead não pode ser vazio.");
@@ -125,6 +121,28 @@ public class LeadApp : ILeadApp
         {
             return false;
         }
+    }
+
+    private static Lead MapToLeadRequest(LeadRequest request)
+    {
+        return new Lead
+        {
+            Name = request.Name,
+            Email = request.Email,
+            PhoneNumber = request.PhoneNumber
+        };
+    }
+
+    private static LeadResponse MapToLeadResponse(Lead lead)
+    {
+        return new LeadResponse
+        {
+            ID = lead.Id,
+            Name = lead.Name,
+            Email = lead.Email,
+            PhoneNumber = lead.PhoneNumber,
+            IsActive = lead.IsActive
+        };
     }
 
     #endregion

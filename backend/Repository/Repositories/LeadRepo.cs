@@ -35,17 +35,7 @@ public class LeadRepo : BaseRepo, ILeadRepo
             return await connection.QueryFirstOrDefaultAsync<Lead>(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
         }
     }
-    public async Task<IEnumerable<Lead>> GetByNameContainingAsync(string nameLead)
-    {
-        return await _context.Leads
-            .Where(l => EF.Functions.Like(l.Name, $"%{nameLead}%"))
-            .ToListAsync();
-    }
-    public async Task<IEnumerable<Lead>> GetAllAsync()
-    {
-        return await _context.Leads.ToListAsync();
-    }
-    public async Task<IEnumerable<Lead>> GetAllByStatusAsync(bool statusLead)
+    public async Task<IEnumerable<Lead>> GetAllAsync(bool? statusLead)
     {
         var query = "sp_GetAllLeads";
         var parameters = new { IsActive = statusLead };

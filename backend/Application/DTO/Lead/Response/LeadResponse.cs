@@ -1,3 +1,5 @@
+namespace Application.DTO;
+
 public class LeadResponse
 {
     public int ID { get; set; }
