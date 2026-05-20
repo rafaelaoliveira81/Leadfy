@@ -19,9 +19,11 @@ public class ProductApp : IProductApp
         return await _productRepo.AddAsync(product);
     }
 
-    public async Task<Product> GetByIdAsync(int idProduct)
+    public async Task<ProductResponse> GetByIdAsync(int idProduct)
     {
-        return await ValidateProductExistsByIdAsync(idProduct);
+        var product = await ValidateProductExistsByIdAsync(idProduct);
+
+        return MapToProductResponse(product);
     }
     public async Task<IEnumerable<ProductResponse>> GetAllAsync(bool? statusProduct)
     {

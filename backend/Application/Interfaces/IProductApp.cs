@@ -4,7 +4,7 @@ using Application.DTO;
 public interface IProductApp
 {
     Task<int> AddAsync(ProductRequest request);
-    Task<Product> GetByIdAsync(int idProduct);
+    Task<ProductResponse> GetByIdAsync(int idProduct);
     Task<IEnumerable<ProductResponse>> GetAllAsync(bool? statusProduct);
     Task UpdateAsync(ProductRequest request);
     Task DeleteAsync(int idProduct);
