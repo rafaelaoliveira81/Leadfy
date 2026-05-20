@@ -1,3 +1,4 @@
+using Application.DTO;
 using Domain.Entities;
 
 namespace Application;
@@ -11,39 +12,50 @@ public class OwnerApp : IOwnerApp
         _userRepo = userRepo;
         _ownerRepo = ownerRepo;
     }
-    public async Task<int> AddAsync(Owner owner)
+    public async Task<int> AddAsync(OwnerRequest request)
     {
-        await ValidateOwnerInformation(owner);
+        await ValidateOwnerRequest(request);
+
+        var owner = MapToOwnerRequest(request);
 
         return await _ownerRepo.AddAsync(owner);
     }
-    public async Task<Owner> GetByIdAsync(int idOwner)
+
+    public async Task<OwnerResponse> GetByIdAsync(int idOwner)
     {
-        return await ValidateOwnerExistsByIdAsync(idOwner);
+        var owner = await ValidateOwnerExistsByIdAsync(idOwner);
+
+        return MapToOwnerResponse(owner);
     }
 
-    public async Task<IEnumerable<Owner>> GetAllAsync(bool? statusOwner)
+    public async Task<IEnumerable<OwnerResponse>> GetAllAsync(bool? statusOwner)
     {
-        return await _ownerRepo.GetAllAsync(statusOwner);
+        var owners = await _ownerRepo.GetAllAsync(statusOwner);
+
+        var response = owners.Select(o => MapToOwnerResponse(o)).ToList();
+
+        return response;
     }
-    public async Task UpdateAsync(Owner owner)
+
+    public async Task UpdateAsync(OwnerRequest request)
     {
-        var ownerEntity = await ValidateOwnerExistsByIdAsync(owner.ID);
+        var ownerEntity = await ValidateOwnerExistsByIdAsync(request.Id);
 
-        await ValidateOwnerInformation(owner);
+        await ValidateOwnerRequest(request);
 
-        ownerEntity.Name = owner.Name;
-        ownerEntity.UserID = owner.UserID;
-        ownerEntity.IsActive = owner.IsActive;
+        ownerEntity.Name = request.Name;
+        ownerEntity.UserID = request.UserID;
 
         await _ownerRepo.UpdateAsync(ownerEntity);
     }
+
     public async Task DeleteAsync(int idOwner)
     {
         var ownerEntity = await ValidateOwnerExistsByIdAsync(idOwner);
 
         await _ownerRepo.DeleteAsync(ownerEntity);
     }
+
     public async Task DeactivateAsync(int idOwner)
     {
         var ownerEntity = await ValidateOwnerExistsByIdAsync(idOwner);
@@ -52,6 +64,7 @@ public class OwnerApp : IOwnerApp
 
         await _ownerRepo.UpdateAsync(ownerEntity);
     }
+
     public async Task ActivateAsync(int idOwner)
     {
         var ownerEntity = await ValidateOwnerExistsByIdAsync(idOwner);
@@ -62,7 +75,7 @@ public class OwnerApp : IOwnerApp
     }
 
     #region Métodos auxiliares
-    private async Task ValidateOwnerInformation(Owner owner)
+    private async Task ValidateOwnerRequest(OwnerRequest owner)
     {
         if (owner == null)
             throw new ArgumentException("Responsável não pode ser vazio.");
@@ -78,10 +91,10 @@ public class OwnerApp : IOwnerApp
         if (!userEntity.IsActive)
             throw new ArgumentException("O usuário vinculado ao responsável deve estar ativo.");
 
-        if (userEntity.Owners != null &&
-            userEntity.Owners.Any(o => o.ID != owner.ID && o.IsActive))
-            throw new ArgumentException("O usuário já possui um responsável ativo cadastrado.");
+        if (userEntity.Owners.Any(o => o.ID != owner.Id && o.IsActive))
+            throw new ArgumentException("O usuário vinculado ao responsável já possui um responsável ativo.");
     }
+
     private async Task<Owner> ValidateOwnerExistsByIdAsync(int idOwner)
     {
         var ownerEntity = await _ownerRepo.GetByIdAsync(idOwner);
@@ -98,6 +111,27 @@ public class OwnerApp : IOwnerApp
             throw new KeyNotFoundException("Usuário não localizado.");
 
         return userEntity;
+    }
+
+    private static Owner MapToOwnerRequest(OwnerRequest request)
+    {
+        return new Owner
+        {
+            Name = request.Name,
+            UserID = request.UserID,
+            IsActive = true
+        };
+    }
+
+    private static OwnerResponse MapToOwnerResponse(Owner owner)
+    {
+        return new OwnerResponse
+        {
+            ID = owner.ID,
+            Name = owner.Name,
+            UserID = owner.UserID,
+            IsActive = owner.IsActive
+        };
     }
 
     #endregion
