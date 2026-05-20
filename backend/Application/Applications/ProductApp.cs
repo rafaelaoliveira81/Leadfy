@@ -1,4 +1,5 @@
 using Domain.Entities;
+using Application.DTO;
 
 namespace Application;
 
@@ -9,48 +10,36 @@ public class ProductApp : IProductApp
     {
         _productRepo = productRepo;
     }
-    public async Task<int> AddAsync(Product product)
+    public async Task<int> AddAsync(ProductRequest request)
     {
-        ValidateProductInformation(product);
+        ValidateProductInformation(request);
+
+        var product = MapToProductRequest(request);
 
         return await _productRepo.AddAsync(product);
     }
+
     public async Task<Product> GetByIdAsync(int idProduct)
     {
         return await ValidateProductExistsByIdAsync(idProduct);
     }
-    public async Task<IEnumerable<Product>> GetByNameContainingAsync(string nameProduct)
+    public async Task<IEnumerable<ProductResponse>> GetAllAsync(bool? statusProduct)
     {
-        if (string.IsNullOrWhiteSpace(nameProduct))
-            throw new ArgumentException("Nome do product não pode ser vazio.");
+        var products = await _productRepo.GetAllAsync(statusProduct);
 
-        nameProduct = nameProduct.Trim();
+        var response = products.Select(p => MapToProductResponse(p)).ToList();
 
-        var productEntity = await _productRepo.GetByNameContainingAsync(nameProduct);
-
-        if (productEntity == null || !productEntity.Any())
-            throw new KeyNotFoundException("Produto não localizado.");
-
-        return productEntity;
+        return response;
     }
-    public async Task<IEnumerable<Product>> GetAllAsync()
+    public async Task UpdateAsync(ProductRequest request)
     {
-        return await _productRepo.GetAllAsync();
-    }
-    public async Task<IEnumerable<Product>> GetAllByStatusAsync(bool statusProduct)
-    {
-        return await _productRepo.GetAllByStatusAsync(statusProduct);
-    }
-    public async Task UpdateAsync(Product product)
-    {
-        var productEntity = await ValidateProductExistsByIdAsync(product.Id);
+        var productEntity = await ValidateProductExistsByIdAsync(request.Id);
 
-        ValidateProductInformation(product);
+        ValidateProductInformation(request);
 
-        productEntity.Name = product.Name;
-        productEntity.Description = product.Description;
-        productEntity.Price = product.Price;
-        productEntity.IsActive = product.IsActive;
+        productEntity.Name = request.Name;
+        productEntity.Description = request.Description;
+        productEntity.Price = request.Price;
 
         await _productRepo.UpdateAsync(productEntity);
     }
@@ -78,18 +67,18 @@ public class ProductApp : IProductApp
     }
 
     #region Métodos auxiliares
-    private void ValidateProductInformation(Product product)
+    private void ValidateProductInformation(ProductRequest request)
     {
-        if (string.IsNullOrWhiteSpace(product.Name))
+        if (string.IsNullOrWhiteSpace(request.Name))
             throw new ArgumentException("Nome do produto é obrigatório.");
 
-        if (product.Name.Length > 150)
+        if (request.Name.Length > 150)
             throw new ArgumentException("Nome do produto não pode exceder 150 caracteres.");
 
-        if (product.Description != null && product.Description.Length > 1000)
+        if (request.Description != null && request.Description.Length > 1000)
             throw new ArgumentException("Descrição do produto não pode exceder 1000 caracteres.");
 
-        if (product.Price <= 0)
+        if (request.Price <= 0)
             throw new ArgumentException("Preço do produto deve ser maior que zero.");
     }
     private async Task<Product> ValidateProductExistsByIdAsync(int idProduct)
@@ -101,6 +90,32 @@ public class ProductApp : IProductApp
 
         return productEntity;
     }
+
+    private ProductResponse MapToProductResponse(Product product)
+    {
+        var productResponse = new ProductResponse
+        {
+            Id = product.Id,
+            Name = product.Name,
+            Description = product.Description,
+            Price = product.Price,
+            IsActive = product.IsActive
+        };
+
+        return productResponse;
+    }
+
+    private static Product MapToProductRequest(ProductRequest request)
+    {
+        return new Product
+        {
+            Name = request.Name.Trim(),
+            Description = request.Description?.Trim(),
+            Price = request.Price,
+            IsActive = true
+        };
+    }
+
 
     #endregion
 }

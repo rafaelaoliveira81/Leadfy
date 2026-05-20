@@ -1,13 +1,12 @@
 using Domain.Entities;
+using Application.DTO;
 
 public interface IProductApp
 {
-    Task<int> AddAsync(Product product);
+    Task<int> AddAsync(ProductRequest request);
     Task<Product> GetByIdAsync(int idProduct);
-    Task<IEnumerable<Product>> GetByNameContainingAsync(string nameProduct);
-    Task<IEnumerable<Product>> GetAllAsync();
-    Task<IEnumerable<Product>> GetAllByStatusAsync(bool statusProduct);
-    Task UpdateAsync(Product product);
+    Task<IEnumerable<ProductResponse>> GetAllAsync(bool? statusProduct);
+    Task UpdateAsync(ProductRequest request);
     Task DeleteAsync(int idProduct);
     Task DeactivateAsync(int idProduct);
     Task ActivateAsync(int idProduct);

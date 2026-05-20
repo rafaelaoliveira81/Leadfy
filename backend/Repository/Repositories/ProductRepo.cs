@@ -35,17 +35,8 @@ public class ProductRepo : BaseRepo, IProductRepo
             return await connection.QueryFirstOrDefaultAsync<Product>(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
         }
     }
-    public async Task<IEnumerable<Product>> GetByNameContainingAsync(string nameProduct)
-    {
-        return await _context.Products
-            .Where(p => EF.Functions.Like(p.Name, $"%{nameProduct}%"))
-            .ToListAsync();
-    }
-    public async Task<IEnumerable<Product>> GetAllAsync()
-    {
-        return await _context.Products.ToListAsync();
-    }
-    public async Task<IEnumerable<Product>> GetAllByStatusAsync(bool statusProduct)
+
+    public async Task<IEnumerable<Product>> GetAllAsync(bool? statusProduct)
     {
         var query = "sp_GetAllProducts";
         var parameters = new { IsActive = statusProduct };
