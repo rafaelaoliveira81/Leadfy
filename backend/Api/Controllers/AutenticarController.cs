@@ -1,5 +1,4 @@
 using Application;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ApiLoginRequest = Models.Request.LoginRequest;
 using ApiLoginResponse = Models.Response.LoginResponse;
@@ -17,7 +16,6 @@ public class AutenticarController : ControllerBase
         _authenticationApp = authenticationApp;
     }
 
-    [AllowAnonymous]
     [HttpPost("login")]
     [ProducesResponseType(typeof(ApiLoginResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

@@ -6,16 +6,13 @@ public class AuthenticationApp : IAuthenticationApp
 {
     private readonly IUserRepo _userRepo;
     private readonly IPasswordHasher _passwordHasher;
-    private readonly IJwtApp _jwtApp;
 
     public AuthenticationApp(
         IUserRepo userRepo,
-        IPasswordHasher passwordHasher,
-        IJwtApp jwtApp)
+        IPasswordHasher passwordHasher)
     {
         _userRepo = userRepo;
         _passwordHasher = passwordHasher;
-        _jwtApp = jwtApp;
     }
 
     public async Task<LoginResponse> LoginAsync(LoginRequest request)
@@ -30,14 +27,11 @@ public class AuthenticationApp : IAuthenticationApp
         if (user == null || !_passwordHasher.Verify(user.PasswordHash, request.Password))
             throw new UnauthorizedAccessException("Email ou senha inválidos.");
 
-        var token = _jwtApp.GenerateToken(user);
-
         return new LoginResponse
         {
             Success = true,
             Name = user.Name,
-            Message = "Login realizado com sucesso.",
-            Token = token
+            Message = "Login realizado com sucesso."
         };
     }
 }

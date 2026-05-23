@@ -1,5 +1,4 @@
 using Application;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Models.Response;
 using Models.Request;
@@ -10,7 +9,6 @@ using Domain.Entities;
 /// </summary>
 [ApiController]
 [Route("api/users")]
-[Authorize]
 public class UserController : ControllerBase
 {
     private readonly IUserApp _userApp;
