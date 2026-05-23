@@ -15,8 +15,7 @@ public class InteractionRepo : BaseRepo, IInteractionRepo
         var query = "sp_CreateInteraction";
         var parameters = new
         {
-            CrmEntityId = interaction.CrmEntityId,
-            CrmEntityType = (int)interaction.CrmEntityType,
+            OpportunityId = interaction.OpportunityId,
             FromStage = (int?)interaction.FromStage,
             ToStage = (int?)interaction.ToStage,
             Description = interaction.Description,
@@ -40,26 +39,20 @@ public class InteractionRepo : BaseRepo, IInteractionRepo
             return await connection.QueryFirstOrDefaultAsync<Interaction>(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
         }
     }
-    public async Task<IEnumerable<Interaction>> GetByCrmEntityAsync(CrmEntityType crmEntityType, int crmEntityId)
+    public async Task<IEnumerable<Interaction>> GetAllByOpportunityIdAsync(int opportunityId)
     {
         return await _context.Interactions
-            .Where(i => i.CrmEntityType == crmEntityType && i.CrmEntityId == crmEntityId)
+            .Where(i => i.OpportunityId == opportunityId)
             .Include(i => i.User)
             .OrderByDescending(i => i.InteractionDate)
             .ThenByDescending(i => i.CreatedAt)
             .ToListAsync();
     }
-    public async Task<IEnumerable<Interaction>> GetAllByOpportunityIdAsync(int opportunityId)
-    {
-        return await GetByCrmEntityAsync(CrmEntityType.Opportunity, opportunityId);
-    }
 
     public async Task<IEnumerable<Interaction>> GetLastInteractionsByOpportunityIdAsync(int opportunityId)
     {
         return await _context.Interactions
-            .Where(i =>
-                i.CrmEntityType == CrmEntityType.Opportunity &&
-                i.CrmEntityId == opportunityId)
+            .Where(i => i.OpportunityId == opportunityId)
             .Include(i => i.User)
             .OrderByDescending(i => i.InteractionDate)
             .ThenByDescending(i => i.CreatedAt)
@@ -73,8 +66,7 @@ public class InteractionRepo : BaseRepo, IInteractionRepo
         var parameters = new
         {
             ID = interaction.Id,
-            CrmEntityId = interaction.CrmEntityId,
-            CrmEntityType = (int)interaction.CrmEntityType,
+            OpportunityId = interaction.OpportunityId,
             FromStage = (int?)interaction.FromStage,
             ToStage = (int?)interaction.ToStage,
             Description = interaction.Description,

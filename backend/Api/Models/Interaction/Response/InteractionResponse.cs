@@ -16,11 +16,6 @@ public class InteractionResponse
     public int OpportunityId { get; set; }
 
     /// <summary>
-    /// Nome do tipo de entidade do CRM vinculada à interação.
-    /// </summary>
-    public string CrmEntityType { get; set; }
-
-    /// <summary>
     /// Código numérico da etapa de origem, quando informado.
     /// </summary>
     public int? FromStage { get; set; }

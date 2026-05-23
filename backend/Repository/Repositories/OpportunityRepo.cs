@@ -15,8 +15,6 @@ public class OpportunityRepo : BaseRepo, IOpportunityRepo
         var query = "sp_CreateOpportunity";
         var parameters = new
         {
-            ActionPlan = opportunity.ActionPlan,
-            ActionPlanGeneratedAt = opportunity.ActionPlanGeneratedAt,
             LeadId = opportunity.LeadId,
             OwnerId = opportunity.OwnerId,
             ProductId = opportunity.ProductId,
@@ -85,8 +83,6 @@ public class OpportunityRepo : BaseRepo, IOpportunityRepo
         var parameters = new
         {
             ID = opportunity.ID,
-            ActionPlan = opportunity.ActionPlan,
-            ActionPlanGeneratedAt = opportunity.ActionPlanGeneratedAt,
             LeadId = opportunity.LeadId,
             OwnerId = opportunity.OwnerId,
             ProductId = opportunity.ProductId,

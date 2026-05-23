@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Repository.Context;
 
@@ -11,9 +12,10 @@ using Repository.Context;
 namespace Repository.Migrations
 {
     [DbContext(typeof(CRMContext))]
-    partial class CRMContextModelSnapshot : ModelSnapshot
+    [Migration("20260523004932_RemoveCrmEntityType")]
+    partial class RemoveCrmEntityType
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -98,8 +100,6 @@ namespace Repository.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("OpportunityId");
-
                     b.HasIndex("UserId");
 
                     b.ToTable("Interactions", (string)null);
@@ -146,6 +146,12 @@ namespace Repository.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"), 1L, 1);
 
+                    b.Property<string>("ActionPlan")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("ActionPlanGeneratedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<decimal>("Amount")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
@@ -186,36 +192,6 @@ namespace Repository.Migrations
                     b.HasIndex("ProductId");
 
                     b.ToTable("Opportunities", (string)null);
-                });
-
-            modelBuilder.Entity("Domain.Entities.OpportunityActionPlan", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<string>("ActionPlan")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("AiConfigId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("GeneratedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("OpportunityId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AiConfigId");
-
-                    b.HasIndex("OpportunityId");
-
-                    b.ToTable("OpportunityActionPlans", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.Owner", b =>
@@ -361,19 +337,11 @@ namespace Repository.Migrations
 
             modelBuilder.Entity("Domain.Entities.Interaction", b =>
                 {
-                    b.HasOne("Domain.Entities.Opportunity", "Opportunity")
-                        .WithMany("Interactions")
-                        .HasForeignKey("OpportunityId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("Domain.Entities.User", "User")
                         .WithMany("Interactions")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.Navigation("Opportunity");
 
                     b.Navigation("User");
                 });
@@ -404,25 +372,6 @@ namespace Repository.Migrations
                     b.Navigation("Product");
                 });
 
-            modelBuilder.Entity("Domain.Entities.OpportunityActionPlan", b =>
-                {
-                    b.HasOne("Domain.Entities.AiConfig", "AiConfig")
-                        .WithMany()
-                        .HasForeignKey("AiConfigId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Entities.Opportunity", "Opportunity")
-                        .WithMany("ActionPlans")
-                        .HasForeignKey("OpportunityId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("AiConfig");
-
-                    b.Navigation("Opportunity");
-                });
-
             modelBuilder.Entity("Domain.Entities.Owner", b =>
                 {
                     b.HasOne("Domain.Entities.User", "User")
@@ -443,13 +392,6 @@ namespace Repository.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Opportunity", b =>
-                {
-                    b.Navigation("ActionPlans");
-
-                    b.Navigation("Interactions");
                 });
 
             modelBuilder.Entity("Domain.Entities.User", b =>
