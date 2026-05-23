@@ -23,12 +23,27 @@ public class RecuperacaoSenhaController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult> RequestRecovery([FromBody] ForgotPasswordRequest request)
     {
-        await _passwordRecoveryApp.RequestPasswordRecoveryAsync(new Application.DTO.ForgotPasswordRequest
+        try
         {
-            Email = request.Email
-        });
+            await _passwordRecoveryApp.RequestPasswordRecoveryAsync(new Application.DTO.ForgotPasswordRequest
+            {
+                Email = request.Email
+            });
 
-        return Ok(new { message = "Solicitação de recuperação enviada com sucesso." });
+            return Ok(new { message = "Solicitação de recuperação enviada com sucesso." });
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = ex.Message });
+        }
     }
 
     [AllowAnonymous]
@@ -37,17 +52,28 @@ public class RecuperacaoSenhaController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult> ValidateToken([FromBody] ValidateTokenRequest request)
     {
-        var recovery = await _passwordRecoveryApp.ValidateTokenAsync(new Application.DTO.ValidateTokenRequest
+        try
         {
-            Token = request.Token
-        });
+            var recovery = await _passwordRecoveryApp.ValidateTokenAsync(new Application.DTO.ValidateTokenRequest
+            {
+                Token = request.Token
+            });
 
-        return Ok(new
+            return Ok(new
+            {
+                valid = true,
+                expiresAt = recovery.ExpiresAt,
+                email = recovery.Email
+            });
+        }
+        catch (ArgumentException ex)
         {
-            valid = true,
-            expiresAt = recovery.ExpiresAt,
-            email = recovery.Email
-        });
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = ex.Message });
+        }
     }
 
     [AllowAnonymous]
@@ -57,13 +83,28 @@ public class RecuperacaoSenhaController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
     {
-        await _passwordRecoveryApp.ResetPasswordAsync(new Application.DTO.ResetPasswordRequest
+        try
         {
-            Token = request.Token,
-            NewPassword = request.NewPassword,
-            ConfirmPassword = request.ConfirmPassword
-        });
+            await _passwordRecoveryApp.ResetPasswordAsync(new Application.DTO.ResetPasswordRequest
+            {
+                Token = request.Token,
+                NewPassword = request.NewPassword,
+                ConfirmPassword = request.ConfirmPassword
+            });
 
-        return Ok(new { message = "Senha redefinida com sucesso." });
+            return Ok(new { message = "Senha redefinida com sucesso." });
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = ex.Message });
+        }
     }
 }

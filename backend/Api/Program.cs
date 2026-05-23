@@ -3,7 +3,6 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Repository.Repositories;
-using Api.Shared.Middleware;
 using Repository.Context;
 using Domain.Interfaces;
 using System.Reflection;
@@ -133,8 +132,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
-app.UseMiddleware<ErrorHandlingMiddleware>();
 
 app.UseCors("Frontend");
 
