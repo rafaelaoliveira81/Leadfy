@@ -79,6 +79,7 @@ builder.Services.AddScoped<IPasswordRecoveryRepo, PasswordRecoveryRepo>();
 builder.Services.AddScoped<ILeadRepo, LeadRepo>();
 builder.Services.AddScoped<IProductRepo, ProductRepo>();
 builder.Services.AddScoped<IOpportunityRepo, OpportunityRepo>();
+builder.Services.AddScoped<IOpportunityActionPlanRepo, OpportunityActionPlanRepo>();
 builder.Services.AddScoped<IInteractionRepo, InteractionRepo>();
 builder.Services.AddScoped<IAiConfigRepo, AiConfigRepo>();
 

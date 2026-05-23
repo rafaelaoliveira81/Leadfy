@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Models.Request;
 using Models.Response;
+using Application.DTOs;
 using Domain.Entities;
 using Domain.Enuns;
 
@@ -92,8 +93,6 @@ public class OpportunityController : ControllerBase
             var opportunityResponse = new OpportunityResponse
             {
                 ID = opportunity.ID,
-                ActionPlan = opportunity.ActionPlan,
-                ActionPlanGeneratedAt = opportunity.ActionPlanGeneratedAt,
                 LeadId = opportunity.LeadId,
                 LeadName = opportunity.Lead?.Name,
                 OwnerId = opportunity.OwnerId,
@@ -165,8 +164,6 @@ public class OpportunityController : ControllerBase
             var opportunitiesResponse = opportunities.Select(o => new OpportunityResponse
             {
                 ID = o.ID,
-                ActionPlan = o.ActionPlan,
-                ActionPlanGeneratedAt = o.ActionPlanGeneratedAt,
                 LeadId = o.LeadId,
                 LeadName = o.Lead?.Name,
                 OwnerId = o.OwnerId,
@@ -206,7 +203,7 @@ public class OpportunityController : ControllerBase
     /// <param name="request">Dados da requisição para geração do plano.</param>
     /// <returns>Plano de ação gerado e persistido.</returns>
     [HttpPost("{id:int}/generate-action-plan")]
-    [ProducesResponseType(typeof(OpportunityActionPlanResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(OpportunityActionPlanDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -214,21 +211,40 @@ public class OpportunityController : ControllerBase
     {
         try
         {
-            var opportunity = await _opportunityActionPlanApp.GenerateAsync(id, request.ConfigId);
+            var dto = await _opportunityActionPlanApp.GenerateAsync(id, request.ConfigId);
 
-            var response = new OpportunityActionPlanResponse
-            {
-                OpportunityId = opportunity.ID,
-                ConfigId = request.ConfigId,
-                ActionPlan = opportunity.ActionPlan,
-                ActionPlanGeneratedAt = opportunity.ActionPlanGeneratedAt
-            };
-
-            return Ok(response);
+            return Ok(dto);
         }
         catch (ArgumentException ex)
         {
             return BadRequest(new { message = ex.Message });
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Obtém todos os planos de ação gerados para uma opportunity.
+    /// </summary>
+    /// <param name="id">Identificador da opportunity.</param>
+    /// <returns>Lista de planos de ação ordenada por data de geração decrescente.</returns>
+    [HttpGet("{id:int}/action-plans")]
+    [ProducesResponseType(typeof(IEnumerable<OpportunityActionPlanDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult> GetActionPlans([FromRoute] int id)
+    {
+        try
+        {
+            var dtos = await _opportunityActionPlanApp.GetByOpportunityIdAsync(id);
+
+            return Ok(dtos);
         }
         catch (KeyNotFoundException ex)
         {

@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text;
+using Application.DTOs;
 using Domain.Entities;
 using Application.Extensions;
 
@@ -8,22 +9,25 @@ namespace Application;
 public class OpportunityActionPlanApp : IOpportunityActionPlanApp
 {
     private readonly IOpportunityRepo _opportunityRepo;
+    private readonly IOpportunityActionPlanRepo _actionPlanRepo;
     private readonly IInteractionRepo _interactionRepo;
     private readonly IAiConfigApp _aiConfigApp;
     private readonly IGenerativeAiService _generativeAiService;
 
     public OpportunityActionPlanApp(
         IOpportunityRepo opportunityRepo,
+        IOpportunityActionPlanRepo actionPlanRepo,
         IInteractionRepo interactionRepo,
         IAiConfigApp aiConfigApp,
         IGenerativeAiService generativeAiService)
     {
         _opportunityRepo = opportunityRepo;
+        _actionPlanRepo = actionPlanRepo;
         _interactionRepo = interactionRepo;
         _aiConfigApp = aiConfigApp;
         _generativeAiService = generativeAiService;
     }
-    public async Task<Opportunity> GenerateAsync(int opportunityId, int configId)
+    public async Task<OpportunityActionPlanDto> GenerateAsync(int opportunityId, int configId)
     {
         var opportunity = await GetOpportunityAsync(opportunityId);
 
@@ -42,12 +46,40 @@ public class OpportunityActionPlanApp : IOpportunityActionPlanApp
         if (string.IsNullOrWhiteSpace(generatedActionPlan))
             throw new InvalidOperationException("A IA não retornou um plano de ação válido.");
 
-        opportunity.ActionPlan = generatedActionPlan.Trim();
-        opportunity.ActionPlanGeneratedAt = DateTime.UtcNow;
+        var actionPlan = new OpportunityActionPlan
+        {
+            OpportunityId = opportunityId,
+            AiConfigId = configId,
+            ActionPlan = generatedActionPlan.Trim(),
+            GeneratedAt = DateTime.UtcNow
+        };
 
-        await _opportunityRepo.UpdateAsync(opportunity);
+        var id = await _actionPlanRepo.AddAsync(actionPlan);
+        actionPlan.Id = id;
 
-        return opportunity;
+        return MapToDto(actionPlan, config.Title);
+    }
+
+    public async Task<IEnumerable<OpportunityActionPlanDto>> GetByOpportunityIdAsync(int opportunityId)
+    {
+        await GetOpportunityAsync(opportunityId);
+
+        var actionPlans = await _actionPlanRepo.GetByOpportunityIdAsync(opportunityId);
+
+        return actionPlans.Select(ap => MapToDto(ap, ap.AiConfig?.Title));
+    }
+
+    private static OpportunityActionPlanDto MapToDto(OpportunityActionPlan actionPlan, string aiConfigTitle)
+    {
+        return new OpportunityActionPlanDto
+        {
+            Id = actionPlan.Id,
+            OpportunityId = actionPlan.OpportunityId,
+            AiConfigId = actionPlan.AiConfigId,
+            AiConfigTitle = aiConfigTitle,
+            ActionPlan = actionPlan.ActionPlan,
+            GeneratedAt = actionPlan.GeneratedAt
+        };
     }
 
     private async Task<AiConfig> GetAiConfig(int configId)

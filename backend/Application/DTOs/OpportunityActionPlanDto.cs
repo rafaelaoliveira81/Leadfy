@@ -1,0 +1,11 @@
+namespace Application.DTOs;
+
+public class OpportunityActionPlanDto
+{
+    public int Id { get; set; }
+    public int OpportunityId { get; set; }
+    public int AiConfigId { get; set; }
+    public string AiConfigTitle { get; set; }
+    public string ActionPlan { get; set; }
+    public DateTime GeneratedAt { get; set; }
+}

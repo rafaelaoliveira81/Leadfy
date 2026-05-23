@@ -1,6 +1,4 @@
 CREATE PROCEDURE sp_CreateOpportunity
-    @ActionPlan NVARCHAR(MAX) = NULL,
-    @ActionPlanGeneratedAt DATETIME = NULL,
     @LeadId INT,
     @OwnerId INT = NULL,
     @ProductId INT,
@@ -11,8 +9,6 @@ CREATE PROCEDURE sp_CreateOpportunity
 AS
 BEGIN
     INSERT INTO Opportunities (
-        ActionPlan,
-        ActionPlanGeneratedAt,
         LeadId,
         OwnerId,
         ProductId,
@@ -24,8 +20,6 @@ BEGIN
         SortOrder
     )
     VALUES (
-        @ActionPlan,
-        @ActionPlanGeneratedAt,
         @LeadId,
         @OwnerId,
         @ProductId,
@@ -47,8 +41,6 @@ AS
 BEGIN
     SELECT 
         ID,
-        ActionPlan,
-        ActionPlanGeneratedAt,
         LeadId,
         OwnerId,
         ProductId,
@@ -69,8 +61,6 @@ AS
 BEGIN
     SELECT 
         ID,
-        ActionPlan,
-        ActionPlanGeneratedAt,
         LeadId,
         OwnerId,
         ProductId,
@@ -88,8 +78,6 @@ GO
 
 CREATE PROCEDURE sp_UpdateOpportunity
     @ID INT,
-    @ActionPlan NVARCHAR(MAX) = NULL,
-    @ActionPlanGeneratedAt DATETIME = NULL,
     @LeadId INT,
     @OwnerId INT = NULL,
     @ProductId INT,
@@ -102,8 +90,6 @@ AS
 BEGIN
     UPDATE Opportunities
     SET 
-        ActionPlan = @ActionPlan,
-        ActionPlanGeneratedAt = @ActionPlanGeneratedAt,
         LeadId = @LeadId,
         OwnerId = @OwnerId,
         ProductId = @ProductId,
