@@ -1,4 +1,4 @@
-namespace Models.Response;
+namespace Application.DTO;
 
 public class UserResponse
 {

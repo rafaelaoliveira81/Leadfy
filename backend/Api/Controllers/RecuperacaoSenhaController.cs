@@ -1,6 +1,6 @@
-using Application;
+
+using Application.DTO;
 using Microsoft.AspNetCore.Mvc;
-using Models.Request;
 
 namespace Api.Controllers;
 
@@ -23,10 +23,7 @@ public class RecuperacaoSenhaController : ControllerBase
     {
         try
         {
-            await _passwordRecoveryApp.RequestPasswordRecoveryAsync(new Application.DTO.ForgotPasswordRequest
-            {
-                Email = request.Email
-            });
+            await _passwordRecoveryApp.RequestPasswordRecoveryAsync(request);
 
             return Ok(new { message = "Solicitação de recuperação enviada com sucesso." });
         }
@@ -51,10 +48,7 @@ public class RecuperacaoSenhaController : ControllerBase
     {
         try
         {
-            var recovery = await _passwordRecoveryApp.ValidateTokenAsync(new Application.DTO.ValidateTokenRequest
-            {
-                Token = request.Token
-            });
+            var recovery = await _passwordRecoveryApp.ValidateTokenAsync(request);
 
             return Ok(new
             {
@@ -81,12 +75,7 @@ public class RecuperacaoSenhaController : ControllerBase
     {
         try
         {
-            await _passwordRecoveryApp.ResetPasswordAsync(new Application.DTO.ResetPasswordRequest
-            {
-                Token = request.Token,
-                NewPassword = request.NewPassword,
-                ConfirmPassword = request.ConfirmPassword
-            });
+            await _passwordRecoveryApp.ResetPasswordAsync(request);
 
             return Ok(new { message = "Senha redefinida com sucesso." });
         }
