@@ -19,8 +19,7 @@ public class InteractionApp : IInteractionApp
         await ValidateOpportunityExistsAsync(opportunityId);
         await ValidateInteractionAsync(interaction);
 
-        interaction.CrmEntityId = opportunityId;
-        interaction.CrmEntityType = CrmEntityType.Opportunity;
+        interaction.OpportunityId = opportunityId;
         interaction.CreatedAt = DateTime.UtcNow;
 
         if (interaction.InteractionDate == default)
@@ -38,8 +37,7 @@ public class InteractionApp : IInteractionApp
         if (interactionEntity == null)
             throw new KeyNotFoundException("Interação não localizada.");
 
-        if (interactionEntity.CrmEntityType == CrmEntityType.Opportunity)
-            await ValidateOpportunityExistsAsync(interactionEntity.CrmEntityId);
+        await ValidateOpportunityExistsAsync(interactionEntity.OpportunityId);
 
         return interactionEntity;
     }
@@ -47,7 +45,7 @@ public class InteractionApp : IInteractionApp
     {
         await ValidateOpportunityExistsAsync(opportunityId);
 
-        return await _interactionRepo.GetByCrmEntityAsync((CrmEntityType)1, opportunityId);
+        return await _interactionRepo.GetAllByOpportunityIdAsync(opportunityId);
     }
     public async Task DeleteAsync(int idInteraction)
     {

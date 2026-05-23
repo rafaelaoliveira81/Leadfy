@@ -193,8 +193,7 @@ public class InteractionController : ControllerBase
         return new InteractionResponse
         {
             Id = interaction.Id,
-            OpportunityId = interaction.CrmEntityId,
-            CrmEntityType = interaction.CrmEntityType.ToString(),
+            OpportunityId = interaction.OpportunityId,
             FromStage = interaction.FromStage,
             FromStageName = interaction.FromStage.HasValue
                 ? ((OpportunityStage)interaction.FromStage.Value).ToString()

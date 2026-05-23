@@ -1,12 +1,9 @@
-using Domain.Enuns;
-
 namespace Domain.Entities;
 
 public class Interaction
 {
     public int Id { get; set; }
-    public int CrmEntityId { get; set; }
-    public CrmEntityType CrmEntityType { get; set; }
+    public int OpportunityId { get; set; }
     public int? FromStage { get; set; }
     public int? ToStage { get; set; }
     public string Description { get; set; }

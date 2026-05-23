@@ -1,6 +1,5 @@
 CREATE PROCEDURE sp_CreateInteraction
-    @CrmEntityId INT,
-	@CrmEntityType INT,
+    @OpportunityId INT,
 	@FromStage INT,
 	@ToStage INT,
 	@Description NVARCHAR(1000),
@@ -9,8 +8,8 @@ CREATE PROCEDURE sp_CreateInteraction
 	@InteractionDate DATETIME2(7)
 AS
 BEGIN
-    INSERT INTO Interactions (CrmEntityId, CrmEntityType, FromStage, ToStage, Description, InteractionDate, UserID, NextContactDate, CreatedAt)
-    VALUES (@CrmEntityId, @CrmEntityType, @FromStage, @ToStage, @Description, @InteractionDate, @UserID,@NextContactDate, GETDATE());
+    INSERT INTO Interactions (OpportunityId, FromStage, ToStage, Description, InteractionDate, UserID, NextContactDate, CreatedAt)
+    VALUES (@OpportunityId, @FromStage, @ToStage, @Description, @InteractionDate, @UserID,@NextContactDate, GETDATE());
 
     SELECT SCOPE_IDENTITY() AS ID;
 END;
@@ -22,8 +21,7 @@ AS
 BEGIN
     SELECT 
         Id,
-        CrmEntityId,
-        CrmEntityType,
+        OpportunityId,
 		FromStage,
 		ToStage,
 		Description,
@@ -41,8 +39,7 @@ AS
 BEGIN
     SELECT 
         Id,
-        CrmEntityId,
-        CrmEntityType,
+        OpportunityId,
 		FromStage,
 		ToStage,
 		Description,
@@ -57,8 +54,7 @@ GO
 
 CREATE PROCEDURE sp_UpdateInteraction
     @ID INT,
-    @CrmEntityId INT,
-	@CrmEntityType INT,
+    @OpportunityId INT,
 	@FromStage INT,
 	@ToStage INT,
 	@Description NVARCHAR(1000),
@@ -69,8 +65,7 @@ CREATE PROCEDURE sp_UpdateInteraction
 BEGIN
     UPDATE Interactions
     SET 
-        CrmEntityId = @CrmEntityId,
-		CrmEntityType = @CrmEntityType,
+        OpportunityId = @OpportunityId,
 		FromStage = @FromStage,
 		ToStage = @ToStage,
 		Description = @Description,

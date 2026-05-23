@@ -12,12 +12,8 @@ public class InteractionConfig : IEntityTypeConfiguration<Interaction>
 
               builder.HasKey(i => i.Id);
 
-              builder.Property(i => i.CrmEntityId)
+              builder.Property(i => i.OpportunityId)
                      .IsRequired();
-
-              builder.Property(i => i.CrmEntityType)
-                     .IsRequired()
-                     .HasConversion<int>();
 
               builder.Property(i => i.FromStage)
                      .IsRequired(false);
@@ -41,8 +37,6 @@ public class InteractionConfig : IEntityTypeConfiguration<Interaction>
 
               builder.Property(i => i.UserId)
                      .IsRequired();
-
-              builder.HasIndex(i => new { i.CrmEntityType, i.CrmEntityId });
 
               builder.HasOne(i => i.User)
                      .WithMany(u => u.Interactions)
