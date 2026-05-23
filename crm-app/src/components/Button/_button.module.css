@@ -1,0 +1,120 @@
+.botao {
+  border: none;
+  color: #ffffff;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  padding: 12px 18px;
+  border-radius: 12px;
+
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+
+  transition:
+    background-color 0.2s ease,
+    transform 0.12s ease,
+    box-shadow 0.2s ease;
+}
+
+.botao svg {
+  font-size: 20px;
+}
+
+.botao:hover {
+  transform: translateY(-2px);
+}
+
+.botao:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+.botao:focus-visible {
+  outline: none;
+}
+
+/* PRIMARY */
+.primary {
+  background-color: #2563eb;
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.22);
+}
+
+.primary:hover {
+  background-color: #1d4ed8;
+  box-shadow: 0 10px 24px rgba(37, 99, 235, 0.26);
+}
+
+.primary:active {
+  background-color: #1e40af;
+  box-shadow: 0 3px 8px rgba(37, 99, 235, 0.18);
+}
+
+/* SUCCESS */
+.success {
+  background-color: #16a34a;
+  box-shadow: 0 8px 20px rgba(22, 163, 74, 0.22);
+}
+
+.success:hover {
+  background-color: #15803d;
+  box-shadow: 0 10px 24px rgba(22, 163, 74, 0.26);
+}
+
+.success:active {
+  background-color: #166534;
+  box-shadow: 0 3px 8px rgba(22, 163, 74, 0.18);
+}
+
+/* WARNING */
+.warning {
+  background-color: #d97706;
+  box-shadow: 0 8px 20px rgba(217, 119, 6, 0.22);
+}
+
+.warning:hover {
+  background-color: #b45309;
+  box-shadow: 0 10px 24px rgba(217, 119, 6, 0.26);
+}
+
+.warning:active {
+  background-color: #92400e;
+  box-shadow: 0 3px 8px rgba(217, 119, 6, 0.18);
+}
+
+/* DANGER / ERROR */
+.danger,
+.error {
+  background-color: #dc2626;
+  box-shadow: 0 8px 20px rgba(220, 38, 38, 0.22);
+}
+
+.danger:hover,
+.error:hover {
+  background-color: #b91c1c;
+  box-shadow: 0 10px 24px rgba(220, 38, 38, 0.26);
+}
+
+.danger:active,
+.error:active {
+  background-color: #991b1b;
+  box-shadow: 0 3px 8px rgba(220, 38, 38, 0.18);
+}
+
+/* SECONDARY */
+.secondary {
+  background-color: #8d99ae;
+  box-shadow: 0 8px 20px rgba(141, 153, 174, 0.22);
+}
+
+.secondary:hover {
+  background-color: #6b7280;
+  box-shadow: 0 10px 24px rgba(141, 153, 174, 0.26);
+}
+
+.secondary:active {
+  background-color: #4b5563;
+  box-shadow: 0 3px 8px rgba(141, 153, 174, 0.18);
+}

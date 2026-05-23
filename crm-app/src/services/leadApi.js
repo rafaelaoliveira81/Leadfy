@@ -41,6 +41,7 @@ const mapApiError = (error) => {
 export const leadAPI = {
   async Create(leadData) {
     try {
+      leadData.id = 0;
       const response = await HTTPClient.post(`/leads`, leadData);
       return response.data;
     } catch (error) {
@@ -77,9 +78,9 @@ export const leadAPI = {
     }
   },
 
-  async Update(leadId, leadData) {
+  async Update(leadData) {
     try {
-      await HTTPClient.put(`/leads/${leadId}`, leadData);
+      await HTTPClient.put("/leads", leadData);
       return;
     } catch (error) {
       return mapApiError(error);

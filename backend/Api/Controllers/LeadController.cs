@@ -134,7 +134,7 @@ public class LeadController : ControllerBase
     /// Retorna status 404 quando o lead não é localizado.
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
-    [HttpPut("{id:int}")]
+    [HttpPut]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

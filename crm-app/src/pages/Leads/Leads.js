@@ -1,54 +1,107 @@
 import { useState, useEffect, useCallback } from "react";
-import { leadAPI } from "../../services/leadApi";
-import { Sidebar } from "../../components/Sidebar/Sidebar";
-import { Topbar } from "../../components/Topbar/Topbar";
-// import { Toast } from "../../components/Toast/Toast";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import style from "./_leads.module.css";
-
+import Modal from "react-bootstrap/Modal";
+import Form from "react-bootstrap/Form";
 import {
-  MdAdd,
   MdEdit,
   MdDelete,
   MdChevronLeft,
   MdChevronRight,
 } from "react-icons/md";
 
+import { Button } from "../../components/Button/Button";
+import { Sidebar } from "../../components/Sidebar/Sidebar";
+import { Topbar } from "../../components/Topbar/Topbar";
+import { ListingHeader } from "../../components/ListingHeader/ListingHeader";
+import { leadAPI } from "../../services/leadApi";
+import style from "./_leads.module.css";
+
 const ITEMS_PER_PAGE = 10;
+
+const INITIAL_LEAD_STATE = {
+  id: null,
+  name: "",
+  email: "",
+  phoneNumber: "",
+};
+
+const formatPhoneNumber = (value) => {
+  const digits = value.replace(/\D/g, "").slice(0, 11);
+
+  if (!digits) {
+    return "";
+  }
+
+  if (digits.length <= 2) {
+    return `(${digits}`;
+  }
+
+  if (digits.length <= 7) {
+    return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+  }
+
+  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+};
+
+const normalizeLeadForApi = (lead) => ({
+  ...lead,
+  phoneNumber: (lead.phoneNumber || "").replace(/\D/g, ""),
+});
 
 export function Leads() {
   const [allLeads, setAllLeads] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
 
+  const [lead, setLead] = useState(INITIAL_LEAD_STATE);
+  const [selectedLead, setSelectedLead] = useState(null);
+
+  const [showModalDelete, setShowModalDelete] = useState(false);
+  const [leadFormMode, setLeadFormMode] = useState(null);
+
   const totalPages = Math.max(1, Math.ceil(allLeads.length / ITEMS_PER_PAGE));
+
   const paginatedLeads = allLeads.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE,
   );
 
+  const isLeadFormOpen = leadFormMode !== null;
+  const isEditing = leadFormMode === "edit";
+  const leadFormTitle = isEditing ? "Edição de Leads" : "Novo Lead";
+
+  const isFormValid = () => {
+    return lead.name;
+  };
+
   const getPageNumbers = () => {
     const maxVisible = 5;
     let start = Math.max(1, currentPage - Math.floor(maxVisible / 2));
     let end = Math.min(totalPages, start + maxVisible - 1);
+
     if (end - start + 1 < maxVisible) {
       start = Math.max(1, end - maxVisible + 1);
     }
+
     const pages = [];
-    for (let i = start; i <= end; i++) pages.push(i);
+
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+
     return pages;
   };
 
   const fetchLeads = useCallback(async () => {
     setIsLoading(true);
+
     try {
       const data = await leadAPI.GetAll();
       setAllLeads(Array.isArray(data) ? data : []);
       setCurrentPage(1);
-      toast.success("Leads carregados com sucesso!");
-    } catch (err) {
-      toast.error("Erro ao carregar os leads. Tente novamente.");
+    } catch (error) {
+      toast.error("Erro ao carregar os leads.");
       setAllLeads([]);
     } finally {
       setIsLoading(false);
@@ -59,21 +112,117 @@ export function Leads() {
     fetchLeads();
   }, [fetchLeads]);
 
+  const closeLeadFormModal = () => {
+    setLeadFormMode(null);
+    setSelectedLead(null);
+    setLead(INITIAL_LEAD_STATE);
+  };
+
+  const closeDeleteModal = () => {
+    setShowModalDelete(false);
+    setSelectedLead(null);
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+
+    const formattedValue =
+      name === "phoneNumber" ? formatPhoneNumber(value) : value;
+
+    setLead((prev) => ({
+      ...prev,
+      [name]: formattedValue,
+    }));
+  };
+
+  const handleClickAddLead = () => {
+    setSelectedLead(null);
+    setLead(INITIAL_LEAD_STATE);
+    setLeadFormMode("create");
+  };
+
+  const handleClickEdit = (lead) => {
+    setSelectedLead(lead);
+    setLead({
+      ...lead,
+      phoneNumber: formatPhoneNumber(lead.phoneNumber || ""),
+    });
+    setLeadFormMode("edit");
+  };
+
+  const handleClickDelete = (lead) => {
+    setSelectedLead(lead);
+    setShowModalDelete(true);
+  };
+
+  const handleSubmitAdd = async (e) => {
+    e.preventDefault();
+
+    if (!isFormValid()) {
+      return;
+    }
+
+    try {
+      await leadAPI.Create(normalizeLeadForApi(lead));
+      toast.success("Lead criado com sucesso.");
+      closeLeadFormModal();
+      fetchLeads();
+    } catch (error) {
+      toast.error("Erro ao criar lead.");
+    }
+  };
+
+  const handleSubmitEdit = async (e) => {
+    e.preventDefault();
+
+    if (!isFormValid()) {
+      return;
+    }
+
+    try {
+      await leadAPI.Update(normalizeLeadForApi(lead));
+      toast.success("Lead atualizado com sucesso.");
+      closeLeadFormModal();
+      fetchLeads();
+    } catch (error) {
+      toast.error("Erro ao editar lead.");
+    }
+  };
+
+  const handleLeadFormSubmit = (e) => {
+    if (isEditing) {
+      handleSubmitEdit(e);
+      return;
+    }
+
+    handleSubmitAdd(e);
+  };
+
+  const handleDeleteLead = async () => {
+    if (!selectedLead?.id) {
+      return;
+    }
+
+    try {
+      await leadAPI.Delete(selectedLead.id);
+      toast.success("Lead deletado com sucesso.");
+      closeDeleteModal();
+      fetchLeads();
+    } catch (error) {
+      toast.error("Erro ao deletar o lead.");
+    }
+  };
+
   return (
     <Sidebar>
       <Topbar>
         <div className={style["pagina-listagem"]}>
-          <header className={style["listagem-header"]}>
-            <div>
-              <h1>Leads</h1>
-              <p>Gerencie os leads cadastrados no CRM.</p>
-            </div>
-
-            <button className={style["botao-novo"]}>
-              <MdAdd />
-              Novo cliente
-            </button>
-          </header>
+          <ListingHeader
+            title="Leads"
+            description="Gerencie os leads cadastrados no CRM."
+            buttonLabel="Novo Lead"
+            onButtonClick={handleClickAddLead}
+          />
 
           <section className={style["tabela-card"]}>
             <table className={style["tabela"]}>
@@ -85,17 +234,11 @@ export function Leads() {
                   <th className={style["coluna-acoes"]}>Ações</th>
                 </tr>
               </thead>
+
               <tbody>
                 {isLoading ? (
                   <tr>
-                    <td
-                      colSpan={4}
-                      style={{
-                        textAlign: "center",
-                        padding: "32px",
-                        color: "#64748b",
-                      }}
-                    >
+                    <td colSpan={4} className={style["celula-carregando"]}>
                       Carregando...
                     </td>
                   </tr>
@@ -104,19 +247,26 @@ export function Leads() {
                     <tr key={lead.id}>
                       <td>{lead.name}</td>
                       <td>{lead.email}</td>
-                      <td>{lead.phoneNumber}</td>
+                      <td>{formatPhoneNumber(lead.phoneNumber || "")}</td>
                       <td className={style["acoes"]}>
-                        <button className={style["botao-editar"]}>
+                        <button
+                          className={style["botao-editar"]}
+                          onClick={() => handleClickEdit(lead)}
+                        >
                           <MdEdit />
                         </button>
-                        <button className={style["botao-excluir"]}>
+
+                        <button
+                          className={style["botao-excluir"]}
+                          onClick={() => handleClickDelete(lead)}
+                        >
                           <MdDelete />
                         </button>
                       </td>
                     </tr>
                   ))
                 )}
-              </tbody>{" "}
+              </tbody>
             </table>
 
             <footer className={style["paginacao"]}>
@@ -126,11 +276,12 @@ export function Leads() {
 
               <div className={style["paginacao-acoes"]}>
                 <button
-                  onClick={() => setCurrentPage((p) => p - 1)}
+                  onClick={() => setCurrentPage((page) => page - 1)}
                   disabled={currentPage === 1}
                 >
                   <MdChevronLeft />
                 </button>
+
                 {getPageNumbers().map((page) => (
                   <button
                     key={page}
@@ -142,8 +293,9 @@ export function Leads() {
                     {page}
                   </button>
                 ))}
+
                 <button
-                  onClick={() => setCurrentPage((p) => p + 1)}
+                  onClick={() => setCurrentPage((page) => page + 1)}
                   disabled={currentPage === totalPages}
                 >
                   <MdChevronRight />
@@ -151,8 +303,93 @@ export function Leads() {
               </div>
             </footer>
           </section>
+
           <ToastContainer position="top-right" autoClose={3000} />
         </div>
+
+        <Modal show={showModalDelete} onHide={closeDeleteModal}>
+          <Modal.Header closeButton>
+            <Modal.Title>Confirmar exclusão</Modal.Title>
+          </Modal.Header>
+
+          <Modal.Body>
+            Tem certeza que deseja deletar o lead "{selectedLead?.name}"?
+          </Modal.Body>
+
+          <Modal.Footer>
+            <Button
+              variant="secondary"
+              buttonLabel="Cancelar"
+              onButtonClick={closeDeleteModal}
+            />
+
+            <Button
+              variant="danger"
+              buttonLabel="Deletar"
+              onButtonClick={handleDeleteLead}
+            />
+          </Modal.Footer>
+        </Modal>
+
+        <Modal show={isLeadFormOpen} onHide={closeLeadFormModal}>
+          <Modal.Header closeButton>
+            <Modal.Title>{leadFormTitle}</Modal.Title>
+          </Modal.Header>
+
+          <Modal.Body>
+            <Form onSubmit={handleLeadFormSubmit}>
+              <Form.Group className="mb-3">
+                <Form.Label>Nome</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="name"
+                  placeholder="Digite o nome"
+                  value={lead.name}
+                  onChange={handleInputChange}
+                  required
+                />
+              </Form.Group>
+
+              <Form.Group className="mb-3">
+                <Form.Label>Email</Form.Label>
+                <Form.Control
+                  type="email"
+                  name="email"
+                  placeholder="Digite o email"
+                  value={lead.email}
+                  onChange={handleInputChange}
+                />
+              </Form.Group>
+
+              <Form.Group className="mb-3">
+                <Form.Label>Telefone</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="phoneNumber"
+                  placeholder="Digite o telefone"
+                  value={lead.phoneNumber}
+                  onChange={handleInputChange}
+                  inputMode="numeric"
+                  maxLength={15}
+                />
+              </Form.Group>
+
+              <Modal.Footer>
+                <Button
+                  variant="secondary"
+                  buttonLabel="Cancelar"
+                  onButtonClick={closeLeadFormModal}
+                />
+
+                <Button
+                  type="submit"
+                  buttonLabel={isEditing ? "Salvar" : "Adicionar"}
+                  disabled={!isFormValid()}
+                />
+              </Modal.Footer>
+            </Form>
+          </Modal.Body>
+        </Modal>
       </Topbar>
     </Sidebar>
   );

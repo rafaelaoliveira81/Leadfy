@@ -17,6 +17,7 @@
 .pagina-conteudo {
   /* conteúdo da pagina começa depois da sidebar que está com width 20% */
   margin-left: 20%;
+  background-color: #f8fafc;
 }
 
 .header {
