@@ -20,6 +20,8 @@ public class Opportunity
     public Product Product { get; set; }
     public Lead Lead { get; set; }
     public ICollection<OpportunityActionPlan> ActionPlans { get; set; }
+    public ICollection<Interaction> Interactions { get; set; }
+
     public Opportunity()
     {
         IsActive = true;
