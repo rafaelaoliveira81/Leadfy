@@ -10,4 +10,6 @@ public interface IUserRepo
     Task<IEnumerable<User>> GetAllByStatusAsync(bool statusUser);
     Task UpdateAsync(User user);
     Task DeleteAsync(User user);
+    Task<User> GetByEmailWithGroupAsync(string emailUser);
+    Task<User> GetActiveByIdAsync(int idUser);
 }

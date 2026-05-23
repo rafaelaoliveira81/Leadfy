@@ -1,118 +1,107 @@
 using Microsoft.EntityFrameworkCore;
+using Dapper;
 using Domain.Entities;
 using Repository.Context;
 
 namespace Repository.Repositories;
 
-/// <summary>
-/// Repositório responsável pela persistência e consulta de usuários.
-/// Implementa operações CRUD utilizando Entity Framework Core.
-/// </summary>
-/// <remarks>
-/// Esta classe pertence à camada de Repository e deve conter apenas
-/// lógica de acesso a dados, sem regras de negócio.
-/// </remarks>
 public class UserRepository : BaseRepo, IUserRepo
 {
     public UserRepository(CRMContext context) : base(context)
     {
     }
 
-    /// <summary>
-    /// Adiciona um novo usuário no banco de dados.
-    /// </summary>
-    /// <param name="user">Entidade do usuário a ser persistida.</param>
-    /// <returns>Retorna o ID do usuário gerado após a inserção.</returns>
     public async Task<int> AddAsync(User user)
     {
-        _context.Users.Add(user);
-        await _context.SaveChangesAsync();
+        var query = "sp_CreateUser";
+        var parameters = new
+        {
+            Name = user.Name,
+            Email = user.Email,
+            PasswordHash = user.PasswordHash
+        };
 
-        return user.ID;
+        using (var connection = GetConnection())
+        {
+            return await connection.ExecuteScalarAsync<int>(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
+        }
     }
-
-    /// <summary>
-    /// Busca um usuário pelo seu identificador único.
-    /// </summary>
-    /// <param name="idUser">ID do usuário.</param>
-    /// <returns>Usuário encontrado ou null caso não exista.</returns>
     public async Task<User> GetByIdAsync(int idUser)
     {
-        return await _context.Users.FindAsync(idUser);
-    }
+        var query = "sp_GetUserById";
+        var parameters = new { ID = idUser };
 
-    /// <summary>
-    /// Busca um usuário pelo email.
-    /// </summary>
-    /// <param name="emailUser">Email do usuário.</param>
-    /// <returns>Usuário correspondente ou null.</returns>
-    /// <remarks>
-    /// Ideal para autenticação e validação de unicidade.
-    /// </remarks>
+        using (var connection = GetConnection())
+        {
+            return await connection.QueryFirstOrDefaultAsync<User>(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
+        }
+    }
     public async Task<User> GetByEmailAsync(string emailUser)
     {
-        return await _context.Users.FirstOrDefaultAsync(u => u.Email == emailUser);
-    }
+        var query = "sp_GetUserByEmail";
+        var parameters = new { Email = emailUser };
 
-    /// <summary>
-    /// Busca usuários cujo nome contenha o valor informado.
-    /// </summary>
-    /// <param name="nameUser">
-    /// Texto utilizado para filtrar os usuários pelo nome.
-    /// A busca é case-insensitive.
-    /// </param>
-    /// <returns>
-    /// Uma coleção de usuários que possuem o nome contendo o valor informado.
-    /// Retorna uma lista vazia caso nenhum usuário seja encontrado.
-    /// </returns>
+        using (var connection = GetConnection())
+        {
+            return await connection.QueryFirstOrDefaultAsync<User>(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
+        }
+    }
     public async Task<IEnumerable<User>> GetByNameContainingAsync(string nameUser)
     {
         return await _context.Users
             .Where(u => EF.Functions.Like(u.Name, $"%{nameUser}%"))
             .ToListAsync();
     }
-
-    /// <summary>
-    /// Retorna todos os usuários cadastrados.
-    /// </summary>
-    /// <returns>Lista de usuários.</returns>
     public async Task<IEnumerable<User>> GetAllAsync()
     {
         return await _context.Users.ToListAsync();
     }
-
-    /// <summary>
-    /// Retorna todos os usuários filtrando pelo status (ativo/inativo).
-    /// </summary>
-    /// <param name="statusUser">Status do usuário (true = ativo, false = inativo).</param>
-    /// <returns>Lista de usuários filtrados.</returns>
     public async Task<IEnumerable<User>> GetAllByStatusAsync(bool statusUser)
     {
-        return await _context.Users
-            .Where(u => u.IsActive == statusUser)
-            .ToListAsync();
-    }
+        var query = "sp_GetAllUsers";
+        var parameters = new { IsActive = statusUser };
 
-    /// <summary>
-    /// Atualiza os dados de um usuário existente.
-    /// </summary>
-    /// <param name="user">Usuário com dados atualizados.</param>
-    /// <remarks>
-    /// O Entity Framework irá rastrear as alterações e persistir no banco.
-    /// </remarks>
+        using (var connection = GetConnection())
+        {
+            return await connection.QueryAsync<User>(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
+        }
+    }
     public async Task UpdateAsync(User user)
     {
-        _context.Users.Update(user);
-        await _context.SaveChangesAsync();
-    }
+        var query = "sp_UpdateUser";
+        var parameters = new
+        {
+            ID = user.ID,
+            Name = user.Name,
+            Email = user.Email,
+            PasswordHash = user.PasswordHash,
+            IsActive = user.IsActive
+        };
 
-    /// <summary>
-    /// Remove um usuário do banco de dados.
-    /// </summary>
-    /// <param name="user">Usuário a ser removido.</param>
+        using (var connection = GetConnection())
+        {
+            await connection.ExecuteAsync(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
+        }
+    }
     public async Task DeleteAsync(User user)
     {
-        _context.Users.Remove(user);
-        await _context.SaveChangesAsync();
+        var query = "sp_DeleteUser";
+        var parameters = new { ID = user.ID };
+
+        using (var connection = GetConnection())
+        {
+            await connection.ExecuteAsync(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
+        }
+    }
+    public async Task<User> GetByEmailWithGroupAsync(string emailUser)
+    {
+        return await _context.Users
+            .FirstOrDefaultAsync(u => u.Email == emailUser && u.IsActive);
+    }
+
+    public async Task<User> GetActiveByIdAsync(int idUser)
+    {
+        return await _context.Users
+            .FirstOrDefaultAsync(u => u.ID == idUser && u.IsActive);
     }
 }

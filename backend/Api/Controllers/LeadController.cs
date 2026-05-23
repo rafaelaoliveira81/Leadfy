@@ -1,7 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using Models.Request;
-using Models.Response;
-using Domain.Entities;
+using Application.DTO;
 
 namespace Api.Controllers;
 
@@ -9,7 +7,7 @@ namespace Api.Controllers;
 /// Controller responsável pelos endpoints de gerenciamento de leads.
 /// </summary>
 [ApiController]
-[Route("leads")]
+[Route("api/leads")]
 public class LeadController : ControllerBase
 {
     private readonly ILeadApp _leadApp;
@@ -36,18 +34,11 @@ public class LeadController : ControllerBase
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> Add([FromBody] LeadAdd leadRequest)
+    public async Task<ActionResult> Add([FromBody] LeadRequest leadRequest)
     {
         try
         {
-            var lead = new Lead
-            {
-                Name = leadRequest.Name,
-                Email = leadRequest.Email,
-                PhoneNumber = leadRequest.PhoneNumber
-            };
-
-            var idLead = await _leadApp.AddAsync(lead);
+            var idLead = await _leadApp.AddAsync(leadRequest);
 
             return CreatedAtAction(nameof(GetById), new { id = idLead }, new { id = idLead });
         }
@@ -84,17 +75,7 @@ public class LeadController : ControllerBase
         {
             var lead = await _leadApp.GetByIdAsync(id);
 
-            var leadResponse = new LeadResponse
-            {
-                ID = lead.Id,
-                Name = lead.Name,
-                Email = lead.Email,
-                PhoneNumber = lead.PhoneNumber,
-                IsActive = lead.IsActive,
-                CreatedAt = lead.CreatedAt
-            };
-
-            return Ok(leadResponse);
+            return Ok(lead);
         }
         catch (KeyNotFoundException ex)
         {
@@ -107,14 +88,13 @@ public class LeadController : ControllerBase
     }
 
     /// <summary>
-    /// Obtém leads cadastrados. Permite filtrar por status de ativação ou nome.
+    /// Obtém leads cadastrados filtrando por status de ativação.
     /// </summary>
     /// <param name="isActive">Filtra por status de ativação (opcional).</param>
-    /// <param name="name">Filtra por nome contendo o valor (opcional).</param>
     /// <returns>
     /// Retorna status 200 com a coleção de leads.
     /// Retorna status 400 quando os parâmetros informados são inválidos.
-    /// Retorna status 404 quando nenhum lead é localizado na busca por nome.
+    /// Retorna status 404 quando nenhum lead é localizado.
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
     [HttpGet]
@@ -122,36 +102,13 @@ public class LeadController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> Get([FromQuery] bool? isActive, [FromQuery] string name)
+    public async Task<ActionResult> Get([FromQuery] bool? isActive)
     {
         try
         {
-            IEnumerable<Lead> leads;
+            var leads = await _leadApp.GetAllAsync(isActive);
 
-            if (isActive.HasValue)
-            {
-                leads = await _leadApp.GetAllByStatusAsync(isActive.Value);
-            }
-            else if (!string.IsNullOrWhiteSpace(name))
-            {
-                leads = await _leadApp.GetByNameContainingAsync(name);
-            }
-            else
-            {
-                leads = await _leadApp.GetAllAsync();
-            }
-
-            var leadsResponse = leads.Select(l => new LeadResponse
-            {
-                ID = l.Id,
-                Name = l.Name,
-                Email = l.Email,
-                PhoneNumber = l.PhoneNumber,
-                IsActive = l.IsActive,
-                CreatedAt = l.CreatedAt
-            });
-
-            return Ok(leadsResponse);
+            return Ok(leads);
         }
         catch (ArgumentException ex)
         {
@@ -170,7 +127,6 @@ public class LeadController : ControllerBase
     /// <summary>
     /// Atualiza os dados cadastrais de um lead.
     /// </summary>
-    /// <param name="id">Identificador do lead a ser atualizado.</param>
     /// <param name="leadRequest">Dados atualizados do lead.</param>
     /// <returns>
     /// Retorna status 204 quando a atualização é realizada com sucesso.
@@ -183,19 +139,11 @@ public class LeadController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> Update([FromRoute] int id, [FromBody] LeadUpdate leadRequest)
+    public async Task<ActionResult> Update([FromBody] LeadRequest leadRequest)
     {
         try
         {
-            var lead = new Lead
-            {
-                Id = id,
-                Name = leadRequest.Name,
-                Email = leadRequest.Email,
-                PhoneNumber = leadRequest.PhoneNumber
-            };
-
-            await _leadApp.UpdateAsync(lead);
+            await _leadApp.UpdateAsync(leadRequest);
 
             return NoContent();
         }
@@ -250,6 +198,7 @@ public class LeadController : ControllerBase
     /// <param name="id">Identificador do lead a ser desativado.</param>
     /// <returns>
     /// Retorna status 204 quando a desativação é realizada com sucesso.
+    /// Retorna status 400 quando os dados informados são inválidos.
     /// Retorna status 404 quando o lead não é localizado.
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
@@ -285,6 +234,7 @@ public class LeadController : ControllerBase
     /// <param name="id">Identificador do lead a ser ativado.</param>
     /// <returns>
     /// Retorna status 204 quando a ativação é realizada com sucesso.
+    /// Retorna status 400 quando os dados informados são inválidos.
     /// Retorna status 404 quando o lead não é localizado.
     /// Retorna status 500 em caso de erro interno.
     /// </returns>

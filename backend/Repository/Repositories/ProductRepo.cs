@@ -1,106 +1,76 @@
 using Microsoft.EntityFrameworkCore;
+using Dapper;
 using Domain.Entities;
 using Repository.Context;
 
 namespace Repository.Repositories;
 
-/// <summary>
-/// Repositório responsável pela persistência e consulta de products.
-/// Implementa operações CRUD utilizando Entity Framework Core.
-/// </summary>
-/// <remarks>
-/// Esta classe pertence à camada de Repository e deve conter apenas
-/// lógica de acesso a dados, sem regras de negócio.
-/// </remarks>
 public class ProductRepo : BaseRepo, IProductRepo
 {
     public ProductRepo(CRMContext context) : base(context)
     {
     }
-
-    /// <summary>
-    /// Adiciona um novo product no banco de dados.
-    /// </summary>
-    /// <param name="product">Entidade do product a ser persistida.</param>
-    /// <returns>Retorna o ID do product gerado após a inserção.</returns>
     public async Task<int> AddAsync(Product product)
     {
-        _context.Products.Add(product);
-        await _context.SaveChangesAsync();
+        var query = "sp_CreateProduct";
+        var parameters = new
+        {
+            Name = product.Name,
+            Description = product.Description,
+            Price = product.Price
+        };
 
-        return product.Id;
+        using (var connection = GetConnection())
+        {
+            return await connection.ExecuteScalarAsync<int>(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
+        }
     }
-
-    /// <summary>
-    /// Busca um product pelo seu identificador único.
-    /// </summary>
-    /// <param name="idProduct">ID do product.</param>
-    /// <returns>Product encontrado ou null caso não exista.</returns>
     public async Task<Product> GetByIdAsync(int idProduct)
     {
-        return await _context.Products
-            .FirstOrDefaultAsync(p => p.Id == idProduct);
+        var query = "sp_GetProductById";
+        var parameters = new { ID = idProduct };
+
+        using (var connection = GetConnection())
+        {
+            return await connection.QueryFirstOrDefaultAsync<Product>(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
+        }
     }
 
-    /// <summary>
-    /// Busca products cujo nome contenha o valor informado.
-    /// </summary>
-    /// <param name="nameProduct">
-    /// Texto utilizado para filtrar os products pelo nome.
-    /// A busca é case-insensitive.
-    /// </param>
-    /// <returns>
-    /// Uma coleção de products que possuem o nome contendo o valor informado.
-    /// Retorna uma lista vazia caso nenhum product seja encontrado.
-    /// </returns>
-    public async Task<IEnumerable<Product>> GetByNameContainingAsync(string nameProduct)
+    public async Task<IEnumerable<Product>> GetAllAsync(bool? statusProduct)
     {
-        return await _context.Products
-            .Where(p => EF.Functions.Like(p.Name, $"%{nameProduct}%"))
-            .ToListAsync();
-    }
+        var query = "sp_GetAllProducts";
+        var parameters = new { IsActive = statusProduct };
 
-    /// <summary>
-    /// Retorna todos os products cadastrados.
-    /// </summary>
-    /// <returns>Lista de products.</returns>
-    public async Task<IEnumerable<Product>> GetAllAsync()
-    {
-        return await _context.Products.ToListAsync();
+        using (var connection = GetConnection())
+        {
+            return await connection.QueryAsync<Product>(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
+        }
     }
-
-    /// <summary>
-    /// Retorna todos os products filtrando pelo status (ativo/inativo).
-    /// </summary>
-    /// <param name="statusProduct">Status do product (true = ativo, false = inativo).</param>
-    /// <returns>Lista de products filtrados.</returns>
-    public async Task<IEnumerable<Product>> GetAllByStatusAsync(bool statusProduct)
-    {
-        return await _context.Products
-            .Where(p => p.IsActive == statusProduct)
-            .ToListAsync();
-    }
-
-    /// <summary>
-    /// Atualiza os dados de um product existente.
-    /// </summary>
-    /// <param name="product">Product com dados atualizados.</param>
-    /// <remarks>
-    /// O Entity Framework irá rastrear as alterações e persistir no banco.
-    /// </remarks>
     public async Task UpdateAsync(Product product)
     {
-        _context.Products.Update(product);
-        await _context.SaveChangesAsync();
-    }
+        var query = "sp_UpdateProduct";
+        var parameters = new
+        {
+            ID = product.Id,
+            Name = product.Name,
+            Description = product.Description,
+            Price = product.Price,
+            IsActive = product.IsActive
+        };
 
-    /// <summary>
-    /// Remove um product do banco de dados.
-    /// </summary>
-    /// <param name="product">Product a ser removido.</param>
+        using (var connection = GetConnection())
+        {
+            await connection.ExecuteAsync(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
+        }
+    }
     public async Task DeleteAsync(Product product)
     {
-        _context.Products.Remove(product);
-        await _context.SaveChangesAsync();
+        var query = "sp_DeleteProduct";
+        var parameters = new { ID = product.Id };
+
+        using (var connection = GetConnection())
+        {
+            await connection.ExecuteAsync(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
+        }
     }
 }

@@ -1,13 +1,13 @@
+using Application.DTO;
 using Domain.Entities;
+using Repository.Repositories;
 
 public interface ILeadApp
 {
-    Task<int> AddAsync(Lead lead);
-    Task<Lead> GetByIdAsync(int idLead);
-    Task<IEnumerable<Lead>> GetByNameContainingAsync(string nameLead);
-    Task<IEnumerable<Lead>> GetAllAsync();
-    Task<IEnumerable<Lead>> GetAllByStatusAsync(bool statusLead);
-    Task UpdateAsync(Lead lead);
+    Task<int> AddAsync(LeadRequest lead);
+    Task<LeadResponse> GetByIdAsync(int idLead);
+    Task<IEnumerable<LeadResponse>> GetAllAsync(bool? statusLead);
+    Task UpdateAsync(LeadRequest lead);
     Task DeleteAsync(int idLead);
     Task DeactivateAsync(int idLead);
     Task ActivateAsync(int idLead);

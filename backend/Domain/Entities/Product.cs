@@ -15,13 +15,6 @@ public class Product
         CreatedAt = DateTime.UtcNow;
     }
 
-    public void Deactivate()
-    {
-        IsActive = false;
-    }
-
-    public void Activate()
-    {
-        IsActive = true;
-    }
+    public void Deactivate() => IsActive = false;
+    public void Activate() => IsActive = true;
 }

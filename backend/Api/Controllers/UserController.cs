@@ -1,14 +1,12 @@
+
+using Application.DTO;
 using Microsoft.AspNetCore.Mvc;
-using Models.Response;
-using Models.Request;
-using Domain.Entities;
-using Domain.Enuns;
 
 /// <summary>
 /// Controller responsável pelos endpoints de gerenciamento de usuários.
 /// </summary>
 [ApiController]
-[Route("users")]
+[Route("api/users")]
 public class UserController : ControllerBase
 {
     private readonly IUserApp _userApp;
@@ -43,11 +41,10 @@ public class UserController : ControllerBase
     {
         try
         {
-            var userRepository = new User()
+            var userRepository = new Domain.Entities.User()
             {
                 Name = user.Name,
-                Email = user.Email,
-                Role = (UserRole)user.IdRole
+                Email = user.Email
             };
 
             var idUser = await _userApp.AddAsync(userRepository, user.Password);
@@ -74,6 +71,7 @@ public class UserController : ControllerBase
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
     [HttpGet("{id:int}")]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -83,16 +81,11 @@ public class UserController : ControllerBase
         {
             var userRepository = await _userApp.GetByIdAsync(id);
 
-            var userResponse = new UserResponse()
+            var userResponse = new UserResponse
             {
                 ID = userRepository.ID,
                 Name = userRepository.Name,
                 Email = userRepository.Email,
-                Role = new UserRoleResponse()
-                {
-                    ID = (int)userRepository.Role,
-                    Name = userRepository.Role.ToString()
-                },
                 IsActive = userRepository.IsActive,
                 CreatedAt = userRepository.CreatedAt
             };
@@ -130,16 +123,11 @@ public class UserController : ControllerBase
         {
             var userRepository = await _userApp.GetByEmailAsync(email);
 
-            var userResponse = new UserResponse()
+            var userResponse = new UserResponse
             {
                 ID = userRepository.ID,
                 Name = userRepository.Name,
                 Email = userRepository.Email,
-                Role = new UserRoleResponse()
-                {
-                    ID = (int)userRepository.Role,
-                    Name = userRepository.Role.ToString()
-                },
                 IsActive = userRepository.IsActive,
                 CreatedAt = userRepository.CreatedAt
             };
@@ -180,7 +168,7 @@ public class UserController : ControllerBase
     {
         try
         {
-            IEnumerable<User> users;
+            IEnumerable<Domain.Entities.User> users;
 
             if (isActive.HasValue)
             {
@@ -195,16 +183,11 @@ public class UserController : ControllerBase
                 users = await _userApp.GetAllAsync();
             }
 
-            var usersResponse = users.Select(u => new UserResponse()
+            var usersResponse = users.Select(u => new UserResponse
             {
                 ID = u.ID,
                 Name = u.Name,
                 Email = u.Email,
-                Role = new UserRoleResponse()
-                {
-                    ID = (int)u.Role,
-                    Name = u.Role.ToString()
-                },
                 IsActive = u.IsActive,
                 CreatedAt = u.CreatedAt
             });
@@ -245,12 +228,11 @@ public class UserController : ControllerBase
     {
         try
         {
-            var user = new User()
+            var user = new Domain.Entities.User
             {
                 ID = id,
                 Name = userRequest.Name,
-                Email = userRequest.Email,
-                Role = (UserRole)userRequest.IdRole
+                Email = userRequest.Email
             };
 
             await _userApp.UpdateAsync(user);
@@ -408,45 +390,4 @@ public class UserController : ControllerBase
         }
     }
 
-    /// <summary>
-    /// Lista todos os perfis de usuário disponíveis.
-    /// </summary>
-    /// <remarks>
-    /// Endpoint utilizado para obter os tipos de papéis (roles) que podem ser atribuídos a um usuário.
-    /// </remarks>
-    /// // <returns>
-    /// Retorna status 200 com a lista de roles disponíveis.
-    /// Retorna status 500 em caso de erro interno.
-    /// </returns>
-    [HttpGet("roles")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public IActionResult GetAvailableRoles()
-    {
-        try
-        {
-            var roles = Enum.GetValues<UserRole>()
-                .Select(role => new UserRoleResponse
-                {
-                    ID = (int)role,
-                    Name = role.ToString(),
-                    DisplayName = role switch
-                    {
-                        UserRole.Admin => "Administrador",
-                        UserRole.Manager => "Gerente",
-                        UserRole.SalesRepresentative => "Representante Comercial",
-                        UserRole.CustomerSupport => "Atendimento ao Cliente",
-                        UserRole.RegularUser => "Usuário Comum",
-                        _ => role.ToString()
-                    }
-                })
-                .ToList();
-
-            return Ok(roles);
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new { message = ex.Message });
-        }
-    }
 }

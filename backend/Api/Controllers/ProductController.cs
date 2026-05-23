@@ -1,10 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using Models.Request;
-using Models.Response;
-using Domain.Entities;
-
+using Application.DTO;
 [ApiController]
-[Route("products")]
+[Route("api/products")]
 public class ProductController : ControllerBase
 {
     private readonly IProductApp _productApp;
@@ -21,7 +18,7 @@ public class ProductController : ControllerBase
     /// <summary>
     /// Adiciona um novo product ao sistema.
     /// </summary>
-    /// <param name="productRequest">Dados necessários para criação do product.</param>
+    /// <param name="request">Dados necessários para criação do product.</param>
     /// <returns>
     /// Retorna status 201 com o identificador do product criado.
     /// Retorna status 400 quando os dados informados são inválidos.
@@ -31,19 +28,11 @@ public class ProductController : ControllerBase
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> Add([FromBody] ProductAdd productRequest)
+    public async Task<ActionResult> Add([FromBody] ProductRequest request)
     {
         try
         {
-            var product = new Product
-            {
-                Name = productRequest.Name,
-                Description = productRequest.Description,
-                Price = productRequest.Price
-            };
-
-            var idProduct = await _productApp.AddAsync(product);
-
+            var idProduct = await _productApp.AddAsync(request);
             return CreatedAtAction(nameof(GetById), new { id = idProduct }, new { id = idProduct });
         }
         catch (ArgumentException ex)
@@ -75,17 +64,7 @@ public class ProductController : ControllerBase
         {
             var product = await _productApp.GetByIdAsync(id);
 
-            var productResponse = new ProductResponse
-            {
-                Id = product.Id,
-                Name = product.Name,
-                Description = product.Description,
-                Price = product.Price,
-                IsActive = product.IsActive,
-                CreatedAt = product.CreatedAt
-            };
-
-            return Ok(productResponse);
+            return Ok(product);
         }
         catch (KeyNotFoundException ex)
         {
@@ -98,14 +77,13 @@ public class ProductController : ControllerBase
     }
 
     /// <summary>
-    /// Obtém products cadastrados. Permite filtrar por status de ativação ou nome.
+    /// Obtém products cadastrados filtrando por status de ativação.
     /// </summary>
-    /// <param name="isActive">Filtra por status de ativação (opcional).</param>
-    /// <param name="name">Filtra por nome contendo o valor (opcional).</param>
+    /// <param name="isActive">Status de ativação utilizado no filtro.</param>
     /// <returns>
     /// Retorna status 200 com a coleção de products.
     /// Retorna status 400 quando os parâmetros informados são inválidos.
-    /// Retorna status 404 quando nenhum product é localizado na busca por nome.
+    /// Retorna status 404 quando nenhum product é localizado.
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
     [HttpGet]
@@ -113,36 +91,13 @@ public class ProductController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> Get([FromQuery] bool? isActive, [FromQuery] string name)
+    public async Task<ActionResult> Get([FromQuery] bool? isActive)
     {
         try
         {
-            IEnumerable<Product> products;
+            var products = await _productApp.GetAllAsync(isActive);
 
-            if (isActive.HasValue)
-            {
-                products = await _productApp.GetAllByStatusAsync(isActive.Value);
-            }
-            else if (!string.IsNullOrWhiteSpace(name))
-            {
-                products = await _productApp.GetByNameContainingAsync(name);
-            }
-            else
-            {
-                products = await _productApp.GetAllAsync();
-            }
-
-            var productsResponse = products.Select(p => new ProductResponse
-            {
-                Id = p.Id,
-                Name = p.Name,
-                Description = p.Description,
-                Price = p.Price,
-                IsActive = p.IsActive,
-                CreatedAt = p.CreatedAt
-            });
-
-            return Ok(productsResponse);
+            return Ok(products);
         }
         catch (ArgumentException ex)
         {
@@ -161,33 +116,23 @@ public class ProductController : ControllerBase
     /// <summary>
     /// Atualiza os dados cadastrais de um product.
     /// </summary>
-    /// <param name="id">Identificador do product a ser atualizado.</param>
-    /// <param name="productRequest">Dados atualizados do product.</param>
+    /// <param name="request">Dados atualizados do product.</param>
     /// <returns>
     /// Retorna status 204 quando a atualização é realizada com sucesso.
     /// Retorna status 400 quando os dados informados são inválidos.
     /// Retorna status 404 quando o product não é localizado.
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
-    [HttpPut("{id:int}")]
+    [HttpPut()]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> Update([FromRoute] int id, [FromBody] ProductUpdate productRequest)
+    public async Task<ActionResult> Update([FromBody] ProductRequest request)
     {
         try
         {
-            var product = new Product
-            {
-                Id = id,
-                Name = productRequest.Name,
-                Description = productRequest.Description,
-                Price = productRequest.Price,
-                IsActive = productRequest.IsActive
-            };
-
-            await _productApp.UpdateAsync(product);
+            await _productApp.UpdateAsync(request);
 
             return NoContent();
         }
@@ -242,6 +187,7 @@ public class ProductController : ControllerBase
     /// <param name="id">Identificador do product a ser desativado.</param>
     /// <returns>
     /// Retorna status 204 quando a desativação é realizada com sucesso.
+    /// Retorna status 400 quando os dados informados são inválidos.
     /// Retorna status 404 quando o product não é localizado.
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
@@ -277,6 +223,7 @@ public class ProductController : ControllerBase
     /// <param name="id">Identificador do product a ser ativado.</param>
     /// <returns>
     /// Retorna status 204 quando a ativação é realizada com sucesso.
+    /// Retorna status 400 quando os dados informados são inválidos.
     /// Retorna status 404 quando o product não é localizado.
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
