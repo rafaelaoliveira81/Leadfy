@@ -1,6 +1,5 @@
-using Application;
+
 using Application.DTO;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 /// <summary>
@@ -8,7 +7,6 @@ using Microsoft.AspNetCore.Mvc;
 /// </summary>
 [ApiController]
 [Route("api/users")]
-[Authorize]
 public class UserController : ControllerBase
 {
     private readonly IUserApp _userApp;

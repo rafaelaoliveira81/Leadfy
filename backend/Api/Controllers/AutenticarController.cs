@@ -1,6 +1,4 @@
-using Application;
 using Application.DTO;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;
@@ -16,7 +14,6 @@ public class AutenticarController : ControllerBase
         _authenticationApp = authenticationApp;
     }
 
-    [AllowAnonymous]
     [HttpPost("login")]
     [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

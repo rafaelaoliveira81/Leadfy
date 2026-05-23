@@ -1,6 +1,5 @@
-using Application;
+
 using Application.DTO;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;
@@ -16,7 +15,6 @@ public class RecuperacaoSenhaController : ControllerBase
         _passwordRecoveryApp = passwordRecoveryApp;
     }
 
-    [AllowAnonymous]
     [HttpPost("request")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -43,7 +41,6 @@ public class RecuperacaoSenhaController : ControllerBase
         }
     }
 
-    [AllowAnonymous]
     [HttpPost("validate-token")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -70,7 +67,6 @@ public class RecuperacaoSenhaController : ControllerBase
         }
     }
 
-    [AllowAnonymous]
     [HttpPost("reset")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
