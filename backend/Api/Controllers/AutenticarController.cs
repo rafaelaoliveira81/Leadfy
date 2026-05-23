@@ -24,18 +24,33 @@ public class AutenticarController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<ApiLoginResponse>> Login([FromBody] ApiLoginRequest request)
     {
-        var response = await _authenticationApp.LoginAsync(new Application.DTO.LoginRequest
+        try
         {
-            Email = request.Email,
-            Password = request.Password
-        });
+            var response = await _authenticationApp.LoginAsync(new Application.DTO.LoginRequest
+            {
+                Email = request.Email,
+                Password = request.Password
+            });
 
-        return Ok(new ApiLoginResponse
+            return Ok(new ApiLoginResponse
+            {
+                Success = response.Success,
+                Message = response.Message,
+                Token = response.Token,
+                Name = response.Name
+            });
+        }
+        catch (ArgumentException ex)
         {
-            Success = response.Success,
-            Message = response.Message,
-            Token = response.Token,
-            Name = response.Name
-        });
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = ex.Message });
+        }
     }
 }
