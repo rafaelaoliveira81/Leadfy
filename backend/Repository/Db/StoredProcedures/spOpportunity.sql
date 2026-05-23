@@ -1,6 +1,5 @@
 CREATE PROCEDURE sp_CreateOpportunity
     @LeadId INT,
-    @OwnerId INT = NULL,
     @ProductId INT,
     @Stage INT,
     @Amount DECIMAL(18, 2),
@@ -10,7 +9,6 @@ AS
 BEGIN
     INSERT INTO Opportunities (
         LeadId,
-        OwnerId,
         ProductId,
         Stage,
         Amount,
@@ -21,7 +19,6 @@ BEGIN
     )
     VALUES (
         @LeadId,
-        @OwnerId,
         @ProductId,
         @Stage,
         @Amount,
@@ -42,7 +39,6 @@ BEGIN
     SELECT 
         ID,
         LeadId,
-        OwnerId,
         ProductId,
         Stage,
         Amount,
@@ -62,7 +58,6 @@ BEGIN
     SELECT 
         ID,
         LeadId,
-        OwnerId,
         ProductId,
         Stage,
         Amount,
@@ -79,7 +74,6 @@ GO
 CREATE PROCEDURE sp_UpdateOpportunity
     @ID INT,
     @LeadId INT,
-    @OwnerId INT = NULL,
     @ProductId INT,
     @Stage INT,
     @Amount DECIMAL(18, 2),
@@ -91,7 +85,6 @@ BEGIN
     UPDATE Opportunities
     SET 
         LeadId = @LeadId,
-        OwnerId = @OwnerId,
         ProductId = @ProductId,
         Stage = @Stage,
         Amount = @Amount,

@@ -119,7 +119,7 @@ public class OpportunityController : ControllerBase
     }
 
     /// <summary>
-    /// Obtém opportunities cadastradas. Permite filtrar por status, lead ou owner.
+    /// Obtém opportunities cadastradas. Permite filtrar por status ou lead.
     /// </summary>
     /// <param name="isActive">Filtra por status de ativação (opcional).</param>
     /// <param name="leadId">Filtra por lead específico (opcional).</param>
