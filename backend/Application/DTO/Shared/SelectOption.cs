@@ -1,4 +1,4 @@
-namespace Models.Shared;
+namespace Application.DTO;
 
 public class SelectOption
 {

@@ -1,9 +1,8 @@
-using Microsoft.AspNetCore.Mvc;
-using Models.Request;
-using Models.Response;
+using Application.DTO;
 using Application.DTOs;
 using Domain.Entities;
 using Domain.Enuns;
+using Microsoft.AspNetCore.Mvc;
 
 /// <summary>
 /// Controller responsável pelos endpoints de gerenciamento de opportunities.

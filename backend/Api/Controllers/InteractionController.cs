@@ -1,8 +1,6 @@
-using Domain.Entities;
+using Application.DTO;
 using Domain.Enuns;
 using Microsoft.AspNetCore.Mvc;
-using Models.Request;
-using Models.Response;
 
 namespace Api.Controllers;
 
@@ -44,7 +42,7 @@ public class InteractionController : ControllerBase
     {
         try
         {
-            var interaction = new Interaction
+            var interaction = new Domain.Entities.Interaction
             {
                 Description = interactionRequest.Description,
                 UserId = interactionRequest.UserId,
@@ -188,7 +186,7 @@ public class InteractionController : ControllerBase
     /// </summary>
     /// <param name="interaction">Entidade de interação a ser convertida.</param>
     /// <returns>Modelo de resposta preenchido com os dados da interação.</returns>
-    private static InteractionResponse MapResponse(Interaction interaction)
+    private static InteractionResponse MapResponse(Domain.Entities.Interaction interaction)
     {
         return new InteractionResponse
         {

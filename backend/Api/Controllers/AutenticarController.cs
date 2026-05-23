@@ -1,8 +1,7 @@
 using Application;
+using Application.DTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ApiLoginRequest = Models.Request.LoginRequest;
-using ApiLoginResponse = Models.Response.LoginResponse;
 
 namespace Api.Controllers;
 
@@ -19,26 +18,16 @@ public class AutenticarController : ControllerBase
 
     [AllowAnonymous]
     [HttpPost("login")]
-    [ProducesResponseType(typeof(ApiLoginResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<ActionResult<ApiLoginResponse>> Login([FromBody] ApiLoginRequest request)
+    public async Task<ActionResult<LoginResponse>> Login([FromBody] LoginRequest request)
     {
         try
         {
-            var response = await _authenticationApp.LoginAsync(new Application.DTO.LoginRequest
-            {
-                Email = request.Email,
-                Password = request.Password
-            });
+            var response = await _authenticationApp.LoginAsync(request);
 
-            return Ok(new ApiLoginResponse
-            {
-                Success = response.Success,
-                Message = response.Message,
-                Token = response.Token,
-                Name = response.Name
-            });
+            return Ok(response);
         }
         catch (ArgumentException ex)
         {

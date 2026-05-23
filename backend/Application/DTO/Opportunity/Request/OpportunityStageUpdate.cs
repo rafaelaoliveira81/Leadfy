@@ -1,4 +1,4 @@
-namespace Models.Request;
+namespace Application.DTO;
 
 public class OpportunityStageUpdate
 {

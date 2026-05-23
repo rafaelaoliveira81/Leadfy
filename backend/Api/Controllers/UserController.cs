@@ -1,9 +1,7 @@
 using Application;
+using Application.DTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Models.Response;
-using Models.Request;
-using Domain.Entities;
 
 /// <summary>
 /// Controller responsável pelos endpoints de gerenciamento de usuários.
@@ -45,7 +43,7 @@ public class UserController : ControllerBase
     {
         try
         {
-            var userRepository = new User()
+            var userRepository = new Domain.Entities.User()
             {
                 Name = user.Name,
                 Email = user.Email
@@ -85,7 +83,7 @@ public class UserController : ControllerBase
         {
             var userRepository = await _userApp.GetByIdAsync(id);
 
-            var userResponse = new UserResponse()
+            var userResponse = new UserResponse
             {
                 ID = userRepository.ID,
                 Name = userRepository.Name,
@@ -127,7 +125,7 @@ public class UserController : ControllerBase
         {
             var userRepository = await _userApp.GetByEmailAsync(email);
 
-            var userResponse = new UserResponse()
+            var userResponse = new UserResponse
             {
                 ID = userRepository.ID,
                 Name = userRepository.Name,
@@ -172,7 +170,7 @@ public class UserController : ControllerBase
     {
         try
         {
-            IEnumerable<User> users;
+            IEnumerable<Domain.Entities.User> users;
 
             if (isActive.HasValue)
             {
@@ -187,7 +185,7 @@ public class UserController : ControllerBase
                 users = await _userApp.GetAllAsync();
             }
 
-            var usersResponse = users.Select(u => new UserResponse()
+            var usersResponse = users.Select(u => new UserResponse
             {
                 ID = u.ID,
                 Name = u.Name,
@@ -232,7 +230,7 @@ public class UserController : ControllerBase
     {
         try
         {
-            var user = new User()
+            var user = new Domain.Entities.User
             {
                 ID = id,
                 Name = userRequest.Name,
