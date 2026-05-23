@@ -7,7 +7,6 @@ public interface IOpportunityRepo
     Task<IEnumerable<Opportunity>> GetAllAsync();
     Task<IEnumerable<Opportunity>> GetAllByStatusAsync(bool statusOpportunity);
     Task<IEnumerable<Opportunity>> GetByLeadIdAsync(int leadId);
-    Task<IEnumerable<Opportunity>> GetByOwnerIdAsync(int ownerId);
     Task UpdateAsync(Opportunity opportunity);
     Task DeleteAsync(Opportunity opportunity);
 }

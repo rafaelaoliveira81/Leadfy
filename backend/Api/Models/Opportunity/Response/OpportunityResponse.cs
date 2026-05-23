@@ -5,8 +5,6 @@ public class OpportunityResponse
     public int ID { get; set; }
     public int LeadId { get; set; }
     public string LeadName { get; set; }
-    public int? OwnerId { get; set; }
-    public string OwnerName { get; set; }
     public int ProductId { get; set; }
     public string ProductName { get; set; }
     public int Stage { get; set; }

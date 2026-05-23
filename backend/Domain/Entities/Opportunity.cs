@@ -6,7 +6,6 @@ public class Opportunity
 {
     public int ID { get; set; }
     public int LeadId { get; set; }
-    public int? OwnerId { get; set; }
     public int ProductId { get; set; }
     public decimal Amount { get; set; }
     public OpportunityStage Stage { get; set; }
@@ -16,7 +15,6 @@ public class Opportunity
     public bool IsActive { get; set; }
 
     // Relacionamentos
-    public Owner Owner { get; set; }
     public Product Product { get; set; }
     public Lead Lead { get; set; }
     public ICollection<OpportunityActionPlan> ActionPlans { get; set; }

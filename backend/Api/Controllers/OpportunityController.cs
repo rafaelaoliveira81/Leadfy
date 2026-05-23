@@ -46,7 +46,6 @@ public class OpportunityController : ControllerBase
             var opportunity = new Opportunity
             {
                 LeadId = opportunityRequest.LeadId,
-                OwnerId = opportunityRequest.OwnerId,
                 ProductId = opportunityRequest.ProductId,
                 Stage = (OpportunityStage)opportunityRequest.Stage,
                 Amount = opportunityRequest.Amount,
@@ -95,8 +94,6 @@ public class OpportunityController : ControllerBase
                 ID = opportunity.ID,
                 LeadId = opportunity.LeadId,
                 LeadName = opportunity.Lead?.Name,
-                OwnerId = opportunity.OwnerId,
-                OwnerName = opportunity.Owner?.Name,
                 ProductId = opportunity.ProductId,
                 ProductName = opportunity.Product?.Name,
                 Stage = (int)opportunity.Stage,
@@ -122,11 +119,10 @@ public class OpportunityController : ControllerBase
     }
 
     /// <summary>
-    /// Obtém opportunities cadastradas. Permite filtrar por status, lead ou owner.
+    /// Obtém opportunities cadastradas. Permite filtrar por status ou lead.
     /// </summary>
     /// <param name="isActive">Filtra por status de ativação (opcional).</param>
     /// <param name="leadId">Filtra por lead específico (opcional).</param>
-    /// <param name="ownerId">Filtra por owner específico (opcional).</param>
     /// <returns>
     /// Retorna status 200 com a coleção de opportunities.
     /// Retorna status 400 quando os parâmetros informados são inválidos.
@@ -138,7 +134,7 @@ public class OpportunityController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> Get([FromQuery] bool? isActive, [FromQuery] int? leadId, [FromQuery] int? ownerId)
+    public async Task<ActionResult> Get([FromQuery] bool? isActive, [FromQuery] int? leadId)
     {
         try
         {
@@ -152,10 +148,6 @@ public class OpportunityController : ControllerBase
             {
                 opportunities = await _opportunityApp.GetByLeadIdAsync(leadId.Value);
             }
-            else if (ownerId.HasValue && ownerId > 0)
-            {
-                opportunities = await _opportunityApp.GetByOwnerIdAsync(ownerId.Value);
-            }
             else
             {
                 opportunities = await _opportunityApp.GetAllAsync();
@@ -166,8 +158,6 @@ public class OpportunityController : ControllerBase
                 ID = o.ID,
                 LeadId = o.LeadId,
                 LeadName = o.Lead?.Name,
-                OwnerId = o.OwnerId,
-                OwnerName = o.Owner?.Name,
                 ProductId = o.ProductId,
                 ProductName = o.Product?.Name,
                 Stage = (int)o.Stage,
@@ -280,7 +270,6 @@ public class OpportunityController : ControllerBase
             {
                 ID = id,
                 LeadId = opportunityRequest.LeadId,
-                OwnerId = opportunityRequest.OwnerId,
                 ProductId = opportunityRequest.ProductId,
                 Stage = (OpportunityStage)opportunityRequest.Stage,
                 Amount = opportunityRequest.Amount,

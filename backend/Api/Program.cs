@@ -61,7 +61,6 @@ builder.Services.AddScoped<IJwtApp, JwtApp>();
 builder.Services.AddScoped<IPasswordRecoveryApp, PasswordRecoveryApp>();
 builder.Services.AddScoped<IEmailApp, EmailService>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
-builder.Services.AddScoped<IOwnerApp, OwnerApp>();
 builder.Services.AddScoped<ILeadApp, LeadApp>();
 builder.Services.AddScoped<IProductApp, ProductApp>();
 builder.Services.AddScoped<IOpportunityApp, OpportunityApp>();
@@ -74,7 +73,6 @@ builder.Services.AddScoped<IGenerativeAiService, AiService>();
 
 // Adicione as interfaces de banco de dados
 builder.Services.AddScoped<IUserRepo, UserRepository>();
-builder.Services.AddScoped<IOwnerRepo, OwnerRepo>();
 builder.Services.AddScoped<IPasswordRecoveryRepo, PasswordRecoveryRepo>();
 builder.Services.AddScoped<ILeadRepo, LeadRepo>();
 builder.Services.AddScoped<IProductRepo, ProductRepo>();
