@@ -7,13 +7,11 @@ public class OpportunityApp : IOpportunityApp
 {
     private readonly IOpportunityRepo _opportunityRepo;
     private readonly ILeadRepo _leadRepo;
-    private readonly IOwnerRepo _ownerRepo;
     private readonly IProductRepo _productRepo;
-    public OpportunityApp(IOpportunityRepo opportunityRepo, ILeadRepo leadRepo, IOwnerRepo ownerRepo, IProductRepo productRepo)
+    public OpportunityApp(IOpportunityRepo opportunityRepo, ILeadRepo leadRepo, IProductRepo productRepo)
     {
         _opportunityRepo = opportunityRepo;
         _leadRepo = leadRepo;
-        _ownerRepo = ownerRepo;
         _productRepo = productRepo;
     }
     public async Task<int> AddAsync(Opportunity opportunity)
@@ -38,10 +36,6 @@ public class OpportunityApp : IOpportunityApp
     {
         return await _opportunityRepo.GetByLeadIdAsync(leadId);
     }
-    public async Task<IEnumerable<Opportunity>> GetByOwnerIdAsync(int ownerId)
-    {
-        return await _opportunityRepo.GetByOwnerIdAsync(ownerId);
-    }
     public async Task UpdateAsync(Opportunity opportunity)
     {
         var opportunityEntity = await ValidateOpportunityExistsByIdAsync(opportunity.ID);
@@ -53,7 +47,6 @@ public class OpportunityApp : IOpportunityApp
             throw new ArgumentException("Amount não pode ser atualizado após a stage ProposalSent.");
 
         opportunityEntity.LeadId = opportunity.LeadId;
-        opportunityEntity.OwnerId = opportunity.OwnerId;
         opportunityEntity.ProductId = opportunity.ProductId;
         opportunityEntity.Stage = opportunity.Stage;
         if (opportunityEntity.Stage < OpportunityStage.ProposalSent)
@@ -98,9 +91,6 @@ public class OpportunityApp : IOpportunityApp
         if (opportunity.LeadId <= 0)
             throw new ArgumentException("O lead vinculado à opportunity deve ser informado.");
 
-        if (opportunity.Stage != OpportunityStage.NewLead && opportunity.OwnerId <= 0)
-            throw new ArgumentException("O owner deve ser informado quando a stage não é NewLead.");
-
         if (opportunity.ProductId <= 0)
             throw new ArgumentException("O produto vinculado à opportunity deve ser informado.");
 
@@ -111,9 +101,6 @@ public class OpportunityApp : IOpportunityApp
             throw new ArgumentException("A data esperada de encerramento não pode ser anterior a hoje.");
 
         await ValidateLeadExistsByIdAsync(opportunity.LeadId);
-
-        if (opportunity.OwnerId.HasValue && opportunity.OwnerId > 0)
-            await ValidateOwnerExistsByIdAsync(opportunity.OwnerId.Value);
 
         await ValidateProductExistsByIdAsync(opportunity.ProductId);
     }
@@ -134,14 +121,6 @@ public class OpportunityApp : IOpportunityApp
 
         return leadEntity;
     }
-    private async Task<Owner> ValidateOwnerExistsByIdAsync(int idOwner)
-    {
-        var ownerEntity = await _ownerRepo.GetByIdAsync(idOwner);
-        if (ownerEntity == null)
-            throw new KeyNotFoundException("Responsável não localizado.");
-
-        return ownerEntity;
-    }
     private async Task<Product> ValidateProductExistsByIdAsync(int idProduct)
     {
         var productEntity = await _productRepo.GetByIdAsync(idProduct);
@@ -158,10 +137,6 @@ public class OpportunityApp : IOpportunityApp
             throw new ArgumentException("A stage informada é inválida.");
 
         var opportunityEntity = await ValidateOpportunityExistsByIdAsync(idOpportunity);
-
-        if (newStage != OpportunityStage.NewLead &&
-            (!opportunityEntity.OwnerId.HasValue || opportunityEntity.OwnerId <= 0))
-            throw new ArgumentException("O owner deve ser informado quando a stage não é NewLead.");
 
         opportunityEntity.Stage = newStage;
 

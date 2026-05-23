@@ -16,7 +16,6 @@ public class OpportunityRepo : BaseRepo, IOpportunityRepo
         var parameters = new
         {
             LeadId = opportunity.LeadId,
-            OwnerId = opportunity.OwnerId,
             ProductId = opportunity.ProductId,
             Stage = (int)opportunity.Stage,
             Amount = opportunity.Amount,
@@ -43,7 +42,6 @@ public class OpportunityRepo : BaseRepo, IOpportunityRepo
     {
         return await _context.Opportunities
             .Include(o => o.Lead)
-            .Include(o => o.Owner)
             .Include(o => o.Product)
             .OrderBy(o => o.Stage)
             .ThenBy(o => o.SortOrder)
@@ -64,16 +62,6 @@ public class OpportunityRepo : BaseRepo, IOpportunityRepo
         return await _context.Opportunities
             .Where(o => o.LeadId == leadId)
             .Include(o => o.Lead)
-            .Include(o => o.Owner)
-            .Include(o => o.Product)
-            .ToListAsync();
-    }
-    public async Task<IEnumerable<Opportunity>> GetByOwnerIdAsync(int ownerId)
-    {
-        return await _context.Opportunities
-            .Where(o => o.OwnerId == ownerId)
-            .Include(o => o.Lead)
-            .Include(o => o.Owner)
             .Include(o => o.Product)
             .ToListAsync();
     }
@@ -84,7 +72,6 @@ public class OpportunityRepo : BaseRepo, IOpportunityRepo
         {
             ID = opportunity.ID,
             LeadId = opportunity.LeadId,
-            OwnerId = opportunity.OwnerId,
             ProductId = opportunity.ProductId,
             Stage = (int)opportunity.Stage,
             Amount = opportunity.Amount,

@@ -15,9 +15,6 @@ public class OpportunityConfig : IEntityTypeConfiguration<Opportunity>
               builder.Property(o => o.LeadId)
                      .IsRequired();
 
-              builder.Property(o => o.OwnerId)
-                     .IsRequired(false);
-
               builder.Property(o => o.ProductId)
                      .IsRequired();
 
@@ -46,11 +43,6 @@ public class OpportunityConfig : IEntityTypeConfiguration<Opportunity>
               builder.HasOne(o => o.Lead)
                      .WithMany()
                      .HasForeignKey(o => o.LeadId)
-                     .OnDelete(DeleteBehavior.Restrict);
-
-              builder.HasOne(o => o.Owner)
-                     .WithMany()
-                     .HasForeignKey(o => o.OwnerId)
                      .OnDelete(DeleteBehavior.Restrict);
 
               builder.HasOne(o => o.Product)
