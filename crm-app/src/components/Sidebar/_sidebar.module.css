@@ -1,0 +1,49 @@
+.container-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 20%;
+  background-color: #0d4316;
+  color: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  transition: width 0.3s ease;
+  z-index: 100;
+  overflow-x: hidden;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+}
+
+.pagina-conteudo {
+  /* conteúdo da pagina começa depois da sidebar que está com width 20% */
+  margin-left: 20%;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  min-height: 60px;
+  gap: 8px;
+}
+
+.title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #cfe8d2;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.divider {
+  border: none;
+  border-top: 1px solid rgba(237, 242, 244, 0.15);
+  margin: 0 16px;
+}
+
+.nav {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 0;
+}
