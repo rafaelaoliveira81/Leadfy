@@ -14,15 +14,18 @@ import { MdMenuOpen } from "react-icons/md";
 import { MdShoppingCart } from "react-icons/md";
 import { MdPersonSearch } from "react-icons/md";
 import { MdPeople } from "react-icons/md";
+import logo from "../../assets/logo.png";
 
 export function Sidebar({ children }) {
   return (
     <div className={style.container}>
       <div className={style["container-sidebar"]}>
         <div className={style["header"]}>
-          <span className={style.title}>CRM Admin</span>
-          <hr className={style.divider} />
+          <Link to="/home">
+            <img src={logo} alt="Logo-Leadfy" className={style.logo} />
+          </Link>
         </div>
+        <hr className={style.divider} />
         <div className={style["style.nav"]}>
           <SidebarItem
             texto="Dashboard"

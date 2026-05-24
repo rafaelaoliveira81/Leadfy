@@ -220,7 +220,7 @@ export function Leads() {
           <ListingHeader
             title="Leads"
             description="Gerencie os leads cadastrados no CRM."
-            buttonLabel="Novo Lead"
+            buttonLabel="+ Novo"
             onButtonClick={handleClickAddLead}
           />
 
@@ -231,7 +231,7 @@ export function Leads() {
                   <th>Nome</th>
                   <th>E-mail</th>
                   <th>Telefone</th>
-                  <th className={style["coluna-acoes"]}>Ações</th>
+                  <th className={style["coluna-acoes"]}></th>
                 </tr>
               </thead>
 
@@ -382,8 +382,9 @@ export function Leads() {
                 />
 
                 <Button
+                  variant={isEditing ? "warning" : "success"}
                   type="submit"
-                  buttonLabel={isEditing ? "Salvar" : "Adicionar"}
+                  buttonLabel={isEditing ? "Atualizar" : "Salvar"}
                   disabled={!isFormValid()}
                 />
               </Modal.Footer>
