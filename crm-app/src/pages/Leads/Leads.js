@@ -8,8 +8,9 @@ import {
   MdDelete,
   MdChevronLeft,
   MdChevronRight,
+  MdBlock,
+  MdCheckCircleOutline,
 } from "react-icons/md";
-
 import { Button } from "../../components/Button/Button";
 import { Sidebar } from "../../components/Sidebar/Sidebar";
 import { Topbar } from "../../components/Topbar/Topbar";
@@ -52,12 +53,13 @@ const normalizeLeadForApi = (lead) => ({
 export function Leads() {
   const [allLeads, setAllLeads] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [errors, setErrors] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
 
   const [lead, setLead] = useState(INITIAL_LEAD_STATE);
   const [selectedLead, setSelectedLead] = useState(null);
 
-  const [showModalDelete, setShowModalDelete] = useState(false);
+  const [confirmAction, setConfirmAction] = useState(null);
   const [leadFormMode, setLeadFormMode] = useState(null);
 
   const totalPages = Math.max(1, Math.ceil(allLeads.length / ITEMS_PER_PAGE));
@@ -72,7 +74,15 @@ export function Leads() {
   const leadFormTitle = isEditing ? "Edição de Leads" : "Novo Lead";
 
   const isFormValid = () => {
-    return lead.name;
+    const newErrors = {};
+
+    if (!lead.name?.trim()) {
+      newErrors.name = true;
+    }
+
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0;
   };
 
   const getPageNumbers = () => {
@@ -118,8 +128,8 @@ export function Leads() {
     setLead(INITIAL_LEAD_STATE);
   };
 
-  const closeDeleteModal = () => {
-    setShowModalDelete(false);
+  const closeConfirmModal = () => {
+    setConfirmAction(null);
     setSelectedLead(null);
   };
 
@@ -152,7 +162,17 @@ export function Leads() {
 
   const handleClickDelete = (lead) => {
     setSelectedLead(lead);
-    setShowModalDelete(true);
+    setConfirmAction("delete");
+  };
+
+  const handleClickActive = (lead) => {
+    setSelectedLead(lead);
+    setConfirmAction("activate");
+  };
+
+  const handleClickDesactive = (lead) => {
+    setSelectedLead(lead);
+    setConfirmAction("deactivate");
   };
 
   const handleSubmitAdd = async (e) => {
@@ -199,19 +219,66 @@ export function Leads() {
   };
 
   const handleDeleteLead = async () => {
-    if (!selectedLead?.id) {
-      return;
-    }
-
+    if (!selectedLead?.id) return;
     try {
       await leadAPI.Delete(selectedLead.id);
       toast.success("Lead deletado com sucesso.");
-      closeDeleteModal();
+      closeConfirmModal();
       fetchLeads();
     } catch (error) {
       toast.error("Erro ao deletar o lead.");
     }
   };
+
+  const handleActivateLead = async () => {
+    if (!selectedLead?.id) return;
+    try {
+      await leadAPI.Activate(selectedLead.id);
+      toast.success("Lead ativado com sucesso.");
+      closeConfirmModal();
+      fetchLeads();
+    } catch (error) {
+      toast.error("Erro ao ativar o lead.");
+    }
+  };
+
+  const handleDeactivateLead = async () => {
+    if (!selectedLead?.id) return;
+    try {
+      await leadAPI.Deactivate(selectedLead.id);
+      toast.success("Lead inativado com sucesso.");
+      closeConfirmModal();
+      fetchLeads();
+    } catch (error) {
+      toast.error("Erro ao inativar o lead.");
+    }
+  };
+
+  const CONFIRM_MODAL_CONFIG = {
+    delete: {
+      title: "Confirmar exclusão",
+      body: `Tem certeza que deseja deletar o lead "${selectedLead?.name}"?`,
+      variant: "danger",
+      label: "Deletar",
+      onConfirm: handleDeleteLead,
+    },
+    activate: {
+      title: "Confirmar ativação",
+      body: `Tem certeza que deseja ativar o lead "${selectedLead?.name}"?`,
+      variant: "success",
+      label: "Ativar",
+      onConfirm: handleActivateLead,
+    },
+    deactivate: {
+      title: "Confirmar inativação",
+      body: `Tem certeza que deseja inativar o lead "${selectedLead?.name}"?`,
+      variant: "warning",
+      label: "Inativar",
+      onConfirm: handleDeactivateLead,
+    },
+  };
+
+  const currentConfirmConfig = CONFIRM_MODAL_CONFIG[confirmAction] ?? null;
 
   return (
     <Sidebar>
@@ -249,9 +316,28 @@ export function Leads() {
                       <td>{lead.email}</td>
                       <td>{formatPhoneNumber(lead.phoneNumber || "")}</td>
                       <td className={style["acoes"]}>
+                        {lead.isActive ? (
+                          <button
+                            className={style["botao-desativar"]}
+                            onClick={() => handleClickDesactive(lead)}
+                            title="Inativar"
+                          >
+                            <MdBlock />
+                          </button>
+                        ) : (
+                          <button
+                            className={style["botao-ativar"]}
+                            onClick={() => handleClickActive(lead)}
+                            title="Ativar"
+                          >
+                            <MdCheckCircleOutline />
+                          </button>
+                        )}
+
                         <button
                           className={style["botao-editar"]}
                           onClick={() => handleClickEdit(lead)}
+                          title="Editar"
                         >
                           <MdEdit />
                         </button>
@@ -259,6 +345,7 @@ export function Leads() {
                         <button
                           className={style["botao-excluir"]}
                           onClick={() => handleClickDelete(lead)}
+                          title="Excluir"
                         >
                           <MdDelete />
                         </button>
@@ -307,26 +394,24 @@ export function Leads() {
           <ToastContainer position="top-right" autoClose={3000} />
         </div>
 
-        <Modal show={showModalDelete} onHide={closeDeleteModal}>
+        <Modal show={confirmAction !== null} onHide={closeConfirmModal}>
           <Modal.Header closeButton>
-            <Modal.Title>Confirmar exclusão</Modal.Title>
+            <Modal.Title>{currentConfirmConfig?.title}</Modal.Title>
           </Modal.Header>
 
-          <Modal.Body>
-            Tem certeza que deseja deletar o lead "{selectedLead?.name}"?
-          </Modal.Body>
+          <Modal.Body>{currentConfirmConfig?.body}</Modal.Body>
 
           <Modal.Footer>
             <Button
               variant="secondary"
               buttonLabel="Cancelar"
-              onButtonClick={closeDeleteModal}
+              onButtonClick={closeConfirmModal}
             />
 
             <Button
-              variant="danger"
-              buttonLabel="Deletar"
-              onButtonClick={handleDeleteLead}
+              variant={currentConfirmConfig?.variant}
+              buttonLabel={currentConfirmConfig?.label}
+              onButtonClick={currentConfirmConfig?.onConfirm}
             />
           </Modal.Footer>
         </Modal>
@@ -345,9 +430,21 @@ export function Leads() {
                   name="name"
                   placeholder="Digite o nome"
                   value={lead.name}
-                  onChange={handleInputChange}
-                  required
+                  onChange={(e) => {
+                    handleInputChange(e);
+
+                    if (errors?.name) {
+                      setErrors((prev) => ({
+                        ...prev,
+                        name: false,
+                      }));
+                    }
+                  }}
+                  isInvalid={errors?.name}
                 />
+                <Form.Control.Feedback type="invalid">
+                  Nome é obrigatório.
+                </Form.Control.Feedback>
               </Form.Group>
 
               <Form.Group className="mb-3">
@@ -385,7 +482,6 @@ export function Leads() {
                   variant={isEditing ? "warning" : "success"}
                   type="submit"
                   buttonLabel={isEditing ? "Atualizar" : "Salvar"}
-                  disabled={!isFormValid()}
                 />
               </Modal.Footer>
             </Form>

@@ -27,6 +27,7 @@
   padding: 16px;
   min-height: 60px;
   gap: 8px;
+  margin: -10px;
 
   & .logo {
     width: 125px;
