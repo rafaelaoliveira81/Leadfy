@@ -42,10 +42,10 @@ public class LeadApp : ILeadApp
 
         await ValidateLeadInformation(request);
 
-        lead.Name = lead.Name;
-        lead.Email = lead.Email;
-        lead.PhoneNumber = lead.PhoneNumber;
-        
+        lead.Name = request.Name;
+        lead.Email = request.Email;
+        lead.PhoneNumber = request.PhoneNumber;
+
         await _leadRepo.UpdateAsync(lead);
     }
 
@@ -64,7 +64,7 @@ public class LeadApp : ILeadApp
 
         await _leadRepo.UpdateAsync(leadEntity);
     }
-    
+
     public async Task ActivateAsync(int idLead)
     {
         var leadEntity = await ValidateLeadExistsByIdAsync(idLead);
