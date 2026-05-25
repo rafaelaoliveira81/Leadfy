@@ -35,15 +35,30 @@ public class LeadRepo : BaseRepo, ILeadRepo
             return await connection.QueryFirstOrDefaultAsync<Lead>(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
         }
     }
-    public async Task<IEnumerable<Lead>> GetAllAsync(bool? statusLead)
+    public async Task<PagedResult<Lead>> GetPagedAsync(
+    int pagina,
+    int quantidadePorPagina)
     {
-        var query = "sp_GetAllLeads";
-        var parameters = new { IsActive = statusLead };
+        using var connection = GetConnection();
 
-        using (var connection = GetConnection())
+        using var multi = await connection.QueryMultipleAsync(
+            "sp_GetLeadsPaginado",
+            new
+            {
+                Pagina = pagina,
+                QuantidadePorPagina = quantidadePorPagina
+            },
+            commandType: System.Data.CommandType.StoredProcedure
+        );
+
+        var totalRegistros = await multi.ReadFirstAsync<int>();
+        var leads = (await multi.ReadAsync<Lead>()).ToList();
+
+        return new PagedResult<Lead>
         {
-            return await connection.QueryAsync<Lead>(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
-        }
+            TotalRegistros = totalRegistros,
+            Dados = leads
+        };
     }
     public async Task UpdateAsync(Lead lead)
     {

@@ -27,13 +27,16 @@ public class LeadApp : ILeadApp
         return MapToLeadResponse(lead);
     }
 
-    public async Task<IEnumerable<LeadResponse>> GetAllAsync(bool? statusLead)
+    public async Task<LeadPagedResponse> GetAllAsync(int pagina, int quantidadePorPagina)
     {
-        var lead = await _leadRepo.GetAllAsync(statusLead);
+        var lead = await _leadRepo.GetPagedAsync(pagina, quantidadePorPagina);
 
-        var response = lead.Select(l => MapToLeadResponse(l)).ToList();
-
-        return response;
+        var response = lead.Dados.Select(MapToLeadResponse).ToList();
+        return new LeadPagedResponse
+        {
+            TotalRegistros = lead.TotalRegistros,
+            Dados = response
+        };
     }
 
     public async Task UpdateAsync(LeadRequest request)

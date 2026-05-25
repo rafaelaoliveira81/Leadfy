@@ -6,7 +6,7 @@ public interface ILeadApp
 {
     Task<int> AddAsync(LeadRequest lead);
     Task<LeadResponse> GetByIdAsync(int idLead);
-    Task<IEnumerable<LeadResponse>> GetAllAsync(bool? statusLead);
+    Task<LeadPagedResponse> GetAllAsync(int pagina, int quantidadePorPagina);
     Task UpdateAsync(LeadRequest lead);
     Task DeleteAsync(int idLead);
     Task DeactivateAsync(int idLead);

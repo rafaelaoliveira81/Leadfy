@@ -27,11 +27,17 @@ BEGIN
 END;
 GO
 
-CREATE PROCEDURE sp_GetAllLeads
-    @IsActive BIT = NULL
+CREATE PROCEDURE sp_GetLeadsPaginado
+    @Pagina INT = 1,
+    @QuantidadePorPagina INT = 10
 AS
 BEGIN
-    SELECT 
+    SET NOCOUNT ON;
+
+    IF @Pagina < 1
+        SET @Pagina = 1;
+
+    SELECT
         Id,
         Name,
         Email,
@@ -39,8 +45,9 @@ BEGIN
         IsActive,
         CreatedAt
     FROM Leads
-    WHERE (@IsActive IS NULL OR IsActive = @IsActive)
-    ORDER BY CreatedAt DESC;
+    ORDER BY ID DESC
+    OFFSET (@Pagina - 1) * @QuantidadePorPagina ROWS
+    FETCH NEXT @QuantidadePorPagina ROWS ONLY;
 END;
 GO
 

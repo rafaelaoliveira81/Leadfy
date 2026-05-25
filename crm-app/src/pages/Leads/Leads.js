@@ -52,6 +52,7 @@ const normalizeLeadForApi = (lead) => ({
 
 export function Leads() {
   const [allLeads, setAllLeads] = useState([]);
+  const [totalRecords, setTotalRecords] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [errors, setErrors] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
@@ -62,12 +63,7 @@ export function Leads() {
   const [confirmAction, setConfirmAction] = useState(null);
   const [leadFormMode, setLeadFormMode] = useState(null);
 
-  const totalPages = Math.max(1, Math.ceil(allLeads.length / ITEMS_PER_PAGE));
-
-  const paginatedLeads = allLeads.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE,
-  );
+  const totalPages = Math.max(1, Math.ceil(totalRecords / ITEMS_PER_PAGE));
 
   const isLeadFormOpen = leadFormMode !== null;
   const isEditing = leadFormMode === "edit";
@@ -103,24 +99,25 @@ export function Leads() {
     return pages;
   };
 
-  const fetchLeads = useCallback(async () => {
+  const fetchLeads = useCallback(async (page) => {
     setIsLoading(true);
 
     try {
-      const data = await leadAPI.GetAll();
-      setAllLeads(Array.isArray(data) ? data : []);
-      setCurrentPage(1);
+      const data = await leadAPI.GetPaged(page, ITEMS_PER_PAGE);
+      setAllLeads(Array.isArray(data?.dados) ? data.dados : []);
+      setTotalRecords(data?.totalRegistros ?? 0);
     } catch (error) {
       toast.error("Erro ao carregar os leads.");
       setAllLeads([]);
+      setTotalRecords(0);
     } finally {
       setIsLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    fetchLeads();
-  }, [fetchLeads]);
+    fetchLeads(currentPage);
+  }, [currentPage, fetchLeads]);
 
   const closeLeadFormModal = () => {
     setLeadFormMode(null);
@@ -186,7 +183,7 @@ export function Leads() {
       await leadAPI.Create(normalizeLeadForApi(lead));
       toast.success("Lead criado com sucesso.");
       closeLeadFormModal();
-      fetchLeads();
+      fetchLeads(currentPage);
     } catch (error) {
       toast.error("Erro ao criar lead.");
     }
@@ -203,7 +200,7 @@ export function Leads() {
       await leadAPI.Update(normalizeLeadForApi(lead));
       toast.success("Lead atualizado com sucesso.");
       closeLeadFormModal();
-      fetchLeads();
+      fetchLeads(currentPage);
     } catch (error) {
       toast.error("Erro ao editar lead.");
     }
@@ -224,7 +221,7 @@ export function Leads() {
       await leadAPI.Delete(selectedLead.id);
       toast.success("Lead deletado com sucesso.");
       closeConfirmModal();
-      fetchLeads();
+      fetchLeads(currentPage);
     } catch (error) {
       toast.error("Erro ao deletar o lead.");
     }
@@ -236,7 +233,7 @@ export function Leads() {
       await leadAPI.Activate(selectedLead.id);
       toast.success("Lead ativado com sucesso.");
       closeConfirmModal();
-      fetchLeads();
+      fetchLeads(currentPage);
     } catch (error) {
       toast.error("Erro ao ativar o lead.");
     }
@@ -248,7 +245,7 @@ export function Leads() {
       await leadAPI.Deactivate(selectedLead.id);
       toast.success("Lead inativado com sucesso.");
       closeConfirmModal();
-      fetchLeads();
+      fetchLeads(currentPage);
     } catch (error) {
       toast.error("Erro ao inativar o lead.");
     }
@@ -310,7 +307,7 @@ export function Leads() {
                     </td>
                   </tr>
                 ) : (
-                  paginatedLeads.map((lead) => (
+                  allLeads.map((lead) => (
                     <tr key={lead.id}>
                       <td>{lead.name}</td>
                       <td>{lead.email}</td>
