@@ -16,6 +16,11 @@ import { Sidebar } from "../../components/Sidebar/Sidebar";
 import { Topbar } from "../../components/Topbar/Topbar";
 import { ListingHeader } from "../../components/ListingHeader/ListingHeader";
 import { leadAPI } from "../../services/leadApi";
+
+import formatPhoneNumberUtil from "../../utils/FormatPhoneNumberUtil";
+import GetPageNumbers from "../../utils/Pagination";
+import normalizePhoneNumber from "../../utils/Lead/NormalizeLeadForApiUtil";
+
 import style from "./_leads.module.css";
 
 const ITEMS_PER_PAGE = 10;
@@ -26,29 +31,6 @@ const INITIAL_LEAD_STATE = {
   email: "",
   phoneNumber: "",
 };
-
-const formatPhoneNumber = (value) => {
-  const digits = value.replace(/\D/g, "").slice(0, 11);
-
-  if (!digits) {
-    return "";
-  }
-
-  if (digits.length <= 2) {
-    return `(${digits}`;
-  }
-
-  if (digits.length <= 7) {
-    return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
-  }
-
-  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
-};
-
-const normalizeLeadForApi = (lead) => ({
-  ...lead,
-  phoneNumber: (lead.phoneNumber || "").replace(/\D/g, ""),
-});
 
 export function Leads() {
   const [allLeads, setAllLeads] = useState([]);
@@ -81,23 +63,7 @@ export function Leads() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const getPageNumbers = () => {
-    const maxVisible = 5;
-    let start = Math.max(1, currentPage - Math.floor(maxVisible / 2));
-    let end = Math.min(totalPages, start + maxVisible - 1);
-
-    if (end - start + 1 < maxVisible) {
-      start = Math.max(1, end - maxVisible + 1);
-    }
-
-    const pages = [];
-
-    for (let i = start; i <= end; i++) {
-      pages.push(i);
-    }
-
-    return pages;
-  };
+  const getPageNumbers = GetPageNumbers(totalPages);
 
   const fetchLeads = useCallback(async (page) => {
     setIsLoading(true);
@@ -134,7 +100,7 @@ export function Leads() {
     const { name, value } = e.target;
 
     const formattedValue =
-      name === "phoneNumber" ? formatPhoneNumber(value) : value;
+      name === "phoneNumber" ? formatPhoneNumberUtil(value) : value;
 
     setLead((prev) => ({
       ...prev,
@@ -152,7 +118,7 @@ export function Leads() {
     setSelectedLead(lead);
     setLead({
       ...lead,
-      phoneNumber: formatPhoneNumber(lead.phoneNumber || ""),
+      phoneNumber: formatPhoneNumberUtil(lead.phoneNumber || ""),
     });
     setLeadFormMode("edit");
   };
@@ -180,7 +146,7 @@ export function Leads() {
     }
 
     try {
-      await leadAPI.Create(normalizeLeadForApi(lead));
+      await leadAPI.Create(normalizePhoneNumber(lead));
       toast.success("Lead criado com sucesso.");
       closeLeadFormModal();
       fetchLeads(currentPage);
@@ -197,7 +163,7 @@ export function Leads() {
     }
 
     try {
-      await leadAPI.Update(normalizeLeadForApi(lead));
+      await leadAPI.Update(normalizePhoneNumber(lead));
       toast.success("Lead atualizado com sucesso.");
       closeLeadFormModal();
       fetchLeads(currentPage);
@@ -311,7 +277,7 @@ export function Leads() {
                     <tr key={lead.id}>
                       <td>{lead.name}</td>
                       <td>{lead.email}</td>
-                      <td>{formatPhoneNumber(lead.phoneNumber || "")}</td>
+                      <td>{formatPhoneNumberUtil(lead.phoneNumber || "")}</td>
                       <td className={style["acoes"]}>
                         {lead.isActive ? (
                           <button
@@ -366,7 +332,7 @@ export function Leads() {
                   <MdChevronLeft />
                 </button>
 
-                {getPageNumbers().map((page) => (
+                {getPageNumbers(currentPage).map((page) => (
                   <button
                     key={page}
                     onClick={() => setCurrentPage(page)}
