@@ -102,11 +102,11 @@ public class LeadController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> Get([FromQuery] int pagina = 1, [FromQuery] int quantidadePorPagina = 10)
+    public async Task<ActionResult> Get([FromQuery] bool? status, [FromQuery] int pagina = 1, [FromQuery] int quantidadePorPagina = 10)
     {
         try
         {
-            var leads = await _leadApp.GetAllAsync(pagina, quantidadePorPagina);
+            var leads = await _leadApp.GetAllAsync(status, pagina, quantidadePorPagina);
 
             return Ok(leads);
         }

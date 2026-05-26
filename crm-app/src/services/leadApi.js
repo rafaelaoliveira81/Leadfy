@@ -58,10 +58,13 @@ export const leadAPI = {
     }
   },
 
-  async GetPaged(pagina = 1, quantidadePorPagina = 10) {
+  async GetPaged(status = true, pagina = 1, quantidadePorPagina = 10) {
     try {
       const params = new URLSearchParams();
 
+      if (status !== null && status !== undefined) {
+        params.append("status", status);
+      }
       params.append("pagina", pagina);
       params.append("quantidadePorPagina", quantidadePorPagina);
 

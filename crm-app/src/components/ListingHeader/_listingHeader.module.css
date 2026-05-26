@@ -2,6 +2,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
   margin-bottom: 28px;
 }
 
@@ -18,34 +20,9 @@
   font-size: 15px;
 }
 
-.botao-novo {
-  border: none;
-  background-color: #16a34a;
-  color: #ffffff;
-
+.header-acoes {
   display: flex;
-  align-items: center;
-  gap: 8px;
-
-  padding: 12px 18px;
-  border-radius: 12px;
-
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-
-  transition:
-    background-color 0.25s ease,
-    transform 0.25s ease,
-    box-shadow 0.25s ease;
-}
-
-.botao-novo:hover {
-  background-color: #15803d;
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(22, 163, 74, 0.24);
-}
-
-.botao-novo svg {
-  font-size: 20px;
+  align-items: flex-end;
+  gap: 16px;
+  flex-wrap: nowrap;
 }

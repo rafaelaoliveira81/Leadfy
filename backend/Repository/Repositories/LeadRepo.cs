@@ -36,8 +36,9 @@ public class LeadRepo : BaseRepo, ILeadRepo
         }
     }
     public async Task<PagedResult<Lead>> GetPagedAsync(
-    int pagina,
-    int quantidadePorPagina)
+        bool? isActive,
+        int pagina,
+        int quantidadePorPagina)
     {
         using var connection = GetConnection();
 
@@ -45,6 +46,7 @@ public class LeadRepo : BaseRepo, ILeadRepo
             "sp_GetLeadsPaginado",
             new
             {
+                Status = isActive.HasValue ? (isActive.Value ? 1 : 0) : (int?)null,
                 Pagina = pagina,
                 QuantidadePorPagina = quantidadePorPagina
             },

@@ -1,5 +1,6 @@
 using Application.DTO;
 using Domain.Entities;
+using System.Net;
 using System.Text.RegularExpressions;
 
 namespace Application;
@@ -27,9 +28,9 @@ public class LeadApp : ILeadApp
         return MapToLeadResponse(lead);
     }
 
-    public async Task<LeadPagedResponse> GetAllAsync(int pagina, int quantidadePorPagina)
+    public async Task<LeadPagedResponse> GetAllAsync(bool? status, int pagina, int quantidadePorPagina)
     {
-        var lead = await _leadRepo.GetPagedAsync(pagina, quantidadePorPagina);
+        var lead = await _leadRepo.GetPagedAsync(status, pagina, quantidadePorPagina);
 
         var response = lead.Dados.Select(MapToLeadResponse).ToList();
         return new LeadPagedResponse

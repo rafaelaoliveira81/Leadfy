@@ -39,6 +39,7 @@ export function Leads() {
   const [isSaving, setIsSaving] = useState(false);
   const [errors, setErrors] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
+  const [statusFilter, setStatusFilter] = useState("active");
 
   const [lead, setLead] = useState(INITIAL_LEAD_STATE);
   const [selectedLead, setSelectedLead] = useState(null);
@@ -66,11 +67,19 @@ export function Leads() {
 
   const getPageNumbers = GetPageNumbers(totalPages);
 
-  const fetchLeads = useCallback(async (page) => {
+  const getStatusParam = useCallback((filter) => {
+    if (filter === "all") {
+      return null;
+    }
+
+    return filter === "active";
+  }, []);
+
+  const fetchLeads = useCallback(async (status, page) => {
     setIsLoading(true);
 
     try {
-      const data = await leadAPI.GetPaged(page, ITEMS_PER_PAGE);
+      const data = await leadAPI.GetPaged(status, page, ITEMS_PER_PAGE);
       setAllLeads(Array.isArray(data?.dados) ? data.dados : []);
       setTotalRecords(data?.totalRegistros ?? 0);
     } catch (error) {
@@ -83,8 +92,8 @@ export function Leads() {
   }, []);
 
   useEffect(() => {
-    fetchLeads(currentPage);
-  }, [currentPage, fetchLeads]);
+    fetchLeads(getStatusParam(statusFilter), currentPage);
+  }, [currentPage, statusFilter, fetchLeads, getStatusParam]);
 
   const closeLeadFormModal = () => {
     setLeadFormMode(null);
@@ -107,6 +116,11 @@ export function Leads() {
       ...prev,
       [name]: formattedValue,
     }));
+  };
+
+  const handleStatusFilterChange = (event) => {
+    setStatusFilter(event.target.value);
+    setCurrentPage(1);
   };
 
   const handleClickAddLead = () => {
@@ -150,7 +164,7 @@ export function Leads() {
       await leadAPI.Create(normalizePhoneNumber(lead));
       toast.success("Lead criado com sucesso.");
       closeLeadFormModal();
-      fetchLeads(currentPage);
+      fetchLeads(getStatusParam(statusFilter), currentPage);
     } catch (error) {
       toast.error("Erro ao criar lead.");
     } finally {
@@ -169,7 +183,7 @@ export function Leads() {
       await leadAPI.Update(normalizePhoneNumber(lead));
       toast.success("Lead atualizado com sucesso.");
       closeLeadFormModal();
-      fetchLeads(currentPage);
+      fetchLeads(getStatusParam(statusFilter), currentPage);
     } catch (error) {
       toast.error("Erro ao editar lead.");
     } finally {
@@ -194,7 +208,7 @@ export function Leads() {
       await leadAPI.Delete(selectedLead.id);
       toast.success("Lead deletado com sucesso.");
       closeConfirmModal();
-      fetchLeads(currentPage);
+      fetchLeads(getStatusParam(statusFilter), currentPage);
     } catch (error) {
       toast.error("Erro ao deletar o lead.");
     } finally {
@@ -209,7 +223,7 @@ export function Leads() {
       await leadAPI.Activate(selectedLead.id);
       toast.success("Lead ativado com sucesso.");
       closeConfirmModal();
-      fetchLeads(currentPage);
+      fetchLeads(getStatusParam(statusFilter), currentPage);
     } catch (error) {
       toast.error("Erro ao ativar o lead.");
     } finally {
@@ -224,7 +238,7 @@ export function Leads() {
       await leadAPI.Deactivate(selectedLead.id);
       toast.success("Lead inativado com sucesso.");
       closeConfirmModal();
-      fetchLeads(currentPage);
+      fetchLeads(getStatusParam(statusFilter), currentPage);
     } catch (error) {
       toast.error("Erro ao inativar o lead.");
     } finally {
@@ -267,8 +281,15 @@ export function Leads() {
             description="Gerencie os leads cadastrados no CRM."
             buttonLabel="+ Novo"
             onButtonClick={handleClickAddLead}
+            selectLabel="Status"
+            selectOptions={[
+              { label: "Todos", value: "all" },
+              { label: "Ativo", value: "active" },
+              { label: "Inativo", value: "inactive" },
+            ]}
+            selectValue={statusFilter}
+            onSelectChange={handleStatusFilterChange}
           />
-
           <section className={style["tabela-card"]}>
             <table className={style["tabela"]}>
               <thead>
@@ -335,11 +356,12 @@ export function Leads() {
             </table>
 
             <footer className={style["paginacao"]}>
-              <span>
-                Página {currentPage} de {totalPages}
-              </span>
+              <span>Total de registros: {totalRecords}</span>
 
               <div className={style["paginacao-acoes"]}>
+                <span>
+                  Página {currentPage} de {totalPages}
+                </span>
                 <button
                   onClick={() => setCurrentPage((page) => page - 1)}
                   disabled={currentPage === 1}
