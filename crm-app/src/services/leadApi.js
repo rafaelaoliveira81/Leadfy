@@ -41,6 +41,7 @@ const mapApiError = (error) => {
 export const leadAPI = {
   async Create(leadData) {
     try {
+      leadData.id = 0;
       const response = await HTTPClient.post(`/leads`, leadData);
       return response.data;
     } catch (error) {
@@ -57,29 +58,26 @@ export const leadAPI = {
     }
   },
 
-  async GetAll(options = {}) {
+  async GetPaged(status = true, pagina = 1, quantidadePorPagina = 10) {
     try {
       const params = new URLSearchParams();
 
-      if (options.isActive !== undefined && options.isActive !== null) {
-        params.append("isActive", options.isActive);
-      } else if (options.name) {
-        params.append("name", options.name);
+      if (status !== null && status !== undefined) {
+        params.append("status", status);
       }
+      params.append("pagina", pagina);
+      params.append("quantidadePorPagina", quantidadePorPagina);
 
-      const queryString = params.toString();
-      const url = queryString ? `/leads?${queryString}` : `/leads`;
-
-      const response = await HTTPClient.get(url);
+      const response = await HTTPClient.get(`/leads?${params.toString()}`);
       return response.data;
     } catch (error) {
       return mapApiError(error);
     }
   },
 
-  async Update(leadId, leadData) {
+  async Update(leadData) {
     try {
-      await HTTPClient.put(`/leads/${leadId}`, leadData);
+      await HTTPClient.put("/leads", leadData);
       return;
     } catch (error) {
       return mapApiError(error);

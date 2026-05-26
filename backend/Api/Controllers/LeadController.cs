@@ -102,11 +102,11 @@ public class LeadController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> Get([FromQuery] bool? isActive)
+    public async Task<ActionResult> Get([FromQuery] bool? status, [FromQuery] int pagina = 1, [FromQuery] int quantidadePorPagina = 10)
     {
         try
         {
-            var leads = await _leadApp.GetAllAsync(isActive);
+            var leads = await _leadApp.GetAllAsync(status, pagina, quantidadePorPagina);
 
             return Ok(leads);
         }
@@ -134,7 +134,7 @@ public class LeadController : ControllerBase
     /// Retorna status 404 quando o lead não é localizado.
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
-    [HttpPut("{id:int}")]
+    [HttpPut]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

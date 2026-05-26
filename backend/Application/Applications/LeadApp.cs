@@ -1,5 +1,6 @@
 using Application.DTO;
 using Domain.Entities;
+using System.Net;
 using System.Text.RegularExpressions;
 
 namespace Application;
@@ -27,13 +28,16 @@ public class LeadApp : ILeadApp
         return MapToLeadResponse(lead);
     }
 
-    public async Task<IEnumerable<LeadResponse>> GetAllAsync(bool? statusLead)
+    public async Task<LeadPagedResponse> GetAllAsync(bool? status, int pagina, int quantidadePorPagina)
     {
-        var lead = await _leadRepo.GetAllAsync(statusLead);
+        var lead = await _leadRepo.GetPagedAsync(status, pagina, quantidadePorPagina);
 
-        var response = lead.Select(l => MapToLeadResponse(l)).ToList();
-
-        return response;
+        var response = lead.Dados.Select(MapToLeadResponse).ToList();
+        return new LeadPagedResponse
+        {
+            TotalRegistros = lead.TotalRegistros,
+            Dados = response
+        };
     }
 
     public async Task UpdateAsync(LeadRequest request)
@@ -42,10 +46,10 @@ public class LeadApp : ILeadApp
 
         await ValidateLeadInformation(request);
 
-        lead.Name = lead.Name;
-        lead.Email = lead.Email;
-        lead.PhoneNumber = lead.PhoneNumber;
-        
+        lead.Name = request.Name;
+        lead.Email = request.Email;
+        lead.PhoneNumber = request.PhoneNumber;
+
         await _leadRepo.UpdateAsync(lead);
     }
 
@@ -64,7 +68,7 @@ public class LeadApp : ILeadApp
 
         await _leadRepo.UpdateAsync(leadEntity);
     }
-    
+
     public async Task ActivateAsync(int idLead)
     {
         var leadEntity = await ValidateLeadExistsByIdAsync(idLead);

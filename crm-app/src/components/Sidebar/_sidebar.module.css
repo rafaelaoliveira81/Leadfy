@@ -4,7 +4,7 @@
   left: 0;
   bottom: 0;
   width: 20%;
-  background-color: #0d4316;
+  background-color: #0f3f17;
   color: #f8fafc;
   display: flex;
   flex-direction: column;
@@ -17,15 +17,21 @@
 .pagina-conteudo {
   /* conteúdo da pagina começa depois da sidebar que está com width 20% */
   margin-left: 20%;
+  background-color: #f8fafc;
 }
 
 .header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   padding: 16px;
   min-height: 60px;
   gap: 8px;
+  margin: -10px;
+
+  & .logo {
+    width: 125px;
+  }
 }
 
 .title {
