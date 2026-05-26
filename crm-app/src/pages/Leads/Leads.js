@@ -36,6 +36,7 @@ export function Leads() {
   const [allLeads, setAllLeads] = useState([]);
   const [totalRecords, setTotalRecords] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [errors, setErrors] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -144,7 +145,7 @@ export function Leads() {
     if (!isFormValid()) {
       return;
     }
-
+    setIsSaving(true);
     try {
       await leadAPI.Create(normalizePhoneNumber(lead));
       toast.success("Lead criado com sucesso.");
@@ -152,6 +153,8 @@ export function Leads() {
       fetchLeads(currentPage);
     } catch (error) {
       toast.error("Erro ao criar lead.");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -161,7 +164,7 @@ export function Leads() {
     if (!isFormValid()) {
       return;
     }
-
+    setIsSaving(true);
     try {
       await leadAPI.Update(normalizePhoneNumber(lead));
       toast.success("Lead atualizado com sucesso.");
@@ -169,10 +172,13 @@ export function Leads() {
       fetchLeads(currentPage);
     } catch (error) {
       toast.error("Erro ao editar lead.");
+    } finally {
+      setIsSaving(false);
     }
   };
 
   const handleLeadFormSubmit = (e) => {
+    if (isSaving) return;
     if (isEditing) {
       handleSubmitEdit(e);
       return;
@@ -183,6 +189,7 @@ export function Leads() {
 
   const handleDeleteLead = async () => {
     if (!selectedLead?.id) return;
+    setIsSaving(true);
     try {
       await leadAPI.Delete(selectedLead.id);
       toast.success("Lead deletado com sucesso.");
@@ -190,11 +197,14 @@ export function Leads() {
       fetchLeads(currentPage);
     } catch (error) {
       toast.error("Erro ao deletar o lead.");
+    } finally {
+      setIsSaving(false);
     }
   };
 
   const handleActivateLead = async () => {
     if (!selectedLead?.id) return;
+    setIsSaving(true);
     try {
       await leadAPI.Activate(selectedLead.id);
       toast.success("Lead ativado com sucesso.");
@@ -202,11 +212,14 @@ export function Leads() {
       fetchLeads(currentPage);
     } catch (error) {
       toast.error("Erro ao ativar o lead.");
+    } finally {
+      setIsSaving(false);
     }
   };
 
   const handleDeactivateLead = async () => {
     if (!selectedLead?.id) return;
+    setIsSaving(true);
     try {
       await leadAPI.Deactivate(selectedLead.id);
       toast.success("Lead inativado com sucesso.");
@@ -214,6 +227,8 @@ export function Leads() {
       fetchLeads(currentPage);
     } catch (error) {
       toast.error("Erro ao inativar o lead.");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -375,6 +390,7 @@ export function Leads() {
               variant={currentConfirmConfig?.variant}
               buttonLabel={currentConfirmConfig?.label}
               onButtonClick={currentConfirmConfig?.onConfirm}
+              disabled={isSaving}
             />
           </Modal.Footer>
         </Modal>
@@ -445,6 +461,7 @@ export function Leads() {
                   variant={isEditing ? "warning" : "success"}
                   type="submit"
                   buttonLabel={isEditing ? "Atualizar" : "Salvar"}
+                  disabled={isSaving}
                 />
               </Modal.Footer>
             </Form>
