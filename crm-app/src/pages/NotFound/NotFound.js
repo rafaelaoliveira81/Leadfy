@@ -10,7 +10,7 @@ export default function NotFound() {
         <div className={style.container}>
           <h1 className={style.code}>404</h1>
           <h2>Página não encontrada</h2>
-          <p>A rota que você tentou acessar não existe.</p>
+          <p>A página que você tentou acessar não existe.</p>
         </div>
       </Topbar>
     </Sidebar>

@@ -1,0 +1,228 @@
+.pagina-login {
+  width: 100%;
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-areas: "brand login";
+  background-color: #f8fafc;
+}
+
+.secao-marca {
+  grid-area: brand;
+  min-height: 100vh;
+  padding: 48px;
+  background: #0f3f17;
+  color: #ffffff;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.secao-login {
+  grid-area: login;
+  min-height: 100vh;
+  padding: 32px;
+  background-color: #f8fafc;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logoArea {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo {
+  width: 125px;
+  object-fit: contain;
+}
+
+.conteudo-marca {
+  max-width: 520px;
+}
+
+.conteudo-marca h1 {
+  margin: 0;
+  font-size: 42px;
+  line-height: 1.15;
+  font-weight: 800;
+}
+
+.conteudo-marca em {
+  display: block;
+  font-weight: 300;
+  font-style: italic;
+}
+
+.linha-detalhe {
+  width: 64px;
+  height: 5px;
+  margin-top: 32px;
+  border-radius: 999px;
+  background-color: #22c55e;
+}
+
+.texto-rodape {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.caixa-login {
+  width: 100%;
+  max-width: 430px;
+}
+
+.caixa-login h2 {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 800;
+  color: #020617;
+}
+
+.caixa-login p {
+  margin: 10px 0 40px;
+  font-size: 15px;
+  color: #64748b;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.formGroup label {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.campo-input {
+  position: relative;
+}
+
+.campo-input input {
+  height: 52px;
+  padding-left: 46px;
+  border: 1px solid #cbd5e1;
+  border-radius: 14px;
+  background-color: #ffffff;
+  color: #0f172a;
+  box-shadow: none;
+}
+
+.campo-input input:focus {
+  border-color: #15803d;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15);
+}
+
+.campo-input input::placeholder {
+  color: #94a3b8;
+}
+
+.icone-input {
+  position: absolute;
+  top: 50%;
+  left: 16px;
+  transform: translateY(-50%);
+  font-size: 18px;
+  color: #64748b;
+  pointer-events: none;
+}
+
+.container-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 36px;
+}
+
+.card {
+  padding: 18px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+}
+
+.card h1 {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 0.95rem;
+}
+
+.card span {
+  color: rgba(237, 242, 244, 0.72);
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+.botaoEntrar {
+  margin-top: 12px;
+  width: 100%;
+  height: 50px;
+  border: none;
+  border-radius: 12px;
+
+  background: #0f3f17;
+  color: #ffffff;
+  box-shadow: 0 8px 20px rgba(22, 163, 74, 0.22);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  font-size: 14px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.botaoEntrar:hover {
+  transform: translateY(-1px);
+
+  background-color: #15803d;
+  box-shadow: 0 10px 24px rgba(22, 163, 74, 0.26);
+}
+
+.botaoEntrar:active {
+  background-color: #16a34a;
+  box-shadow: 0 3px 8px rgba(22, 163, 74, 0.18);
+  transform: scale(0.98);
+}
+
+.botaoEntrar svg {
+  font-size: 18px;
+}
+
+@media (max-width: 900px) {
+  .pagina-login {
+    grid-template-columns: 1fr;
+    grid-template-areas: "login";
+  }
+
+  .secao-marca {
+    display: none;
+  }
+
+  .secao-login {
+    padding: 24px;
+  }
+}
