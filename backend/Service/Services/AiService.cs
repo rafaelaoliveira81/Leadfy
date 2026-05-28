@@ -1,10 +1,9 @@
-using Domain.Interfaces;
 using Microsoft.Extensions.Configuration;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 
-public class AiService : IAiService, IGenerativeAiService
+public class AiService : IAiService
 {
     private readonly IConfiguration _config;
 
@@ -47,11 +46,5 @@ public class AiService : IAiService, IGenerativeAiService
             .GetProperty("message")
             .GetProperty("content")
             .GetString();
-    }
-
-    public async Task<string> GenerateAsync(string prompt, string modelName, string apiKey)
-    {
-        var response = await GetResponseFromModel(prompt, modelName, apiKey);
-        return response ?? string.Empty;
     }
 }

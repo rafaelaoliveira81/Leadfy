@@ -12,20 +12,20 @@ public class OpportunityActionPlanApp : IOpportunityActionPlanApp
     private readonly IOpportunityActionPlanRepo _actionPlanRepo;
     private readonly IInteractionRepo _interactionRepo;
     private readonly IAiConfigApp _aiConfigApp;
-    private readonly IGenerativeAiService _generativeAiService;
+    private readonly IAiService _aiService;
 
     public OpportunityActionPlanApp(
         IOpportunityRepo opportunityRepo,
         IOpportunityActionPlanRepo actionPlanRepo,
         IInteractionRepo interactionRepo,
         IAiConfigApp aiConfigApp,
-        IGenerativeAiService generativeAiService)
+        IAiService aiService)
     {
         _opportunityRepo = opportunityRepo;
         _actionPlanRepo = actionPlanRepo;
         _interactionRepo = interactionRepo;
         _aiConfigApp = aiConfigApp;
-        _generativeAiService = generativeAiService;
+        _aiService = aiService;
     }
     public async Task<OpportunityActionPlanDto> GenerateAsync(int opportunityId, int configId)
     {
@@ -41,7 +41,7 @@ public class OpportunityActionPlanApp : IOpportunityActionPlanApp
 
         var modelName = config.Model.GetDescription();
 
-        var generatedActionPlan = await _generativeAiService.GenerateAsync(prompt, modelName, plainApiKey);
+        var generatedActionPlan = await _aiService.GetResponseFromModel(prompt, modelName, plainApiKey);
 
         if (string.IsNullOrWhiteSpace(generatedActionPlan))
             throw new InvalidOperationException("A IA não retornou um plano de ação válido.");

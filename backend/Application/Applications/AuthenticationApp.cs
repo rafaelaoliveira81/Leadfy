@@ -29,9 +29,7 @@ public class AuthenticationApp : IAuthenticationApp
 
         return new LoginResponse
         {
-            Success = true,
             Name = user.Name,
-            Message = "Login realizado com sucesso."
         };
     }
 }

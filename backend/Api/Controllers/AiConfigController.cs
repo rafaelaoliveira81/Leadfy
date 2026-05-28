@@ -1,4 +1,3 @@
-using Application;
 using Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Application.DTO;
@@ -16,17 +15,13 @@ namespace Api.Controllers;
 public class AiConfigController : ControllerBase
 {
     private readonly IAiConfigApp _aiConfigApp;
-    private readonly ILeadApp _leadApp;
-    private readonly IAiService _aiService;
 
     /// <summary>
     /// Inicializa uma nova instância do controller de configuração de IA.
     /// </summary>
-    public AiConfigController(IAiConfigApp aiConfigApp, ILeadApp leadApp, IAiService aiService)
+    public AiConfigController(IAiConfigApp aiConfigApp)
     {
         _aiConfigApp = aiConfigApp;
-        _leadApp = leadApp;
-        _aiService = aiService;
     }
 
     /// <summary>
@@ -270,51 +265,6 @@ public class AiConfigController : ControllerBase
             return StatusCode(500, new { message = ex.Message });
         }
     }
-
-    // /// <summary>
-    // /// Gera um plano de ação para conversão do lead utilizando a configuração de IA informada.
-    // /// </summary>
-    // /// <param name="configId">ID da configuração de IA a ser utilizada.</param>
-    // /// <param name="leadId">ID do lead para o qual o plano será gerado.</param>
-    // /// <returns>Plano de ação gerado pela IA.</returns>
-    // /// <remarks>
-    // /// O template da configuração é preenchido com os dados do lead antes do envio ao modelo.
-    // /// A chave de API é descriptografada internamente e nunca trafega para o cliente.
-    // /// </remarks>
-    // /// <response code="200">Plano de ação gerado com sucesso.</response>
-    // /// <response code="404">Configuração ou lead não localizado.</response>
-    // [HttpPost("{configId:int}/generate-action-plan/{leadId:int}")]
-    // [ProducesResponseType(typeof(object), 200)]
-    // [ProducesResponseType(404)]
-    // public async Task<ActionResult> GenerateActionPlan([FromRoute] int configId, [FromRoute] int leadId)
-    // {
-    //     try
-    //     {
-    //         var config = await _aiConfigApp.GetByIdAsync(configId);
-    //         var lead = await _leadApp.GetByIdAsync(leadId);
-
-    //         var prompt = _aiConfigApp.BuildPrompt(config, lead);
-    //         var plainApiKey = _aiConfigApp.DecryptApiKey(config.ApiKeyHash);
-
-    //         var modelName = Enum.GetName(typeof(AiModelsEnum), config.Model);
-
-    //         var actionPlan = await _aiService.GetResponseFromModel(prompt, modelName, plainApiKey);
-
-    //         return Ok(new { leadId, configId, actionPlan });
-    //     }
-    //     catch (ArgumentException ex)
-    //     {
-    //         return BadRequest(new { message = ex.Message });
-    //     }
-    //     catch (KeyNotFoundException ex)
-    //     {
-    //         return NotFound(new { message = ex.Message });
-    //     }
-    //     catch (Exception ex)
-    //     {
-    //         return StatusCode(500, new { message = ex.Message });
-    //     }
-    // }
 
     #region Métodos auxiliares
 
