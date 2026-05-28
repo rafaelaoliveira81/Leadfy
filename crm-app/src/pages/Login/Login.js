@@ -3,9 +3,11 @@ import "react-toastify/dist/ReactToastify.css";
 import Form from "react-bootstrap/Form";
 import { useState } from "react";
 import { MdEmail, MdLock, MdArrowForward } from "react-icons/md";
+import { authAPI } from "../../services/authApi";
 
 import logo from "../../assets/logo.png";
 import style from "./_login.module.css";
+import { useNavigate } from "react-router-dom";
 
 export default function Login() {
   const INITIAL_USER_STATE = {
@@ -14,6 +16,7 @@ export default function Login() {
   };
 
   const [user, setUser] = useState(INITIAL_USER_STATE);
+  const navigate = useNavigate();
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -26,12 +29,17 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    toast.info("Teste de envio");
+    try {
+      const data = await authAPI.Authentication(user);
+      toast.success("Login feito com sucesso!");
+      navigate("/leads");
+    } catch (error) {
+      toast.error(error?.message ?? "Erro ao efetuar login");
+    }
   };
 
   return (
     <main className={style["pagina-login"]}>
-      <ToastContainer />
       <section className={style["secao-marca"]}>
         <div className={style.logoArea}>
           <img src={logo} alt="Leadfy" className={style.logo} />
@@ -105,6 +113,7 @@ export default function Login() {
           </Form>
         </div>
       </section>
+      <ToastContainer />
     </main>
   );
 }
