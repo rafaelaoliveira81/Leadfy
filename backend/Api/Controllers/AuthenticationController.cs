@@ -5,11 +5,11 @@ namespace Api.Controllers;
 
 [ApiController]
 [Route("api/auth")]
-public class AutenticarController : ControllerBase
+public class AuthenticationController : ControllerBase
 {
     private readonly IAuthenticationApp _authenticationApp;
 
-    public AutenticarController(IAuthenticationApp authenticationApp)
+    public AuthenticationController(IAuthenticationApp authenticationApp)
     {
         _authenticationApp = authenticationApp;
     }
