@@ -2,6 +2,7 @@ using Application.DTO;
 using Application.DTOs;
 using Domain.Entities;
 using Domain.Enuns;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 /// <summary>
@@ -34,6 +35,7 @@ public class OpportunityController : ControllerBase
     /// Retorna status 400 quando os dados informados são inválidos.
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
+    [Authorize]
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -78,6 +80,7 @@ public class OpportunityController : ControllerBase
     /// Retorna status 404 quando a opportunity não é localizada.
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
+    [Authorize]
     [HttpGet("{id:int}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -128,6 +131,7 @@ public class OpportunityController : ControllerBase
     /// Retorna status 404 quando nenhuma opportunity é localizada na busca.
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
+    [Authorize]
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -191,6 +195,7 @@ public class OpportunityController : ControllerBase
     /// <param name="id">Identificador da opportunity.</param>
     /// <param name="request">Dados da requisição para geração do plano.</param>
     /// <returns>Plano de ação gerado e persistido.</returns>
+    [Authorize]
     [HttpPost("{id:int}/generate-action-plan")]
     [ProducesResponseType(typeof(OpportunityActionPlanDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -223,6 +228,7 @@ public class OpportunityController : ControllerBase
     /// </summary>
     /// <param name="id">Identificador da opportunity.</param>
     /// <returns>Lista de planos de ação ordenada por data de geração decrescente.</returns>
+    [Authorize]
     [HttpGet("{id:int}/action-plans")]
     [ProducesResponseType(typeof(IEnumerable<OpportunityActionPlanDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -256,6 +262,7 @@ public class OpportunityController : ControllerBase
     /// Retorna status 404 quando a opportunity não é localizada.
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
+    [Authorize]
     [HttpPut("{id:int}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -303,6 +310,7 @@ public class OpportunityController : ControllerBase
     /// Retorna status 404 quando a opportunity não é localizada.
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
+    [Authorize]
     [HttpDelete("{id:int}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -334,6 +342,7 @@ public class OpportunityController : ControllerBase
     /// Retorna status 404 quando a opportunity não é localizada.
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
+    [Authorize]
     [HttpPatch("{id:int}/deactivate")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -369,6 +378,7 @@ public class OpportunityController : ControllerBase
     /// Retorna status 404 quando a opportunity não é localizada.
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
+    [Authorize]
     [HttpPatch("{id:int}/activate")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -400,6 +410,7 @@ public class OpportunityController : ControllerBase
     /// </summary>
     /// <param name="id">Identificador da opportunity.</param>
     /// <param name="request">Novo stage.</param>
+    [Authorize]
     [HttpPatch("{id:int}/stage")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -431,6 +442,7 @@ public class OpportunityController : ControllerBase
     /// Atualiza o stage e a ordenação de múltiplas opportunities em lote (usado pelo Kanban).
     /// </summary>
     /// <param name="request">Lista de itens com id, stage e sortOrder.</param>
+    [Authorize]
     [HttpPatch("reorder")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
