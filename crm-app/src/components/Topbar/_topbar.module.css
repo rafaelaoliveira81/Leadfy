@@ -27,6 +27,8 @@
 
 .botao-logout {
   text-decoration: none;
+  border: none;
+  background-color: #ffffff;
   color: #0d4316;
   font-size: 3.2vh;
 
@@ -47,9 +49,13 @@
 }
 
 .botao-logout:hover {
-  color: #f8fafc;
+  color: #f1e527;
   background: #145322;
   transform: translateY(-2px);
 
   box-shadow: 0 8px 20px rgba(13, 67, 22, 0.22);
+}
+
+.botao-logout:active {
+  transform: translateY(1px) scale(0.98);
 }

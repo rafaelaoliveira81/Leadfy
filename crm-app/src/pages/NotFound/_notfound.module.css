@@ -1,0 +1,16 @@
+.container {
+  padding: 32px;
+  height: 90vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  background-color: #f8fafc;
+}
+
+.code {
+  font-size: 120px;
+  margin: 0;
+  color: #ff4d4f;
+}

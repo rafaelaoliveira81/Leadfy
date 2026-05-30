@@ -1,9 +1,9 @@
-using Application;
 using Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Application.DTO;
 using Application.Extensions;
 using Dominio.Enums;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Api.Controllers;
 
@@ -16,17 +16,13 @@ namespace Api.Controllers;
 public class AiConfigController : ControllerBase
 {
     private readonly IAiConfigApp _aiConfigApp;
-    private readonly ILeadApp _leadApp;
-    private readonly IAiService _aiService;
 
     /// <summary>
     /// Inicializa uma nova instância do controller de configuração de IA.
     /// </summary>
-    public AiConfigController(IAiConfigApp aiConfigApp, ILeadApp leadApp, IAiService aiService)
+    public AiConfigController(IAiConfigApp aiConfigApp)
     {
         _aiConfigApp = aiConfigApp;
-        _leadApp = leadApp;
-        _aiService = aiService;
     }
 
     /// <summary>
@@ -34,6 +30,7 @@ public class AiConfigController : ControllerBase
     /// </summary>
     /// <returns>Lista de modelos com id e label.</returns>
     /// <response code="200">Lista retornada com sucesso.</response>
+    [Authorize]
     [HttpGet("models")]
     [ProducesResponseType(200)]
     public ActionResult GetModels()
@@ -50,6 +47,7 @@ public class AiConfigController : ControllerBase
     /// <returns>Configuração criada com a chave mascarada.</returns>
     /// <response code="201">Configuração criada com sucesso.</response>
     /// <response code="400">Dados inválidos.</response>
+    [Authorize]
     [HttpPost]
     [ProducesResponseType(typeof(AiConfigResponse), 201)]
     [ProducesResponseType(400)]
@@ -77,6 +75,7 @@ public class AiConfigController : ControllerBase
     /// <returns>Configuração encontrada com a chave mascarada.</returns>
     /// <response code="200">Configuração encontrada.</response>
     /// <response code="404">Configuração não localizada.</response>
+    [Authorize]
     [HttpGet("{id:int}")]
     [ProducesResponseType(typeof(AiConfigResponse), 200)]
     [ProducesResponseType(404)]
@@ -107,6 +106,7 @@ public class AiConfigController : ControllerBase
     /// <returns>Configuração ativa com a chave mascarada.</returns>
     /// <response code="200">Configuração ativa encontrada.</response>
     /// <response code="404">Nenhuma configuração ativa localizada.</response>
+    [Authorize]
     [HttpGet("ativa")]
     [ProducesResponseType(typeof(AiConfigResponse), 200)]
     [ProducesResponseType(404)]
@@ -132,6 +132,7 @@ public class AiConfigController : ControllerBase
     /// </summary>
     /// <returns>Lista de configurações com as chaves mascaradas.</returns>
     /// <response code="200">Lista retornada com sucesso.</response>
+    [Authorize]
     [HttpGet]
     [ProducesResponseType(typeof(IEnumerable<AiConfigResponse>), 200)]
     public async Task<ActionResult> GetAll()
@@ -156,6 +157,7 @@ public class AiConfigController : ControllerBase
     /// <response code="204">Atualização realizada com sucesso.</response>
     /// <response code="400">Dados inválidos.</response>
     /// <response code="404">Configuração não localizada.</response>
+    [Authorize]
     [HttpPut("{id:int}")]
     [ProducesResponseType(204)]
     [ProducesResponseType(400)]
@@ -187,6 +189,7 @@ public class AiConfigController : ControllerBase
     /// <param name="id">ID da configuração.</param>
     /// <response code="204">Remoção realizada com sucesso.</response>
     /// <response code="404">Configuração não localizada.</response>
+    [Authorize]
     [HttpDelete("{id:int}")]
     [ProducesResponseType(204)]
     [ProducesResponseType(404)]
@@ -217,6 +220,7 @@ public class AiConfigController : ControllerBase
     /// <param name="id">ID da configuração.</param>
     /// <response code="204">Ativação realizada com sucesso.</response>
     /// <response code="404">Configuração não localizada.</response>
+    [Authorize]
     [HttpPatch("{id:int}/activate")]
     [ProducesResponseType(204)]
     [ProducesResponseType(404)]
@@ -247,6 +251,7 @@ public class AiConfigController : ControllerBase
     /// <param name="id">ID da configuração.</param>
     /// <response code="204">Desativação realizada com sucesso.</response>
     /// <response code="404">Configuração não localizada.</response>
+    [Authorize]
     [HttpPatch("{id:int}/deactivate")]
     [ProducesResponseType(204)]
     [ProducesResponseType(404)]
@@ -270,51 +275,6 @@ public class AiConfigController : ControllerBase
             return StatusCode(500, new { message = ex.Message });
         }
     }
-
-    // /// <summary>
-    // /// Gera um plano de ação para conversão do lead utilizando a configuração de IA informada.
-    // /// </summary>
-    // /// <param name="configId">ID da configuração de IA a ser utilizada.</param>
-    // /// <param name="leadId">ID do lead para o qual o plano será gerado.</param>
-    // /// <returns>Plano de ação gerado pela IA.</returns>
-    // /// <remarks>
-    // /// O template da configuração é preenchido com os dados do lead antes do envio ao modelo.
-    // /// A chave de API é descriptografada internamente e nunca trafega para o cliente.
-    // /// </remarks>
-    // /// <response code="200">Plano de ação gerado com sucesso.</response>
-    // /// <response code="404">Configuração ou lead não localizado.</response>
-    // [HttpPost("{configId:int}/generate-action-plan/{leadId:int}")]
-    // [ProducesResponseType(typeof(object), 200)]
-    // [ProducesResponseType(404)]
-    // public async Task<ActionResult> GenerateActionPlan([FromRoute] int configId, [FromRoute] int leadId)
-    // {
-    //     try
-    //     {
-    //         var config = await _aiConfigApp.GetByIdAsync(configId);
-    //         var lead = await _leadApp.GetByIdAsync(leadId);
-
-    //         var prompt = _aiConfigApp.BuildPrompt(config, lead);
-    //         var plainApiKey = _aiConfigApp.DecryptApiKey(config.ApiKeyHash);
-
-    //         var modelName = Enum.GetName(typeof(AiModelsEnum), config.Model);
-
-    //         var actionPlan = await _aiService.GetResponseFromModel(prompt, modelName, plainApiKey);
-
-    //         return Ok(new { leadId, configId, actionPlan });
-    //     }
-    //     catch (ArgumentException ex)
-    //     {
-    //         return BadRequest(new { message = ex.Message });
-    //     }
-    //     catch (KeyNotFoundException ex)
-    //     {
-    //         return NotFound(new { message = ex.Message });
-    //     }
-    //     catch (Exception ex)
-    //     {
-    //         return StatusCode(500, new { message = ex.Message });
-    //     }
-    // }
 
     #region Métodos auxiliares
 

@@ -1,5 +1,6 @@
 
 using Application.DTO;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 /// <summary>
@@ -33,6 +34,7 @@ public class UserController : ControllerBase
     /// Este endpoint recebe os dados de entrada, monta a entidade de domínio
     /// e delega o processo de cadastro para a camada de aplicação.
     /// </remarks>
+    [Authorize]
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -70,6 +72,7 @@ public class UserController : ControllerBase
     /// Retorna status 404 quando o usuário não é localizado.
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
+    [Authorize]
     [HttpGet("{id:int}")]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -112,6 +115,7 @@ public class UserController : ControllerBase
     /// Retorna status 404 quando nenhum usuário é localizado.
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
+    [Authorize]
     [HttpGet("email/{email}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -159,6 +163,7 @@ public class UserController : ControllerBase
     /// Retorna status 404 quando nenhum usuário é localizado na busca por nome.
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
+    [Authorize]
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -219,6 +224,7 @@ public class UserController : ControllerBase
     /// Retorna status 404 quando o usuário não é localizado.
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
+    [Authorize]
     [HttpPut("{id:int}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -265,6 +271,7 @@ public class UserController : ControllerBase
     /// Retorna status 404 quando o usuário não é localizado.
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
+    [Authorize]
     [HttpPatch("{id:int}/password")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -306,6 +313,7 @@ public class UserController : ControllerBase
     /// Retorna status 404 quando o usuário não é localizado.
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
+    [Authorize]
     [HttpDelete("{id:int}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -337,6 +345,7 @@ public class UserController : ControllerBase
     /// Retorna status 404 quando o usuário não é localizado.
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
+    [Authorize]
     [HttpPatch("{id:int}/deactivate")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -368,6 +377,7 @@ public class UserController : ControllerBase
     /// Retorna status 404 quando o usuário não é localizado.
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
+    [Authorize]
     [HttpPatch("{id:int}/activate")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

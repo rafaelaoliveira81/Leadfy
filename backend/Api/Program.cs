@@ -1,18 +1,14 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models;
 using Repository.Repositories;
 using Repository.Context;
-using Domain.Interfaces;
 using System.Reflection;
-using Domain.Config;
 using Application;
+using Domain.Config;
 
 var builder = WebApplication.CreateBuilder(args);
 
 var allowedOrigins = builder.Configuration.GetSection("CorsOrigins").Get<string[]>()
                      ?? new[] { "http://localhost:3000" };
-
-builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 
 // Configura o Swagger para incluir comentários XML
 builder.Services.AddSwaggerGen(c =>
@@ -25,8 +21,6 @@ builder.Services.AddSwaggerGen(c =>
 // Adicione serviços ao contêiner.
 builder.Services.AddScoped<IUserApp, UserApp>();
 builder.Services.AddScoped<IAuthenticationApp, AuthenticationApp>();
-builder.Services.AddScoped<IPasswordRecoveryApp, PasswordRecoveryApp>();
-builder.Services.AddScoped<IEmailApp, EmailService>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<ILeadApp, LeadApp>();
 builder.Services.AddScoped<IProductApp, ProductApp>();
@@ -35,8 +29,9 @@ builder.Services.AddScoped<IOpportunityActionPlanApp, OpportunityActionPlanApp>(
 builder.Services.AddScoped<IInteractionApp, InteractionApp>();
 builder.Services.AddScoped<IAiConfigApp, AiConfigApp>();
 builder.Services.AddScoped<IApiKeyEncryptionService, ApiKeyEncryptionService>();
+
 builder.Services.AddScoped<IAiService, AiService>();
-builder.Services.AddScoped<IGenerativeAiService, AiService>();
+builder.Services.AddScoped<ITokenService, TokenService>();
 
 // Adicione as interfaces de banco de dados
 builder.Services.AddScoped<IUserRepo, UserRepository>();
@@ -50,6 +45,10 @@ builder.Services.AddScoped<IAiConfigRepo, AiConfigRepo>();
 
 // Adiciona os serviços
 builder.Services.AddControllers();
+
+builder.Services.Configure<JwtSettings>(
+builder.Configuration.GetSection("JwtSettings")
+);
 
 builder.Services.AddCors(options =>
 {

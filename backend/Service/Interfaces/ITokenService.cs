@@ -1,6 +1,6 @@
 using Domain.Entities;
 
-public interface IJwtApp
+public interface ITokenService
 {
     string GenerateToken(User user);
 }

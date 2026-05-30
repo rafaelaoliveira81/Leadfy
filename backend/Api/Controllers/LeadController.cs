@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Application.DTO;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Api.Controllers;
 
@@ -30,6 +31,7 @@ public class LeadController : ControllerBase
     /// Retorna status 400 quando os dados informados são inválidos.
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
+    [Authorize]
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -65,6 +67,7 @@ public class LeadController : ControllerBase
     /// Retorna status 404 quando o lead não é localizado.
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
+    [Authorize]
     [HttpGet("{id:int}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -91,22 +94,25 @@ public class LeadController : ControllerBase
     /// Obtém leads cadastrados filtrando por status de ativação.
     /// </summary>
     /// <param name="isActive">Filtra por status de ativação (opcional).</param>
+    /// <param name="pagina"> Número da página para paginação (padrão: 1).</param>
+    /// <param name="quantidadePorPagina">Quantidade de itens por página para paginação (padrão: 10).</param>
     /// <returns>
     /// Retorna status 200 com a coleção de leads.
     /// Retorna status 400 quando os parâmetros informados são inválidos.
     /// Retorna status 404 quando nenhum lead é localizado.
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
+    [Authorize]
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> Get([FromQuery] bool? isActive)
+    public async Task<ActionResult> Get([FromQuery] bool? isActive, [FromQuery] int pagina = 1, [FromQuery] int quantidadePorPagina = 10)
     {
         try
         {
-            var leads = await _leadApp.GetAllAsync(isActive);
+            var leads = await _leadApp.GetAllAsync(isActive, pagina, quantidadePorPagina);
 
             return Ok(leads);
         }
@@ -134,7 +140,8 @@ public class LeadController : ControllerBase
     /// Retorna status 404 quando o lead não é localizado.
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
-    [HttpPut("{id:int}")]
+    [Authorize]
+    [HttpPut]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -170,6 +177,7 @@ public class LeadController : ControllerBase
     /// Retorna status 404 quando o lead não é localizado.
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
+    [Authorize]
     [HttpDelete("{id:int}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -202,6 +210,7 @@ public class LeadController : ControllerBase
     /// Retorna status 404 quando o lead não é localizado.
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
+    [Authorize]
     [HttpPatch("{id:int}/deactivate")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -238,6 +247,7 @@ public class LeadController : ControllerBase
     /// Retorna status 404 quando o lead não é localizado.
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
+    [Authorize]
     [HttpPatch("{id:int}/activate")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
