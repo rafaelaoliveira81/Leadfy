@@ -1,5 +1,6 @@
 using Application.DTO;
 using Domain.Enuns;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;
@@ -33,6 +34,7 @@ public class InteractionController : ControllerBase
     /// Retorna status 404 quando a opportunity ou o usuário não são localizados.
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
+    [Authorize]
     [HttpPost("opportunities/{opportunityId:int}/interactions")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -80,6 +82,7 @@ public class InteractionController : ControllerBase
     /// Retorna status 404 quando a opportunity não é localizada.
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
+    [Authorize]
     [HttpGet("opportunities/{opportunityId:int}/interactions")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -117,6 +120,7 @@ public class InteractionController : ControllerBase
     /// Retorna status 404 quando a interação não é localizada.
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
+    [Authorize]
     [HttpGet("interactions/{id:int}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -154,6 +158,7 @@ public class InteractionController : ControllerBase
     /// Retorna status 404 quando a interação não é localizada.
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
+    [Authorize]
     [HttpDelete("interactions/{id:int}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

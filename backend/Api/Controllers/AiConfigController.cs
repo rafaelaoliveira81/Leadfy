@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Application.DTO;
 using Application.Extensions;
 using Dominio.Enums;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Api.Controllers;
 
@@ -29,6 +30,7 @@ public class AiConfigController : ControllerBase
     /// </summary>
     /// <returns>Lista de modelos com id e label.</returns>
     /// <response code="200">Lista retornada com sucesso.</response>
+    [Authorize]
     [HttpGet("models")]
     [ProducesResponseType(200)]
     public ActionResult GetModels()
@@ -45,6 +47,7 @@ public class AiConfigController : ControllerBase
     /// <returns>Configuração criada com a chave mascarada.</returns>
     /// <response code="201">Configuração criada com sucesso.</response>
     /// <response code="400">Dados inválidos.</response>
+    [Authorize]
     [HttpPost]
     [ProducesResponseType(typeof(AiConfigResponse), 201)]
     [ProducesResponseType(400)]
@@ -72,6 +75,7 @@ public class AiConfigController : ControllerBase
     /// <returns>Configuração encontrada com a chave mascarada.</returns>
     /// <response code="200">Configuração encontrada.</response>
     /// <response code="404">Configuração não localizada.</response>
+    [Authorize]
     [HttpGet("{id:int}")]
     [ProducesResponseType(typeof(AiConfigResponse), 200)]
     [ProducesResponseType(404)]
@@ -102,6 +106,7 @@ public class AiConfigController : ControllerBase
     /// <returns>Configuração ativa com a chave mascarada.</returns>
     /// <response code="200">Configuração ativa encontrada.</response>
     /// <response code="404">Nenhuma configuração ativa localizada.</response>
+    [Authorize]
     [HttpGet("ativa")]
     [ProducesResponseType(typeof(AiConfigResponse), 200)]
     [ProducesResponseType(404)]
@@ -127,6 +132,7 @@ public class AiConfigController : ControllerBase
     /// </summary>
     /// <returns>Lista de configurações com as chaves mascaradas.</returns>
     /// <response code="200">Lista retornada com sucesso.</response>
+    [Authorize]
     [HttpGet]
     [ProducesResponseType(typeof(IEnumerable<AiConfigResponse>), 200)]
     public async Task<ActionResult> GetAll()
@@ -151,6 +157,7 @@ public class AiConfigController : ControllerBase
     /// <response code="204">Atualização realizada com sucesso.</response>
     /// <response code="400">Dados inválidos.</response>
     /// <response code="404">Configuração não localizada.</response>
+    [Authorize]
     [HttpPut("{id:int}")]
     [ProducesResponseType(204)]
     [ProducesResponseType(400)]
@@ -182,6 +189,7 @@ public class AiConfigController : ControllerBase
     /// <param name="id">ID da configuração.</param>
     /// <response code="204">Remoção realizada com sucesso.</response>
     /// <response code="404">Configuração não localizada.</response>
+    [Authorize]
     [HttpDelete("{id:int}")]
     [ProducesResponseType(204)]
     [ProducesResponseType(404)]
@@ -212,6 +220,7 @@ public class AiConfigController : ControllerBase
     /// <param name="id">ID da configuração.</param>
     /// <response code="204">Ativação realizada com sucesso.</response>
     /// <response code="404">Configuração não localizada.</response>
+    [Authorize]
     [HttpPatch("{id:int}/activate")]
     [ProducesResponseType(204)]
     [ProducesResponseType(404)]
@@ -242,6 +251,7 @@ public class AiConfigController : ControllerBase
     /// <param name="id">ID da configuração.</param>
     /// <response code="204">Desativação realizada com sucesso.</response>
     /// <response code="404">Configuração não localizada.</response>
+    [Authorize]
     [HttpPatch("{id:int}/deactivate")]
     [ProducesResponseType(204)]
     [ProducesResponseType(404)]

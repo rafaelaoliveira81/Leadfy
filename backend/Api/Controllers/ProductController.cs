@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Application.DTO;
+using Microsoft.AspNetCore.Authorization;
 [ApiController]
 [Route("api/products")]
 public class ProductController : ControllerBase
@@ -24,6 +25,7 @@ public class ProductController : ControllerBase
     /// Retorna status 400 quando os dados informados são inválidos.
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
+    [Authorize]
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -54,6 +56,7 @@ public class ProductController : ControllerBase
     /// Retorna status 404 quando o product não é localizado.
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
+    [Authorize]
     [HttpGet("{id:int}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -86,6 +89,7 @@ public class ProductController : ControllerBase
     /// Retorna status 404 quando nenhum product é localizado.
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
+    [Authorize]
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -123,7 +127,8 @@ public class ProductController : ControllerBase
     /// Retorna status 404 quando o product não é localizado.
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
-    [HttpPut()]
+    [Authorize]
+    [HttpPut]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -159,6 +164,7 @@ public class ProductController : ControllerBase
     /// Retorna status 404 quando o product não é localizado.
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
+    [Authorize]
     [HttpDelete("{id:int}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -191,6 +197,7 @@ public class ProductController : ControllerBase
     /// Retorna status 404 quando o product não é localizado.
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
+    [Authorize]
     [HttpPatch("{id:int}/deactivate")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -227,6 +234,7 @@ public class ProductController : ControllerBase
     /// Retorna status 404 quando o product não é localizado.
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
+    [Authorize]
     [HttpPatch("{id:int}/activate")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
