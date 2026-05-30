@@ -1,9 +1,9 @@
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Form from "react-bootstrap/Form";
 import { useState } from "react";
 import { MdEmail, MdLock, MdArrowForward } from "react-icons/md";
-import { authAPI } from "../../services/authApi";
+import { useAuth } from "../../context/AuthContext";
 
 import logo from "../../assets/logo.png";
 import style from "./_login.module.css";
@@ -17,6 +17,7 @@ export default function Login() {
 
   const [user, setUser] = useState(INITIAL_USER_STATE);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -29,10 +30,11 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     try {
-      const data = await authAPI.Authentication(user);
+      await login(user);
       toast.success("Login feito com sucesso!");
-      navigate("/leads");
+      navigate("/leads", { replace: true });
     } catch (error) {
       toast.error(error?.message ?? "Erro ao efetuar login");
     }
@@ -113,7 +115,6 @@ export default function Login() {
           </Form>
         </div>
       </section>
-      <ToastContainer />
     </main>
   );
 }
