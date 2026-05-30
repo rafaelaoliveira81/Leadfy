@@ -3,7 +3,7 @@ using Repository.Repositories;
 using Repository.Context;
 using System.Reflection;
 using Application;
-using Service.Interfaces;
+using Domain.Config;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -45,6 +45,10 @@ builder.Services.AddScoped<IAiConfigRepo, AiConfigRepo>();
 
 // Adiciona os serviços
 builder.Services.AddControllers();
+
+builder.Services.Configure<JwtSettings>(
+builder.Configuration.GetSection("JwtSettings")
+);
 
 builder.Services.AddCors(options =>
 {
