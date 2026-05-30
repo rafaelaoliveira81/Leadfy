@@ -24,7 +24,6 @@ builder.Services.AddSwaggerGen(c =>
 // Adicione serviços ao contêiner.
 builder.Services.AddScoped<IUserApp, UserApp>();
 builder.Services.AddScoped<IAuthenticationApp, AuthenticationApp>();
-builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<ILeadApp, LeadApp>();
 builder.Services.AddScoped<IProductApp, ProductApp>();
 builder.Services.AddScoped<IOpportunityApp, OpportunityApp>();
@@ -38,7 +37,6 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 
 // Adicione as interfaces de banco de dados
 builder.Services.AddScoped<IUserRepo, UserRepository>();
-builder.Services.AddScoped<IPasswordRecoveryRepo, PasswordRecoveryRepo>();
 builder.Services.AddScoped<ILeadRepo, LeadRepo>();
 builder.Services.AddScoped<IProductRepo, ProductRepo>();
 builder.Services.AddScoped<IOpportunityRepo, OpportunityRepo>();

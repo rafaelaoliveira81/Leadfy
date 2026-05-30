@@ -46,15 +46,33 @@ public class UserRepository : BaseRepo, IUserRepo
             return await connection.QueryFirstOrDefaultAsync<User>(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
         }
     }
-    public async Task<IEnumerable<User>> GetByNameContainingAsync(string nameUser)
+
+    public async Task<PagedResult<User>> GetPagedAsync(
+        bool? isActive,
+        int pagina,
+        int quantidadePorPagina)
     {
-        return await _context.Users
-            .Where(u => EF.Functions.Like(u.Name, $"%{nameUser}%"))
-            .ToListAsync();
-    }
-    public async Task<IEnumerable<User>> GetAllAsync()
-    {
-        return await _context.Users.ToListAsync();
+        using var connection = GetConnection();
+
+        using var multi = await connection.QueryMultipleAsync(
+            "sp_GetUsersPaginado",
+            new
+            {
+                isActive = isActive.HasValue ? (isActive.Value ? 1 : 0) : (int?)null,
+                Pagina = pagina,
+                QuantidadePorPagina = quantidadePorPagina
+            },
+            commandType: System.Data.CommandType.StoredProcedure
+        );
+
+        var totalRegistros = await multi.ReadFirstAsync<int>();
+        var users = (await multi.ReadAsync<User>()).ToList();
+
+        return new PagedResult<User>
+        {
+            TotalRegistros = totalRegistros,
+            Dados = users
+        };
     }
     public async Task<IEnumerable<User>> GetAllByStatusAsync(bool statusUser)
     {

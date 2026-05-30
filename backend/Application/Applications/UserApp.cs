@@ -1,102 +1,106 @@
+using System.Security.Cryptography;
+using Application.DTO;
 using Domain.Entities;
-using Domain.Enuns;
 
 namespace Application;
 
 public class UserApp : IUserApp
 {
     private readonly IUserRepo _userRepo;
-    private readonly IPasswordHasher _passwordHasher;
-    public UserApp(IUserRepo userRepo, IPasswordHasher passwordHasher)
+    public UserApp(IUserRepo userRepo)
     {
         _userRepo = userRepo;
-        _passwordHasher = passwordHasher;
     }
-    public async Task<int> AddAsync(User user, string password)
-    {
-        ValidateUserInformation(user);
 
-        if (string.IsNullOrWhiteSpace(password))
+    public async Task<int> AddAsync(UserRequest request)
+    {
+        ValidateUserInformation(request);
+
+        if (string.IsNullOrWhiteSpace(request.Password))
             throw new ArgumentException("A senha do usuário deve ser informada.");
 
-        var userEntity = await _userRepo.GetByEmailAsync(user.Email);
+        var userEntity = await _userRepo.GetByEmailAsync(request.Email);
         if (userEntity != null)
             throw new ArgumentException("Já existe usuário com o e-mail informado.");
 
-        user.SetPassword(password, _passwordHasher);
+        var user = new User
+        {
+            Name = request.Name,
+            Email = request.Email,
+            PasswordHash = PasswordHasher(request.Password)
+        };
 
         return await _userRepo.AddAsync(user);
     }
-    public async Task<User> GetByIdAsync(int idUser)
+
+    public async Task<UserResponse> GetByIdAsync(int idUser)
     {
-        return await ValidateUserExistsByIdAsync(idUser);
+        var user = await ValidateUserExistsByIdAsync(idUser);
+
+        return MapToUserResponse(user);
     }
-    public async Task<User> GetByEmailAsync(string emailUser)
+
+    public async Task<UserResponse> GetByEmailAsync(string emailUser)
     {
         if (string.IsNullOrWhiteSpace(emailUser))
             throw new ArgumentException("Email não pode ser vazio");
 
-        var userEntity = await _userRepo.GetByEmailAsync(emailUser);
-        if (userEntity == null)
+        var user = await _userRepo.GetByEmailAsync(emailUser);
+        if (user == null)
             throw new KeyNotFoundException("Usuário não localizado.");
 
-        return userEntity;
+        return MapToUserResponse(user);
     }
-    public async Task<IEnumerable<User>> GetByNameContainingAsync(string nameUser)
+
+    public async Task<UserPagedResponse> GetAllAsync(bool? isActive, int pagina, int quantidadePorPagina)
     {
-        if (string.IsNullOrWhiteSpace(nameUser))
-            throw new ArgumentException("Nome do usuário não pode ser vazio");
+        var users = await _userRepo.GetPagedAsync(isActive, pagina, quantidadePorPagina);
 
-        nameUser = nameUser.Trim();
+        var response = users.Dados.Select(MapToUserResponse).ToList();
 
-        var userEntity = await _userRepo.GetByNameContainingAsync(nameUser);
-        if (userEntity == null)
-            throw new KeyNotFoundException("Usuário não localizado.");
-
-        return userEntity;
+        return new UserPagedResponse
+        {
+            TotalRegistros = users.TotalRegistros,
+            Dados = response
+        };
     }
-    public async Task<IEnumerable<User>> GetAllAsync()
-    {
-        return await _userRepo.GetAllAsync();
-    }
-    public async Task<IEnumerable<User>> GetAllByStatusAsync(bool statusUser)
-    {
-        return await _userRepo.GetAllByStatusAsync(statusUser);
-    }
-    public async Task UpdateAsync(User user)
-    {
-        var userEntity = await ValidateUserExistsByIdAsync(user.ID);
 
-        ValidateUserInformation(user);
+    public async Task UpdateAsync(int id, UserRequest request)
+    {
+        var user = await ValidateUserExistsByIdAsync(id);
 
-        var userEntityByEmail = await _userRepo.GetByEmailAsync(user.Email);
+        ValidateUserInformation(request);
 
-        if (userEntityByEmail != null && user.ID != userEntityByEmail.ID)
+        var userByEmail = await _userRepo.GetByEmailAsync(request.Email);
+
+        if (userByEmail != null && id != userByEmail.ID)
             throw new ArgumentException("Já existe um usuário com o e-mail informado.");
 
-        userEntity.Name = user.Name;
-        userEntity.Email = user.Email;
+        user.Name = request.Name;
+        user.Email = request.Email;
 
-        await _userRepo.UpdateAsync(userEntity);
+        await _userRepo.UpdateAsync(user);
     }
-    public async Task UpdatePasswordAsync(int userId, string currentPassword, string newPassword)
-    {
-        var userEntity = await ValidateUserExistsByIdAsync(userId);
 
-        if (string.IsNullOrWhiteSpace(currentPassword))
+    public async Task UpdatePasswordAsync(int id, UserUpdatePasswordRequest request)
+    {
+        var user = await ValidateUserExistsByIdAsync(id);
+
+        if (string.IsNullOrWhiteSpace(request.CurrentPassword))
             throw new ArgumentException("A senha atual deve ser informada.");
 
-        if (string.IsNullOrWhiteSpace(newPassword))
+        if (string.IsNullOrWhiteSpace(request.NewPassword))
             throw new ArgumentException("A nova senha deve ser informada.");
 
-        var isCurrentPasswordValid = _passwordHasher.Verify(userEntity.PasswordHash, currentPassword);
+        if (request.CurrentPassword != request.NewPassword)
+            throw new ArgumentException("As senhas não coincidem.");
 
-        if (!isCurrentPasswordValid)
-            throw new UnauthorizedAccessException("Senha atual incorreta.");
+        if (!VerifyPassword(request.CurrentPassword, user.PasswordHash))
+            throw new ArgumentException("Senha inválida.");
 
-        userEntity.SetPassword(newPassword, _passwordHasher);
+        user.PasswordHash = PasswordHasher(request.NewPassword);
 
-        await _userRepo.UpdateAsync(userEntity);
+        await _userRepo.UpdateAsync(user);
     }
     public async Task DeleteAsync(int idUser)
     {
@@ -121,17 +125,16 @@ public class UserApp : IUserApp
         await _userRepo.UpdateAsync(userEntity);
     }
 
-
     #region Métodos auxiliares
-    private static void ValidateUserInformation(User user)
+    private static void ValidateUserInformation(UserRequest request)
     {
-        if (user == null)
+        if (request == null)
             throw new ArgumentException("Usuário não pode ser vazio.");
 
-        if (string.IsNullOrWhiteSpace(user.Name))
+        if (string.IsNullOrWhiteSpace(request.Name))
             throw new ArgumentException("O nome do usuário deve ser informado.");
 
-        if (string.IsNullOrWhiteSpace(user.Email))
+        if (string.IsNullOrWhiteSpace(request.Email))
             throw new ArgumentException("O e-mail do usuário deve ser informado.");
     }
     private async Task<User> ValidateUserExistsByIdAsync(int idUser)
@@ -142,6 +145,56 @@ public class UserApp : IUserApp
 
         return userEntity;
     }
+    private static UserResponse MapToUserResponse(User user)
+    {
+        return new UserResponse
+        {
+            ID = user.ID,
+            Name = user.Name,
+            Email = user.Email,
+            IsActive = user.IsActive
+        };
+    }
 
+    private string PasswordHasher(string password)
+    {
+        const int iterations = 10000;
+        const int saltSize = 16;
+        const int keySize = 32;
+
+        using var algorithm = new Rfc2898DeriveBytes(
+            password,
+            saltSize,
+            iterations,
+            HashAlgorithmName.SHA256
+        );
+
+        string salt = Convert.ToBase64String(algorithm.Salt);
+        string key = Convert.ToBase64String(algorithm.GetBytes(keySize));
+
+        string passwordHash = "{iterations}.{salt}.{key}";
+
+        return passwordHash;
+    }
+
+    private bool VerifyPassword(string password, string storedHash)
+    {
+        var parts = storedHash.Split('.');
+
+        int iterations = int.Parse(parts[0]);
+        byte[] salt = Convert.FromBase64String(parts[1]);
+        string savedKey = parts[2];
+
+        using var algorithm = new Rfc2898DeriveBytes(
+            password,
+            salt,
+            iterations,
+            HashAlgorithmName.SHA256
+        );
+
+        string generatedKey = Convert.ToBase64String(algorithm.GetBytes(32));
+
+        return generatedKey == savedKey;
+    }
     #endregion
 }

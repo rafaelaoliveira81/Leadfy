@@ -1,6 +1,4 @@
 using Application.DTO;
-using Domain.Entities;
-using Repository.Repositories;
 
 public interface ILeadApp
 {
