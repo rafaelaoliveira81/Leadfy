@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import { Leads } from "../pages/Leads/Leads";
 import NotFound from "../pages/NotFound/NotFound";
 import Login from "../pages/Login/Login";
+import { Users } from "../pages/Users/Users";
 
 function ProtectedRoute() {
   const { isAuthenticated } = useAuth();
@@ -33,7 +34,7 @@ export function Rotas() {
         <Route element={<ProtectedRoute />}>
           <Route path="/leads" element={<Leads />} />
           {/* <Route path="/dashboard" element={<Dashboard />} /> */}
-          {/* <Route path="/users" element={<Users />} /> */}
+          <Route path="/usuarios" element={<Users />} />
           <Route path="/*" element={<NotFound />} />
         </Route>
       </Routes>
