@@ -79,6 +79,9 @@ public class UserApp : IUserApp
         user.Name = request.Name;
         user.Email = request.Email;
 
+        if (!string.IsNullOrWhiteSpace(request.Password))
+            user.PasswordHash = PasswordHasher(request.Password);
+
         await _userRepo.UpdateAsync(user);
     }
 
@@ -92,11 +95,11 @@ public class UserApp : IUserApp
         if (string.IsNullOrWhiteSpace(request.NewPassword))
             throw new ArgumentException("A nova senha deve ser informada.");
 
-        if (request.CurrentPassword != request.NewPassword)
-            throw new ArgumentException("As senhas não coincidem.");
-
         if (!VerifyPassword(request.CurrentPassword, user.PasswordHash))
-            throw new ArgumentException("Senha inválida.");
+            throw new UnauthorizedAccessException("Senha atual inválida.");
+
+        if (request.CurrentPassword == request.NewPassword)
+            throw new ArgumentException("A nova senha deve ser diferente da senha atual.");
 
         user.PasswordHash = PasswordHasher(request.NewPassword);
 
@@ -172,9 +175,7 @@ public class UserApp : IUserApp
         string salt = Convert.ToBase64String(algorithm.Salt);
         string key = Convert.ToBase64String(algorithm.GetBytes(keySize));
 
-        string passwordHash = "{iterations}.{salt}.{key}";
-
-        return passwordHash;
+        return $"{iterations}.{salt}.{key}";
     }
 
     private bool VerifyPassword(string password, string storedHash)

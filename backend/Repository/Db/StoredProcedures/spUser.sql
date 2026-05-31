@@ -93,6 +93,8 @@ CREATE PROCEDURE sp_UpdateUser
     @IsActive BIT
 AS
 BEGIN
+    SET NOCOUNT ON;
+
     UPDATE Users
     SET
         Name = @Name,
