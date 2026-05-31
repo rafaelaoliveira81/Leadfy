@@ -440,7 +440,7 @@ export function Users() {
             </footer>
           </section>
 
-          <ToastContainer position="top-right" autoClose={3000} />
+          <ToastContainer />
         </div>
 
         <Modal show={confirmAction !== null} onHide={closeConfirmModal}>

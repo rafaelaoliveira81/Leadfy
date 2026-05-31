@@ -1,4 +1,4 @@
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Form from "react-bootstrap/Form";
 import { useState } from "react";
@@ -17,6 +17,7 @@ export default function Login() {
 
   const [user, setUser] = useState(INITIAL_USER_STATE);
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
 
   const handleInputChange = (e) => {
@@ -30,6 +31,7 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
 
     try {
       await login(user);
@@ -37,6 +39,8 @@ export default function Login() {
       navigate("/leads", { replace: true });
     } catch (error) {
       toast.error(error?.message ?? "Erro ao efetuar login");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -108,12 +112,17 @@ export default function Login() {
                 />
               </div>
             </Form.Group>
-            <button type="submit" className={style.botaoEntrar}>
-              Entrar
+            <button
+              type="submit"
+              className={style.botaoEntrar}
+              disabled={isLoading}
+            >
+              {isLoading ? "Carregando..." : "Entrar"}
               <MdArrowForward />
             </button>
           </Form>
         </div>
+        <ToastContainer />
       </section>
     </main>
   );
