@@ -1,5 +1,6 @@
 using Application.DTO;
 using Application.DTOs;
+using Api.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -42,7 +43,9 @@ public class OpportunityController : ControllerBase
     {
         try
         {
-            var idOpportunity = await _opportunityApp.AddAsync(opportunityRequest);
+            var userId = User.GetAuthenticatedUserId();
+
+            var idOpportunity = await _opportunityApp.AddAsync(opportunityRequest, userId);
 
             return CreatedAtAction(nameof(GetById), new { id = idOpportunity }, new { id = idOpportunity });
         }
@@ -95,8 +98,6 @@ public class OpportunityController : ControllerBase
     /// <summary>
     /// Obtém opportunities cadastradas. Permite filtrar por status ou lead.
     /// </summary>
-    /// <param name="isActive">Filtra por status de ativação (opcional).</param>
-    /// <param name="leadId">Filtra por lead específico (opcional).</param>
     /// <returns>
     /// Retorna status 200 com a coleção de opportunities.
     /// Retorna status 400 quando os parâmetros informados são inválidos.
@@ -109,24 +110,11 @@ public class OpportunityController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> Get([FromQuery] bool? isActive, [FromQuery] int? leadId)
+    public async Task<ActionResult> Get()
     {
         try
         {
-            IEnumerable<OpportunityResponse> opportunities;
-
-            if (isActive.HasValue)
-            {
-                opportunities = await _opportunityApp.GetAllByStatusAsync(isActive.Value);
-            }
-            else if (leadId.HasValue && leadId > 0)
-            {
-                opportunities = await _opportunityApp.GetByLeadIdAsync(leadId.Value);
-            }
-            else
-            {
-                opportunities = await _opportunityApp.GetAllAsync();
-            }
+            var opportunities = await _opportunityApp.GetAllAsync();
 
             return Ok(opportunities);
         }
@@ -302,78 +290,6 @@ public class OpportunityController : ControllerBase
         catch (KeyNotFoundException ex)
         {
             return NotFound(new { message = ex.Message });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new { message = ex.Message });
-        }
-    }
-
-    /// <summary>
-    /// Desativa uma opportunity.
-    /// </summary>
-    /// <param name="id">Identificador da opportunity a ser desativada.</param>
-    /// <returns>
-    /// Retorna status 204 quando a desativação é realizada com sucesso.
-    /// Retorna status 404 quando a opportunity não é localizada.
-    /// Retorna status 500 em caso de erro interno.
-    /// </returns>
-    [Authorize]
-    [HttpPatch("{id:int}/deactivate")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> Deactivate([FromRoute] int id)
-    {
-        try
-        {
-            await _opportunityApp.DeactivateAsync(id);
-
-            return NoContent();
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(new { message = ex.Message });
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new { message = ex.Message });
-        }
-    }
-
-    /// <summary>
-    /// Ativa uma opportunity.
-    /// </summary>
-    /// <param name="id">Identificador da opportunity a ser ativada.</param>
-    /// <returns>
-    /// Retorna status 204 quando a ativação é realizada com sucesso.
-    /// Retorna status 404 quando a opportunity não é localizada.
-    /// Retorna status 500 em caso de erro interno.
-    /// </returns>
-    [Authorize]
-    [HttpPatch("{id:int}/activate")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> Activate([FromRoute] int id)
-    {
-        try
-        {
-            await _opportunityApp.ActivateAsync(id);
-
-            return NoContent();
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(new { message = ex.Message });
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(new { message = ex.Message });
         }
         catch (Exception ex)
         {

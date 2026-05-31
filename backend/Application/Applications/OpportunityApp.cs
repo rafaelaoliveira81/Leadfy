@@ -15,9 +15,11 @@ public class OpportunityApp : IOpportunityApp
         _leadRepo = leadRepo;
         _productRepo = productRepo;
     }
-    public async Task<int> AddAsync(OpportunityAdd request)
+    public async Task<int> AddAsync(OpportunityAdd request, int idUser)
     {
         var opportunity = MapToOpportunity(request);
+
+        opportunity.UserId = idUser;
 
         await ValidateOpportunityInformation(opportunity);
 
@@ -35,23 +37,11 @@ public class OpportunityApp : IOpportunityApp
 
         return opportunities.Select(MapToOpportunityResponse);
     }
-    public async Task<IEnumerable<OpportunityResponse>> GetAllByStatusAsync(bool statusOpportunity)
-    {
-        var opportunities = await _opportunityRepo.GetAllByStatusAsync(statusOpportunity);
-
-        return opportunities.Select(MapToOpportunityResponse);
-    }
     public async Task<IEnumerable<OpportunityResponse>> GetByStageAsync(int stage)
     {
         ParseOpportunityStage(stage, "A stage informada é inválida.");
 
         var opportunities = await _opportunityRepo.GetByStageAsync(stage);
-
-        return opportunities.Select(MapToOpportunityResponse);
-    }
-    public async Task<IEnumerable<OpportunityResponse>> GetByLeadIdAsync(int leadId)
-    {
-        var opportunities = await _opportunityRepo.GetByLeadIdAsync(leadId);
 
         return opportunities.Select(MapToOpportunityResponse);
     }
@@ -72,7 +62,6 @@ public class OpportunityApp : IOpportunityApp
         if (opportunityEntity.Stage < OpportunityStage.ProposalSent)
             opportunityEntity.Amount = opportunity.Amount;
         opportunityEntity.ExpectedCloseDate = opportunity.ExpectedCloseDate;
-        opportunityEntity.IsActive = opportunity.IsActive;
 
         await _opportunityRepo.UpdateAsync(opportunityEntity);
     }
@@ -81,22 +70,6 @@ public class OpportunityApp : IOpportunityApp
         var opportunityEntity = await ValidateOpportunityExistsByIdAsync(idOpportunity);
 
         await _opportunityRepo.DeleteAsync(opportunityEntity);
-    }
-    public async Task DeactivateAsync(int idOpportunity)
-    {
-        var opportunityEntity = await ValidateOpportunityExistsByIdAsync(idOpportunity);
-
-        opportunityEntity.Deactivate();
-
-        await _opportunityRepo.UpdateAsync(opportunityEntity);
-    }
-    public async Task ActivateAsync(int idOpportunity)
-    {
-        var opportunityEntity = await ValidateOpportunityExistsByIdAsync(idOpportunity);
-
-        opportunityEntity.Activate();
-
-        await _opportunityRepo.UpdateAsync(opportunityEntity);
     }
 
     #region Métodos auxiliares
@@ -170,7 +143,6 @@ public class OpportunityApp : IOpportunityApp
             Stage = (OpportunityStage)request.Stage,
             Amount = request.Amount,
             ExpectedCloseDate = request.ExpectedCloseDate,
-            IsActive = request.IsActive
         };
     }
     private static OpportunityResponse MapToOpportunityResponse(Opportunity opportunity)
@@ -184,12 +156,10 @@ public class OpportunityApp : IOpportunityApp
             ProductName = opportunity.Product?.Name,
             Stage = (int)opportunity.Stage,
             StageName = opportunity.Stage.ToString(),
-            Status = opportunity.IsActive ? "Active" : "Inactive",
             Amount = opportunity.Amount,
             SortOrder = opportunity.SortOrder,
             ExpectedCloseDate = opportunity.ExpectedCloseDate,
             CreatedAt = opportunity.CreatedAt,
-            IsActive = opportunity.IsActive
         };
     }
 

@@ -15,7 +15,9 @@ public class OpportunityConfig : IEntityTypeConfiguration<Opportunity>
               builder.Property(o => o.LeadId)
                      .IsRequired();
 
-              builder.Property(o => o.ProductId)
+              builder.Property(o => o.ProductId);
+
+              builder.Property(o => o.UserId)
                      .IsRequired();
 
               builder.Property(o => o.Stage)
@@ -23,18 +25,13 @@ public class OpportunityConfig : IEntityTypeConfiguration<Opportunity>
                      .HasConversion<int>();
 
               builder.Property(o => o.Amount)
-                     .IsRequired()
                      .HasPrecision(18, 2);
 
-              builder.Property(o => o.ExpectedCloseDate)
-                     .IsRequired();
+              builder.Property(o => o.ExpectedCloseDate);
 
               builder.Property(o => o.CreatedAt)
                      .IsRequired()
                      .ValueGeneratedOnAdd();
-
-              builder.Property(o => o.IsActive)
-                     .IsRequired();
 
               builder.Property(o => o.SortOrder)
                      .IsRequired()
@@ -43,6 +40,11 @@ public class OpportunityConfig : IEntityTypeConfiguration<Opportunity>
               builder.HasOne(o => o.Lead)
                      .WithMany()
                      .HasForeignKey(o => o.LeadId)
+                     .OnDelete(DeleteBehavior.Restrict);
+
+              builder.HasOne(o => o.User)
+                     .WithMany()
+                     .HasForeignKey(o => o.UserId)
                      .OnDelete(DeleteBehavior.Restrict);
 
               builder.HasOne(o => o.Product)

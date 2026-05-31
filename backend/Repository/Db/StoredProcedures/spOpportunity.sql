@@ -1,6 +1,7 @@
 CREATE PROCEDURE sp_CreateOpportunity
     @LeadId INT,
     @ProductId INT,
+    @UserId INT,
     @Stage INT,
     @Amount DECIMAL(18, 2),
     @ExpectedCloseDate DATETIME,
@@ -9,16 +10,17 @@ AS
 BEGIN
     INSERT INTO Opportunities (
         LeadId,
+        UserId,
         ProductId,
         Stage,
         Amount,
         ExpectedCloseDate,
         CreatedAt,
-        IsActive,
         SortOrder
     )
     VALUES (
         @LeadId,
+        @UserId,
         @ProductId,
         @Stage,
         @Amount,
@@ -39,12 +41,12 @@ BEGIN
     SELECT 
         ID,
         LeadId,
+        UserId,
         ProductId,
         Stage,
         Amount,
         ExpectedCloseDate,
         CreatedAt,
-        IsActive,
         SortOrder
     FROM Opportunities
     WHERE ID = @ID;
@@ -52,21 +54,19 @@ END;
 GO
 
 CREATE PROCEDURE sp_GetAllOpportunities
-    @IsActive BIT = NULL
 AS
 BEGIN
     SELECT 
         ID,
         LeadId,
+        UserId,
         ProductId,
         Stage,
         Amount,
         ExpectedCloseDate,
         CreatedAt,
-        IsActive,
         SortOrder
     FROM Opportunities
-    WHERE (@IsActive IS NULL OR IsActive = @IsActive)
     ORDER BY CreatedAt DESC;
 END;
 GO
@@ -78,7 +78,6 @@ CREATE PROCEDURE sp_UpdateOpportunity
     @Stage INT,
     @Amount DECIMAL(18, 2),
     @ExpectedCloseDate DATETIME,
-    @IsActive BIT,
     @SortOrder INT
 AS
 BEGIN
@@ -89,7 +88,6 @@ BEGIN
         Stage = @Stage,
         Amount = @Amount,
         ExpectedCloseDate = @ExpectedCloseDate,
-        IsActive = @IsActive,
         SortOrder = @SortOrder
     WHERE ID = @ID;
 END;
