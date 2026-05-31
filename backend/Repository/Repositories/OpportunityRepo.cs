@@ -57,6 +57,15 @@ public class OpportunityRepo : BaseRepo, IOpportunityRepo
             return await connection.QueryAsync<Opportunity>(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
         }
     }
+    public async Task<IEnumerable<Opportunity>> GetByStageAsync(int stage)
+    {
+        return await _context.Opportunities
+            .Where(o => (int)o.Stage == stage)
+            .Include(o => o.Lead)
+            .Include(o => o.Product)
+            .OrderBy(o => o.SortOrder)
+            .ToListAsync();
+    }
     public async Task<IEnumerable<Opportunity>> GetByLeadIdAsync(int leadId)
     {
         return await _context.Opportunities

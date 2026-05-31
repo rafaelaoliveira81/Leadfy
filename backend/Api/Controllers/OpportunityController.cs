@@ -1,7 +1,5 @@
 using Application.DTO;
 using Application.DTOs;
-using Domain.Entities;
-using Domain.Enuns;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -44,16 +42,7 @@ public class OpportunityController : ControllerBase
     {
         try
         {
-            var opportunity = new Opportunity
-            {
-                LeadId = opportunityRequest.LeadId,
-                ProductId = opportunityRequest.ProductId,
-                Stage = (OpportunityStage)opportunityRequest.Stage,
-                Amount = opportunityRequest.Amount,
-                ExpectedCloseDate = opportunityRequest.ExpectedCloseDate
-            };
-
-            var idOpportunity = await _opportunityApp.AddAsync(opportunity);
+            var idOpportunity = await _opportunityApp.AddAsync(opportunityRequest);
 
             return CreatedAtAction(nameof(GetById), new { id = idOpportunity }, new { id = idOpportunity });
         }
@@ -91,24 +80,7 @@ public class OpportunityController : ControllerBase
         {
             var opportunity = await _opportunityApp.GetByIdAsync(id);
 
-            var opportunityResponse = new OpportunityResponse
-            {
-                ID = opportunity.ID,
-                LeadId = opportunity.LeadId,
-                LeadName = opportunity.Lead?.Name,
-                ProductId = opportunity.ProductId,
-                ProductName = opportunity.Product?.Name,
-                Stage = (int)opportunity.Stage,
-                StageName = opportunity.Stage.ToString(),
-                Status = opportunity.IsActive ? "Active" : "Inactive",
-                Amount = opportunity.Amount,
-                SortOrder = opportunity.SortOrder,
-                ExpectedCloseDate = opportunity.ExpectedCloseDate,
-                CreatedAt = opportunity.CreatedAt,
-                IsActive = opportunity.IsActive
-            };
-
-            return Ok(opportunityResponse);
+            return Ok(opportunity);
         }
         catch (KeyNotFoundException ex)
         {
@@ -141,7 +113,7 @@ public class OpportunityController : ControllerBase
     {
         try
         {
-            IEnumerable<Opportunity> opportunities;
+            IEnumerable<OpportunityResponse> opportunities;
 
             if (isActive.HasValue)
             {
@@ -156,24 +128,7 @@ public class OpportunityController : ControllerBase
                 opportunities = await _opportunityApp.GetAllAsync();
             }
 
-            var opportunitiesResponse = opportunities.Select(o => new OpportunityResponse
-            {
-                ID = o.ID,
-                LeadId = o.LeadId,
-                LeadName = o.Lead?.Name,
-                ProductId = o.ProductId,
-                ProductName = o.Product?.Name,
-                Stage = (int)o.Stage,
-                StageName = o.Stage.ToString(),
-                Status = o.IsActive ? "Active" : "Inactive",
-                Amount = o.Amount,
-                SortOrder = o.SortOrder,
-                ExpectedCloseDate = o.ExpectedCloseDate,
-                CreatedAt = o.CreatedAt,
-                IsActive = o.IsActive
-            });
-
-            return Ok(opportunitiesResponse);
+            return Ok(opportunities);
         }
         catch (ArgumentException ex)
         {
@@ -182,6 +137,38 @@ public class OpportunityController : ControllerBase
         catch (KeyNotFoundException ex)
         {
             return NotFound(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Obtém opportunities de uma stage específica.
+    /// </summary>
+    /// <param name="stage">Stage da opportunity.</param>
+    /// <returns>
+    /// Retorna status 200 com a coleção de opportunities da stage informada.
+    /// Retorna status 400 quando o stage informado é inválido.
+    /// Retorna status 500 em caso de erro interno.
+    /// </returns>
+    [Authorize]
+    [HttpGet("stage/{stage:int}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult> GetByStage([FromRoute] int stage)
+    {
+        try
+        {
+            var opportunities = await _opportunityApp.GetByStageAsync(stage);
+
+            return Ok(opportunities);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
         }
         catch (Exception ex)
         {
@@ -272,18 +259,7 @@ public class OpportunityController : ControllerBase
     {
         try
         {
-            var opportunity = new Opportunity
-            {
-                ID = id,
-                LeadId = opportunityRequest.LeadId,
-                ProductId = opportunityRequest.ProductId,
-                Stage = (OpportunityStage)opportunityRequest.Stage,
-                Amount = opportunityRequest.Amount,
-                ExpectedCloseDate = opportunityRequest.ExpectedCloseDate,
-                IsActive = opportunityRequest.IsActive
-            };
-
-            await _opportunityApp.UpdateAsync(opportunity);
+            await _opportunityApp.UpdateAsync(id, opportunityRequest);
 
             return NoContent();
         }
@@ -420,7 +396,7 @@ public class OpportunityController : ControllerBase
     {
         try
         {
-            await _opportunityApp.ChangeStageAsync(id, (OpportunityStage)request.Stage);
+            await _opportunityApp.ChangeStageAsync(id, request.Stage);
 
             return NoContent();
         }
@@ -452,10 +428,7 @@ public class OpportunityController : ControllerBase
     {
         try
         {
-            var items = request.Items.Select(i =>
-                (i.Id, (OpportunityStage)i.Stage, i.SortOrder));
-
-            await _opportunityApp.UpdateSortOrderAsync(items);
+            await _opportunityApp.UpdateSortOrderAsync(request.Items);
 
             return NoContent();
         }

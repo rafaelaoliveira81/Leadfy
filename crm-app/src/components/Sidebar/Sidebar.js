@@ -32,11 +32,7 @@ export function Sidebar({ children }) {
             link="/dashboard"
             logo={<MdOutlineDashboard />}
           />
-          <SidebarItem
-            texto="Kanban"
-            link="/kanban-oportunidades"
-            logo={<MdViewKanban />}
-          />
+          <SidebarItem texto="Kanban" link="/kanban" logo={<MdViewKanban />} />
           <hr className={style.divider} />
           <SidebarItem texto="Leads" link="/leads" logo={<MdPersonSearch />} />
           <SidebarItem
