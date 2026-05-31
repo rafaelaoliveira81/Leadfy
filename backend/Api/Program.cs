@@ -7,6 +7,7 @@ using Domain.Config;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,12 +20,36 @@ builder.Services.AddSwaggerGen(c =>
     var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
     c.IncludeXmlComments(xmlPath);
+
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = "Autenticação JWT usando Bearer. Insira: 'Bearer {token}'",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT"
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
 });
 
 // Adicione serviços ao contêiner.
 builder.Services.AddScoped<IUserApp, UserApp>();
 builder.Services.AddScoped<IAuthenticationApp, AuthenticationApp>();
-builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<ILeadApp, LeadApp>();
 builder.Services.AddScoped<IProductApp, ProductApp>();
 builder.Services.AddScoped<IOpportunityApp, OpportunityApp>();
@@ -38,7 +63,6 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 
 // Adicione as interfaces de banco de dados
 builder.Services.AddScoped<IUserRepo, UserRepository>();
-builder.Services.AddScoped<IPasswordRecoveryRepo, PasswordRecoveryRepo>();
 builder.Services.AddScoped<ILeadRepo, LeadRepo>();
 builder.Services.AddScoped<IProductRepo, ProductRepo>();
 builder.Services.AddScoped<IOpportunityRepo, OpportunityRepo>();

@@ -24,32 +24,28 @@ public class UserController : ControllerBase
     /// <summary>
     /// Adiciona um novo usuário ao sistema.
     /// </summary>
-    /// <param name="user">Dados necessários para criação do usuário.</param>
+    /// <param name="request">Dados necessários para criação do usuário.</param>
     /// <returns>
     /// Retorna status 201 com o identificador do usuário criado.
+    /// Retorna status 401 quando o usuário não está autenticado.
     /// Retorna status 400 quando os dados informados são inválidos.
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
     /// <remarks>
-    /// Este endpoint recebe os dados de entrada, monta a entidade de domínio
-    /// e delega o processo de cadastro para a camada de aplicação.
+    /// Este endpoint recebe os dados de entrada e delega o processo de cadastro
+    /// para a camada de aplicação.
     /// </remarks>
     [Authorize]
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> Add([FromBody] UserAdd user)
+    public async Task<ActionResult> Add([FromBody] UserRequest request)
     {
         try
         {
-            var userRepository = new Domain.Entities.User()
-            {
-                Name = user.Name,
-                Email = user.Email
-            };
-
-            var idUser = await _userApp.AddAsync(userRepository, user.Password);
+            var idUser = await _userApp.AddAsync(request);
 
             return CreatedAtAction(nameof(GetById), new { id = idUser }, new { id = idUser });
         }
@@ -69,6 +65,7 @@ public class UserController : ControllerBase
     /// <param name="id">Identificador do usuário.</param>
     /// <returns>
     /// Retorna status 200 com os dados do usuário encontrado.
+    /// Retorna status 401 quando o usuário não está autenticado.
     /// Retorna status 404 quando o usuário não é localizado.
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
@@ -82,18 +79,9 @@ public class UserController : ControllerBase
     {
         try
         {
-            var userRepository = await _userApp.GetByIdAsync(id);
+            var user = await _userApp.GetByIdAsync(id);
 
-            var userResponse = new UserResponse
-            {
-                ID = userRepository.ID,
-                Name = userRepository.Name,
-                Email = userRepository.Email,
-                IsActive = userRepository.IsActive,
-                CreatedAt = userRepository.CreatedAt
-            };
-
-            return Ok(userResponse);
+            return Ok(user);
         }
         catch (KeyNotFoundException ex)
         {
@@ -111,6 +99,7 @@ public class UserController : ControllerBase
     /// <param name="email">E-mail do usuário.</param>
     /// <returns>
     /// Retorna status 200 com os dados do usuário encontrado.
+    /// Retorna status 401 quando o usuário não está autenticado.
     /// Retorna status 400 quando o e-mail informado é inválido.
     /// Retorna status 404 quando nenhum usuário é localizado.
     /// Retorna status 500 em caso de erro interno.
@@ -118,6 +107,7 @@ public class UserController : ControllerBase
     [Authorize]
     [HttpGet("email/{email}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -125,18 +115,9 @@ public class UserController : ControllerBase
     {
         try
         {
-            var userRepository = await _userApp.GetByEmailAsync(email);
+            var user = await _userApp.GetByEmailAsync(email);
 
-            var userResponse = new UserResponse
-            {
-                ID = userRepository.ID,
-                Name = userRepository.Name,
-                Email = userRepository.Email,
-                IsActive = userRepository.IsActive,
-                CreatedAt = userRepository.CreatedAt
-            };
-
-            return Ok(userResponse);
+            return Ok(user);
         }
         catch (ArgumentException ex)
         {
@@ -153,51 +134,32 @@ public class UserController : ControllerBase
     }
 
     /// <summary>
-    /// Obtém usuários cadastrados. Permite filtrar por status de ativação ou nome.
+    /// Obtém usuários cadastrados com opção de filtro por status de ativação.
     /// </summary>
     /// <param name="isActive">Filtra por status de ativação (opcional).</param>
-    /// <param name="name">Filtra por nome contendo o valor (opcional).</param>
+    /// <param name="pagina">Número da página para paginação (padrão: 1).</param>
+    /// <param name="quantidadePorPagina">Quantidade de itens por página para paginação (padrão: 10).</param>
     /// <returns>
     /// Retorna status 200 com a coleção de usuários.
+    /// Retorna status 401 quando o usuário não está autenticado.
     /// Retorna status 400 quando os parâmetros informados são inválidos.
-    /// Retorna status 404 quando nenhum usuário é localizado na busca por nome.
+    /// Retorna status 404 quando nenhum usuário é localizado com os filtros informados.
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
     [Authorize]
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> Get([FromQuery] bool? isActive, [FromQuery] string name)
+    public async Task<ActionResult> Get([FromQuery] bool? isActive, [FromQuery] int pagina = 1, [FromQuery] int quantidadePorPagina = 10)
     {
         try
         {
-            IEnumerable<Domain.Entities.User> users;
+            var users = await _userApp.GetAllAsync(isActive, pagina, quantidadePorPagina);
 
-            if (isActive.HasValue)
-            {
-                users = await _userApp.GetAllByStatusAsync(isActive.Value);
-            }
-            else if (!string.IsNullOrWhiteSpace(name))
-            {
-                users = await _userApp.GetByNameContainingAsync(name);
-            }
-            else
-            {
-                users = await _userApp.GetAllAsync();
-            }
-
-            var usersResponse = users.Select(u => new UserResponse
-            {
-                ID = u.ID,
-                Name = u.Name,
-                Email = u.Email,
-                IsActive = u.IsActive,
-                CreatedAt = u.CreatedAt
-            });
-
-            return Ok(usersResponse);
+            return Ok(users);
         }
         catch (ArgumentException ex)
         {
@@ -217,9 +179,10 @@ public class UserController : ControllerBase
     /// Atualiza os dados cadastrais de um usuário.
     /// </summary>
     /// <param name="id">Identificador do usuário a ser atualizado.</param>
-    /// <param name="userRequest">Dados atualizados do usuário.</param>
+    /// <param name="request">Dados atualizados do usuário.</param>
     /// <returns>
     /// Retorna status 204 quando a atualização é realizada com sucesso.
+    /// Retorna status 401 quando o usuário não está autenticado.
     /// Retorna status 400 quando os dados informados são inválidos.
     /// Retorna status 404 quando o usuário não é localizado.
     /// Retorna status 500 em caso de erro interno.
@@ -227,21 +190,15 @@ public class UserController : ControllerBase
     [Authorize]
     [HttpPut("{id:int}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> Update([FromRoute] int id, [FromBody] UserUpdate userRequest)
+    public async Task<ActionResult> Update([FromRoute] int id, [FromBody] UserRequest request)
     {
         try
         {
-            var user = new Domain.Entities.User
-            {
-                ID = id,
-                Name = userRequest.Name,
-                Email = userRequest.Email
-            };
-
-            await _userApp.UpdateAsync(user);
+            await _userApp.UpdateAsync(id, request);
 
             return NoContent();
         }
@@ -266,8 +223,8 @@ public class UserController : ControllerBase
     /// <param name="request">Dados necessários para alteração de senha.</param>
     /// <returns>
     /// Retorna status 204 quando a senha é alterada com sucesso.
+    /// Retorna status 401 quando o usuário não está autenticado ou quando a senha atual informada é inválida.
     /// Retorna status 400 quando os dados informados são inválidos.
-    /// Retorna status 401 quando a senha atual informada é inválida.
     /// Retorna status 404 quando o usuário não é localizado.
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
@@ -278,11 +235,11 @@ public class UserController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> UpdatePassword([FromRoute] int id, [FromBody] UserUpdatePassword request)
+    public async Task<ActionResult> UpdatePassword([FromRoute] int id, [FromBody] UserUpdatePasswordRequest request)
     {
         try
         {
-            await _userApp.UpdatePasswordAsync(id, request.CurrentPassword, request.NewPassword);
+            await _userApp.UpdatePasswordAsync(id, request);
 
             return NoContent();
         }
@@ -310,12 +267,14 @@ public class UserController : ControllerBase
     /// <param name="id">Identificador do usuário a ser removido.</param>
     /// <returns>
     /// Retorna status 204 quando a exclusão é realizada com sucesso.
+    /// Retorna status 401 quando o usuário não está autenticado.
     /// Retorna status 404 quando o usuário não é localizado.
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
     [Authorize]
     [HttpDelete("{id:int}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult> Delete([FromRoute] int id)
@@ -342,12 +301,14 @@ public class UserController : ControllerBase
     /// <param name="id">Identificador do usuário a ser desativado.</param>
     /// <returns>
     /// Retorna status 204 quando a desativação é realizada com sucesso.
+    /// Retorna status 401 quando o usuário não está autenticado.
     /// Retorna status 404 quando o usuário não é localizado.
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
     [Authorize]
     [HttpPatch("{id:int}/deactivate")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult> Deactivate([FromRoute] int id)
@@ -374,12 +335,14 @@ public class UserController : ControllerBase
     /// <param name="id">Identificador do usuário a ser ativado.</param>
     /// <returns>
     /// Retorna status 204 quando a ativação é realizada com sucesso.
+    /// Retorna status 401 quando o usuário não está autenticado.
     /// Retorna status 404 quando o usuário não é localizado.
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
     [Authorize]
     [HttpPatch("{id:int}/activate")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult> Activate([FromRoute] int id)

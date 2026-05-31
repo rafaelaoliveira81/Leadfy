@@ -1,6 +1,6 @@
 namespace Application.DTO;
 
-public class UserAdd
+public class UserRequest
 {
     public string Name { get; set; }
     public string Email { get; set; }
