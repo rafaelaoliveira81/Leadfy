@@ -18,19 +18,24 @@ export function ListingHeader({
         <h1>{title}</h1>
         <p>{description}</p>
       </div>
-      <div className={style["header-acoes"]}>
-        <Select
-          label={selectLabel}
-          options={selectOptions}
-          value={selectValue}
-          onChange={onSelectChange}
-        />
 
-        <Button
-          variant={"success"}
-          buttonLabel={buttonLabel}
-          onButtonClick={onButtonClick}
-        />
+      <div className={style["header-acoes"]}>
+        {selectOptions && (
+          <Select
+            label={selectLabel}
+            options={selectOptions}
+            value={selectValue}
+            onChange={onSelectChange}
+          />
+        )}
+
+        {buttonLabel && (
+          <Button
+            variant="success"
+            buttonLabel={buttonLabel}
+            onButtonClick={onButtonClick}
+          />
+        )}
       </div>
     </header>
   );

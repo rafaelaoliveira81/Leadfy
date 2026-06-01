@@ -9,6 +9,7 @@ import { Topbar } from "../../components/Topbar/Topbar";
 import opportunityAPI from "../../services/opportunityApi";
 
 import style from "./_kanban.module.css";
+import { ListingHeader } from "../../components/ListingHeader/ListingHeader";
 
 const STAGES = [
   { id: 1, label: "Novo Lead", color: "#2563EB" },
@@ -101,11 +102,12 @@ function Kanban() {
       [destStageId]: destItems,
     }));
 
-    const patchResult = await opportunityAPI.PatchStage(
-      movedCard.id,
-      destStageId,
-    );
-    if (patchResult) {
+    try {
+      const patchResult = await opportunityAPI.PatchStage(
+        movedCard.id,
+        destStageId,
+      );
+    } catch {
       setBoard(savedBoard);
       toast.error("Erro ao mover a oportunidade. Tente novamente.");
     }
@@ -121,15 +123,18 @@ function Kanban() {
     setSelectedOpportunity(null);
   }
 
+  const handleClickAddLead = () => {
+    toast.info("Funcionalidade de adicionar lead ainda não implementada.");
+  };
+
   return (
     <Sidebar>
       <Topbar>
         <div className={style["pagina-kanban"]}>
-          <header className={style["kanban-header"]}>
-            <div>
-              <h1>Kanban de Oportunidades</h1>
-            </div>
-          </header>
+          <ListingHeader
+            title="Kanban de Oportunidades"
+            description="Gerencie suas oportunidades."
+          />
 
           {isLoading ? (
             <div className={style["kanban-loading"]}>Carregando board...</div>
