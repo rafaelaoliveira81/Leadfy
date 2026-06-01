@@ -10,6 +10,7 @@ public class Prompt
 
     public Prompt()
     {
+        IsActive = true;
         CreatedAt = DateTime.UtcNow;
     }
 

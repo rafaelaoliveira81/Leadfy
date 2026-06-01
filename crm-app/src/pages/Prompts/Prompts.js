@@ -108,7 +108,13 @@ export function Prompts() {
     }
 
     fetchPrompts(getStatusParam(statusFilter), currentPage);
-  }, [currentPage, statusFilter, fetchPrompts, getStatusParam, isAuthenticated]);
+  }, [
+    currentPage,
+    statusFilter,
+    fetchPrompts,
+    getStatusParam,
+    isAuthenticated,
+  ]);
 
   const closePromptFormModal = () => {
     setPromptFormMode(null);
@@ -336,7 +342,6 @@ export function Prompts() {
                   <th>Título</th>
                   <th>Conteúdo</th>
                   <th>Status</th>
-                  <th>Criado em</th>
                   <th className={style["coluna-acoes"]}></th>
                 </tr>
               </thead>
@@ -368,7 +373,6 @@ export function Prompts() {
                           {listedPrompt.isActive ? "Ativo" : "Inativo"}
                         </span>
                       </td>
-                      <td>{formatDate(listedPrompt.createdAt)}</td>
                       <td className={style["acoes"]}>
                         {listedPrompt.isActive ? (
                           <button

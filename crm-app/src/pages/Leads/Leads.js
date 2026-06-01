@@ -306,6 +306,7 @@ export function Leads() {
                   <th>Nome</th>
                   <th>E-mail</th>
                   <th>Telefone</th>
+                  <th>Status</th>
                   <th className={style["coluna-acoes"]}></th>
                 </tr>
               </thead>
@@ -323,6 +324,15 @@ export function Leads() {
                       <td>{lead.name}</td>
                       <td>{lead.email}</td>
                       <td>{formatPhoneNumberUtil(lead.phoneNumber || "")}</td>
+                      <td>
+                        <span
+                          className={`${style.badge} ${
+                            lead.isActive ? style.ativo : style.inativo
+                          }`}
+                        >
+                          {lead.isActive ? "Ativo" : "Inativo"}
+                        </span>
+                      </td>
                       <td className={style["acoes"]}>
                         {lead.isActive ? (
                           <button
