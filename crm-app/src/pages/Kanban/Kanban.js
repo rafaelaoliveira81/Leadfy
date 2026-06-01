@@ -1,8 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
-import { Modal } from "react-bootstrap";
+import { Badge, Card, Col, Form, Modal, Row } from "react-bootstrap";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { FaDollarSign } from "react-icons/fa";
+import { MdInventory2 } from "react-icons/md";
+import { BsCalendarCheck } from "react-icons/bs";
 
 import { Sidebar } from "../../components/Sidebar/Sidebar";
 import { Topbar } from "../../components/Topbar/Topbar";
@@ -10,6 +13,7 @@ import opportunityAPI from "../../services/opportunityApi";
 
 import style from "./_kanban.module.css";
 import { ListingHeader } from "../../components/ListingHeader/ListingHeader";
+import { Button } from "../../components/Button/Button";
 
 const STAGES = [
   { id: 1, label: "Novo Lead", color: "#2563EB" },
@@ -218,57 +222,132 @@ function Kanban() {
           <ToastContainer position="top-right" autoClose={3000} />
         </div>
 
-        <Modal show={isModalOpen} onHide={handleCloseModal} centered>
+        <Modal show={isModalOpen} onHide={handleCloseModal} centered size="lg">
           <Modal.Header closeButton>
-            <Modal.Title>Detalhes da Oportunidade</Modal.Title>
+            <div className="d-flex flex-row align-items-center gap-3">
+              <h4 className="mb-0">{selectedOpportunity?.leadName}</h4>
+              <Badge bg="primary" className="mb-2">
+                {STAGES.find((s) => s.id === selectedOpportunity?.stage)
+                  ?.label || "NOVO LEAD"}
+              </Badge>
+            </div>
           </Modal.Header>
 
           <Modal.Body>
             {selectedOpportunity && (
-              <div className={style["modal-details"]}>
-                <div className={style["detail-row"]}>
-                  <span className={style["detail-label"]}>Lead</span>
-                  <span>{selectedOpportunity.leadName}</span>
+              <>
+                <Row className="mb-4">
+                  <Col md={4}>
+                    <Form.Group>
+                      <Form.Label>
+                        {" "}
+                        <FaDollarSign /> Valor
+                      </Form.Label>
+
+                      <Form.Control
+                        type="text"
+                        defaultValue={formatCurrency(
+                          selectedOpportunity.amount,
+                        )}
+                      />
+                    </Form.Group>
+                  </Col>
+                  <Col md={4}>
+                    <Form.Group>
+                      <Form.Label>
+                        {" "}
+                        <MdInventory2 /> Produto
+                      </Form.Label>
+
+                      <Form.Control
+                        type="text"
+                        defaultValue={selectedOpportunity.productName}
+                      />
+                    </Form.Group>
+                  </Col>
+                  <Col md={4}>
+                    <Form.Group>
+                      <Form.Label>
+                        <BsCalendarCheck /> Previsão
+                      </Form.Label>
+
+                      <Form.Control
+                        type="date"
+                        defaultValue={
+                          selectedOpportunity.expectedCloseDate?.split("T")[0]
+                        }
+                      />
+                    </Form.Group>
+                  </Col>{" "}
+                </Row>
+
+                {/* Registrar interação */}
+                <div className="mb-4">
+                  <h6>Registrar interação</h6>
+
+                  <Form.Control
+                    as="textarea"
+                    rows={4}
+                    placeholder="O que foi conversado com o lead?"
+                  />
+
+                  <div className="d-flex justify-content-end mt-2">
+                    <Button
+                      variant="success"
+                      buttonLabel="Adicionar interação"
+                      onButtonClick={() =>
+                        toast.info(
+                          "Funcionalidade de registrar interação ainda não implementada.",
+                        )
+                      }
+                    />
+                  </div>
                 </div>
-                <div className={style["detail-row"]}>
-                  <span className={style["detail-label"]}>Produto</span>
-                  <span>{selectedOpportunity.productName}</span>
+
+                {/* Histórico */}
+                <div className="mb-4">
+                  <h6>Histórico (0)</h6>
+
+                  <Card className="p-3 bg-light">
+                    <small className="text-muted">
+                      Nenhuma interação registrada ainda.
+                    </small>
+                  </Card>
                 </div>
-                <div className={style["detail-row"]}>
-                  <span className={style["detail-label"]}>Estágio</span>
-                  <span>
-                    {STAGES.find((s) => s.id === selectedOpportunity.stage)
-                      ?.label ?? selectedOpportunity.stageName}
-                  </span>
-                </div>
-                <div className={style["detail-row"]}>
-                  <span className={style["detail-label"]}>Status</span>
-                  <span>{selectedOpportunity.status}</span>
-                </div>
-                <div className={style["detail-row"]}>
-                  <span className={style["detail-label"]}>Valor</span>
-                  <span>{formatCurrency(selectedOpportunity.amount)}</span>
-                </div>
-                <div className={style["detail-row"]}>
-                  <span className={style["detail-label"]}>Data de Início</span>
-                  <span>{formatDate(selectedOpportunity.createdAt)}</span>
-                </div>
-                <div className={style["detail-row"]}>
-                  <span className={style["detail-label"]}>
-                    Previsão de Fechamento
-                  </span>
-                  <span>
-                    {formatDate(selectedOpportunity.expectedCloseDate)}
-                  </span>
-                </div>
-              </div>
+
+                {/* IA */}
+                <Card className="p-3">
+                  <div className="d-flex justify-content-between align-items-center">
+                    <div>
+                      <h6 className="mb-1">Plano de ação com IA</h6>
+
+                      <small className="text-muted">
+                        Use IA para receber um diagnóstico e próximos passos da
+                        oportunidade.
+                      </small>
+                    </div>
+
+                    <Button
+                      variant="danger"
+                      buttonLabel="Gerar plano"
+                      onButtonClick={() =>
+                        toast.info(
+                          "Funcionalidade de IA ainda não implementada.",
+                        )
+                      }
+                    />
+                  </div>
+                </Card>
+              </>
             )}
           </Modal.Body>
 
           <Modal.Footer>
-            <button className={style["btn-fechar"]} onClick={handleCloseModal}>
-              Fechar
-            </button>
+            <Button
+              variant="secondary"
+              buttonLabel="Fechar"
+              onClick={handleCloseModal}
+            />
           </Modal.Footer>
         </Modal>
       </Topbar>
