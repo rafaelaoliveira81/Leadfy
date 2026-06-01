@@ -16,6 +16,13 @@ export default function mapApiError(error) {
     };
   }
 
+  if (status === 401) {
+    throw {
+      type: "unauthorized",
+      message: data?.message || "Não autorizado",
+    };
+  }
+
   if (status === 404) {
     throw {
       type: "not_found",

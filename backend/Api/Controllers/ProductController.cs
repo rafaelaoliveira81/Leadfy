@@ -82,7 +82,9 @@ public class ProductController : ControllerBase
     /// <summary>
     /// Obtém products cadastrados filtrando por status de ativação.
     /// </summary>
-    /// <param name="isActive">Status de ativação utilizado no filtro.</param>
+    /// <param name="isActive">Filtra por status de ativação (opcional).</param>
+    /// <param name="pagina"> Número da página para paginação (padrão: 1).</param>
+    /// <param name="quantidadePorPagina">Quantidade de itens por página para paginação (padrão: 10).</param>
     /// <returns>
     /// Retorna status 200 com a coleção de products.
     /// Retorna status 400 quando os parâmetros informados são inválidos.
@@ -95,11 +97,11 @@ public class ProductController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> Get([FromQuery] bool? isActive)
+    public async Task<ActionResult> Get([FromQuery] bool? isActive, [FromQuery] int pagina = 1, [FromQuery] int quantidadePorPagina = 10)
     {
         try
         {
-            var products = await _productApp.GetAllAsync(isActive);
+            var products = await _productApp.GetAllAsync(isActive, pagina, quantidadePorPagina);
 
             return Ok(products);
         }

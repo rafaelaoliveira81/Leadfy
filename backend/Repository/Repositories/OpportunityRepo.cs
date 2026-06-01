@@ -16,6 +16,7 @@ public class OpportunityRepo : BaseRepo, IOpportunityRepo
         var parameters = new
         {
             LeadId = opportunity.LeadId,
+            UserId = opportunity.UserId,
             ProductId = opportunity.ProductId,
             Stage = (int)opportunity.Stage,
             Amount = opportunity.Amount,
@@ -42,27 +43,19 @@ public class OpportunityRepo : BaseRepo, IOpportunityRepo
     {
         return await _context.Opportunities
             .Include(o => o.Lead)
+            .Include(o => o.User)
             .Include(o => o.Product)
             .OrderBy(o => o.Stage)
             .ThenBy(o => o.SortOrder)
             .ToListAsync();
     }
-    public async Task<IEnumerable<Opportunity>> GetAllByStatusAsync(bool statusOpportunity)
-    {
-        var query = "sp_GetAllOpportunities";
-        var parameters = new { IsActive = statusOpportunity };
-
-        using (var connection = GetConnection())
-        {
-            return await connection.QueryAsync<Opportunity>(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
-        }
-    }
-    public async Task<IEnumerable<Opportunity>> GetByLeadIdAsync(int leadId)
+    public async Task<IEnumerable<Opportunity>> GetByStageAsync(int stage)
     {
         return await _context.Opportunities
-            .Where(o => o.LeadId == leadId)
+            .Where(o => (int)o.Stage == stage)
             .Include(o => o.Lead)
             .Include(o => o.Product)
+            .OrderBy(o => o.SortOrder)
             .ToListAsync();
     }
     public async Task UpdateAsync(Opportunity opportunity)
@@ -76,7 +69,6 @@ public class OpportunityRepo : BaseRepo, IOpportunityRepo
             Stage = (int)opportunity.Stage,
             Amount = opportunity.Amount,
             ExpectedCloseDate = opportunity.ExpectedCloseDate,
-            IsActive = opportunity.IsActive,
             SortOrder = opportunity.SortOrder
         };
 

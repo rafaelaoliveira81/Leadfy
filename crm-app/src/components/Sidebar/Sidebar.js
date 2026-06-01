@@ -21,7 +21,7 @@ export function Sidebar({ children }) {
     <div className={style.container}>
       <div className={style["container-sidebar"]}>
         <div className={style["header"]}>
-          <Link to="/home">
+          <Link to="/dashboard">
             <img src={logo} alt="Logo-Leadfy" className={style.logo} />
           </Link>
         </div>
@@ -32,11 +32,7 @@ export function Sidebar({ children }) {
             link="/dashboard"
             logo={<MdOutlineDashboard />}
           />
-          <SidebarItem
-            texto="Kanban"
-            link="/kanban-oportunidades"
-            logo={<MdViewKanban />}
-          />
+          <SidebarItem texto="Kanban" link="/kanban" logo={<MdViewKanban />} />
           <hr className={style.divider} />
           <SidebarItem texto="Leads" link="/leads" logo={<MdPersonSearch />} />
           <SidebarItem
@@ -47,11 +43,7 @@ export function Sidebar({ children }) {
           <SidebarItem texto="Usuários" link="/usuarios" logo={<MdPeople />} />
 
           <hr className={style.divider} />
-          <SidebarItem
-            texto="Configuração IA"
-            link="/usuarios"
-            logo={<MdSmartToy />}
-          />
+          <SidebarItem texto="Prompts" link="/prompts" logo={<MdSmartToy />} />
         </div>
       </div>
       <div className={style["pagina-conteudo"]}>{children}</div>

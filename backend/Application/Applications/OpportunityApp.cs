@@ -1,3 +1,4 @@
+using Application.DTO;
 using Domain.Entities;
 using Domain.Enuns;
 
@@ -14,31 +15,40 @@ public class OpportunityApp : IOpportunityApp
         _leadRepo = leadRepo;
         _productRepo = productRepo;
     }
-    public async Task<int> AddAsync(Opportunity opportunity)
+    public async Task<int> AddAsync(OpportunityAdd request, int idUser)
     {
+        var opportunity = MapToOpportunity(request);
+
+        opportunity.UserId = idUser;
+
         await ValidateOpportunityInformation(opportunity);
 
         return await _opportunityRepo.AddAsync(opportunity);
     }
-    public async Task<Opportunity> GetByIdAsync(int idOpportunity)
+    public async Task<OpportunityResponse> GetByIdAsync(int idOpportunity)
     {
-        return await ValidateOpportunityExistsByIdAsync(idOpportunity);
+        var opportunity = await ValidateOpportunityExistsByIdAsync(idOpportunity);
+
+        return MapToOpportunityResponse(opportunity);
     }
-    public async Task<IEnumerable<Opportunity>> GetAllAsync()
+    public async Task<IEnumerable<OpportunityResponse>> GetAllAsync()
     {
-        return await _opportunityRepo.GetAllAsync();
+        var opportunities = await _opportunityRepo.GetAllAsync();
+
+        return opportunities.Select(MapToOpportunityResponse);
     }
-    public async Task<IEnumerable<Opportunity>> GetAllByStatusAsync(bool statusOpportunity)
+    public async Task<IEnumerable<OpportunityResponse>> GetByStageAsync(int stage)
     {
-        return await _opportunityRepo.GetAllByStatusAsync(statusOpportunity);
+        ParseOpportunityStage(stage, "A stage informada é inválida.");
+
+        var opportunities = await _opportunityRepo.GetByStageAsync(stage);
+
+        return opportunities.Select(MapToOpportunityResponse);
     }
-    public async Task<IEnumerable<Opportunity>> GetByLeadIdAsync(int leadId)
+    public async Task UpdateAsync(int idOpportunity, OpportunityUpdate request)
     {
-        return await _opportunityRepo.GetByLeadIdAsync(leadId);
-    }
-    public async Task UpdateAsync(Opportunity opportunity)
-    {
-        var opportunityEntity = await ValidateOpportunityExistsByIdAsync(opportunity.ID);
+        var opportunityEntity = await ValidateOpportunityExistsByIdAsync(idOpportunity);
+        var opportunity = MapToOpportunity(request, idOpportunity);
 
         await ValidateOpportunityInformation(opportunity);
 
@@ -52,7 +62,6 @@ public class OpportunityApp : IOpportunityApp
         if (opportunityEntity.Stage < OpportunityStage.ProposalSent)
             opportunityEntity.Amount = opportunity.Amount;
         opportunityEntity.ExpectedCloseDate = opportunity.ExpectedCloseDate;
-        opportunityEntity.IsActive = opportunity.IsActive;
 
         await _opportunityRepo.UpdateAsync(opportunityEntity);
     }
@@ -61,22 +70,6 @@ public class OpportunityApp : IOpportunityApp
         var opportunityEntity = await ValidateOpportunityExistsByIdAsync(idOpportunity);
 
         await _opportunityRepo.DeleteAsync(opportunityEntity);
-    }
-    public async Task DeactivateAsync(int idOpportunity)
-    {
-        var opportunityEntity = await ValidateOpportunityExistsByIdAsync(idOpportunity);
-
-        opportunityEntity.Deactivate();
-
-        await _opportunityRepo.UpdateAsync(opportunityEntity);
-    }
-    public async Task ActivateAsync(int idOpportunity)
-    {
-        var opportunityEntity = await ValidateOpportunityExistsByIdAsync(idOpportunity);
-
-        opportunityEntity.Activate();
-
-        await _opportunityRepo.UpdateAsync(opportunityEntity);
     }
 
     #region Métodos auxiliares
@@ -91,18 +84,19 @@ public class OpportunityApp : IOpportunityApp
         if (opportunity.LeadId <= 0)
             throw new ArgumentException("O lead vinculado à opportunity deve ser informado.");
 
-        if (opportunity.ProductId <= 0)
-            throw new ArgumentException("O produto vinculado à opportunity deve ser informado.");
+        if (opportunity.ProductId.HasValue && opportunity.ProductId.Value <= 0)
+            throw new ArgumentException("Quando informado, o produto vinculado à opportunity deve ser válido.");
 
         if (opportunity.Amount <= 0)
             throw new ArgumentException("O amount deve ser maior que zero.");
 
-        if (opportunity.ExpectedCloseDate < DateTime.UtcNow.Date)
+        if (opportunity.ExpectedCloseDate.HasValue && opportunity.ExpectedCloseDate.Value < DateTime.UtcNow.Date)
             throw new ArgumentException("A data esperada de encerramento não pode ser anterior a hoje.");
 
         await ValidateLeadExistsByIdAsync(opportunity.LeadId);
 
-        await ValidateProductExistsByIdAsync(opportunity.ProductId);
+        if (opportunity.ProductId.HasValue)
+            await ValidateProductExistsByIdAsync(opportunity.ProductId.Value);
     }
     private async Task<Opportunity> ValidateOpportunityExistsByIdAsync(int idOpportunity)
     {
@@ -129,30 +123,76 @@ public class OpportunityApp : IOpportunityApp
 
         return productEntity;
     }
+    private static Opportunity MapToOpportunity(OpportunityAdd request)
+    {
+        return new Opportunity
+        {
+            LeadId = request.LeadId,
+            ProductId = request.ProductId,
+            Stage = (OpportunityStage)request.Stage,
+            Amount = request.Amount,
+            ExpectedCloseDate = request.ExpectedCloseDate
+        };
+    }
+    private static Opportunity MapToOpportunity(OpportunityUpdate request, int idOpportunity)
+    {
+        return new Opportunity
+        {
+            ID = idOpportunity,
+            LeadId = request.LeadId,
+            ProductId = request.ProductId,
+            Stage = (OpportunityStage)request.Stage,
+            Amount = request.Amount,
+            ExpectedCloseDate = request.ExpectedCloseDate,
+        };
+    }
+    private static OpportunityResponse MapToOpportunityResponse(Opportunity opportunity)
+    {
+        return new OpportunityResponse
+        {
+            ID = opportunity.ID,
+            LeadId = opportunity.LeadId,
+            LeadName = opportunity.Lead?.Name,
+            ProductId = opportunity.ProductId,
+            ProductName = opportunity.Product?.Name,
+            Stage = (int)opportunity.Stage,
+            StageName = opportunity.Stage.ToString(),
+            Amount = opportunity.Amount,
+            SortOrder = opportunity.SortOrder,
+            ExpectedCloseDate = opportunity.ExpectedCloseDate,
+            CreatedAt = opportunity.CreatedAt,
+        };
+    }
 
     #endregion
-    public async Task ChangeStageAsync(int idOpportunity, OpportunityStage newStage)
+    public async Task ChangeStageAsync(int idOpportunity, int newStage)
     {
-        if (!Enum.IsDefined(typeof(OpportunityStage), newStage))
-            throw new ArgumentException("A stage informada é inválida.");
+        var stage = ParseOpportunityStage(newStage, "A stage informada é inválida.");
 
         var opportunityEntity = await ValidateOpportunityExistsByIdAsync(idOpportunity);
 
-        opportunityEntity.Stage = newStage;
+        opportunityEntity.Stage = stage;
 
         await _opportunityRepo.UpdateAsync(opportunityEntity);
     }
-    public async Task UpdateSortOrderAsync(IEnumerable<(int id, OpportunityStage stage, int sortOrder)> items)
+    public async Task UpdateSortOrderAsync(IEnumerable<OpportunitySortOrderItem> items)
     {
         if (items == null || !items.Any())
             throw new ArgumentException("A lista de itens não pode ser vazia.");
 
         foreach (var item in items)
         {
-            var opportunityEntity = await ValidateOpportunityExistsByIdAsync(item.id);
-            opportunityEntity.Stage = item.stage;
-            opportunityEntity.SortOrder = item.sortOrder;
+            var opportunityEntity = await ValidateOpportunityExistsByIdAsync(item.Id);
+            opportunityEntity.Stage = ParseOpportunityStage(item.Stage, "A stage informada na lista é inválida.");
+            opportunityEntity.SortOrder = item.SortOrder;
             await _opportunityRepo.UpdateAsync(opportunityEntity);
         }
+    }
+    private static OpportunityStage ParseOpportunityStage(int stage, string errorMessage)
+    {
+        if (!Enum.IsDefined(typeof(OpportunityStage), stage))
+            throw new ArgumentException(errorMessage);
+
+        return (OpportunityStage)stage;
     }
 }

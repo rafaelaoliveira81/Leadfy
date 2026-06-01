@@ -1,7 +1,6 @@
 using Application.DTO;
 using Application.DTOs;
-using Domain.Entities;
-using Domain.Enuns;
+using Api.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -44,16 +43,9 @@ public class OpportunityController : ControllerBase
     {
         try
         {
-            var opportunity = new Opportunity
-            {
-                LeadId = opportunityRequest.LeadId,
-                ProductId = opportunityRequest.ProductId,
-                Stage = (OpportunityStage)opportunityRequest.Stage,
-                Amount = opportunityRequest.Amount,
-                ExpectedCloseDate = opportunityRequest.ExpectedCloseDate
-            };
+            var userId = User.GetAuthenticatedUserId();
 
-            var idOpportunity = await _opportunityApp.AddAsync(opportunity);
+            var idOpportunity = await _opportunityApp.AddAsync(opportunityRequest, userId);
 
             return CreatedAtAction(nameof(GetById), new { id = idOpportunity }, new { id = idOpportunity });
         }
@@ -91,24 +83,7 @@ public class OpportunityController : ControllerBase
         {
             var opportunity = await _opportunityApp.GetByIdAsync(id);
 
-            var opportunityResponse = new OpportunityResponse
-            {
-                ID = opportunity.ID,
-                LeadId = opportunity.LeadId,
-                LeadName = opportunity.Lead?.Name,
-                ProductId = opportunity.ProductId,
-                ProductName = opportunity.Product?.Name,
-                Stage = (int)opportunity.Stage,
-                StageName = opportunity.Stage.ToString(),
-                Status = opportunity.IsActive ? "Active" : "Inactive",
-                Amount = opportunity.Amount,
-                SortOrder = opportunity.SortOrder,
-                ExpectedCloseDate = opportunity.ExpectedCloseDate,
-                CreatedAt = opportunity.CreatedAt,
-                IsActive = opportunity.IsActive
-            };
-
-            return Ok(opportunityResponse);
+            return Ok(opportunity);
         }
         catch (KeyNotFoundException ex)
         {
@@ -123,8 +98,6 @@ public class OpportunityController : ControllerBase
     /// <summary>
     /// Obtém opportunities cadastradas. Permite filtrar por status ou lead.
     /// </summary>
-    /// <param name="isActive">Filtra por status de ativação (opcional).</param>
-    /// <param name="leadId">Filtra por lead específico (opcional).</param>
     /// <returns>
     /// Retorna status 200 com a coleção de opportunities.
     /// Retorna status 400 quando os parâmetros informados são inválidos.
@@ -137,43 +110,13 @@ public class OpportunityController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> Get([FromQuery] bool? isActive, [FromQuery] int? leadId)
+    public async Task<ActionResult> Get()
     {
         try
         {
-            IEnumerable<Opportunity> opportunities;
+            var opportunities = await _opportunityApp.GetAllAsync();
 
-            if (isActive.HasValue)
-            {
-                opportunities = await _opportunityApp.GetAllByStatusAsync(isActive.Value);
-            }
-            else if (leadId.HasValue && leadId > 0)
-            {
-                opportunities = await _opportunityApp.GetByLeadIdAsync(leadId.Value);
-            }
-            else
-            {
-                opportunities = await _opportunityApp.GetAllAsync();
-            }
-
-            var opportunitiesResponse = opportunities.Select(o => new OpportunityResponse
-            {
-                ID = o.ID,
-                LeadId = o.LeadId,
-                LeadName = o.Lead?.Name,
-                ProductId = o.ProductId,
-                ProductName = o.Product?.Name,
-                Stage = (int)o.Stage,
-                StageName = o.Stage.ToString(),
-                Status = o.IsActive ? "Active" : "Inactive",
-                Amount = o.Amount,
-                SortOrder = o.SortOrder,
-                ExpectedCloseDate = o.ExpectedCloseDate,
-                CreatedAt = o.CreatedAt,
-                IsActive = o.IsActive
-            });
-
-            return Ok(opportunitiesResponse);
+            return Ok(opportunities);
         }
         catch (ArgumentException ex)
         {
@@ -190,10 +133,42 @@ public class OpportunityController : ControllerBase
     }
 
     /// <summary>
-    /// Gera um plano de ação para a opportunity informada usando a configuração de IA escolhida.
+    /// Obtém opportunities de uma stage específica.
+    /// </summary>
+    /// <param name="stage">Stage da opportunity.</param>
+    /// <returns>
+    /// Retorna status 200 com a coleção de opportunities da stage informada.
+    /// Retorna status 400 quando o stage informado é inválido.
+    /// Retorna status 500 em caso de erro interno.
+    /// </returns>
+    [Authorize]
+    [HttpGet("stage/{stage:int}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult> GetByStage([FromRoute] int stage)
+    {
+        try
+        {
+            var opportunities = await _opportunityApp.GetByStageAsync(stage);
+
+            return Ok(opportunities);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Gera um plano de ação para a opportunity informada usando o prompt de IA escolhido.
     /// </summary>
     /// <param name="id">Identificador da opportunity.</param>
-    /// <param name="request">Dados da requisição para geração do plano.</param>
+    /// <param name="request">Dados da requisição contendo o identificador do prompt de IA.</param>
     /// <returns>Plano de ação gerado e persistido.</returns>
     [Authorize]
     [HttpPost("{id:int}/generate-action-plan")]
@@ -201,11 +176,11 @@ public class OpportunityController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> GenerateActionPlan([FromRoute] int id, [FromBody] OpportunityActionPlanGenerate request)
+    public async Task<ActionResult> GenerateActionPlan([FromRoute] int id, [FromBody] GenerateActionPlanRequest request)
     {
         try
         {
-            var dto = await _opportunityActionPlanApp.GenerateAsync(id, request.ConfigId);
+            var dto = await _opportunityActionPlanApp.GenerateAsync(id, request.PromptId);
 
             return Ok(dto);
         }
@@ -272,18 +247,7 @@ public class OpportunityController : ControllerBase
     {
         try
         {
-            var opportunity = new Opportunity
-            {
-                ID = id,
-                LeadId = opportunityRequest.LeadId,
-                ProductId = opportunityRequest.ProductId,
-                Stage = (OpportunityStage)opportunityRequest.Stage,
-                Amount = opportunityRequest.Amount,
-                ExpectedCloseDate = opportunityRequest.ExpectedCloseDate,
-                IsActive = opportunityRequest.IsActive
-            };
-
-            await _opportunityApp.UpdateAsync(opportunity);
+            await _opportunityApp.UpdateAsync(id, opportunityRequest);
 
             return NoContent();
         }
@@ -334,78 +298,6 @@ public class OpportunityController : ControllerBase
     }
 
     /// <summary>
-    /// Desativa uma opportunity.
-    /// </summary>
-    /// <param name="id">Identificador da opportunity a ser desativada.</param>
-    /// <returns>
-    /// Retorna status 204 quando a desativação é realizada com sucesso.
-    /// Retorna status 404 quando a opportunity não é localizada.
-    /// Retorna status 500 em caso de erro interno.
-    /// </returns>
-    [Authorize]
-    [HttpPatch("{id:int}/deactivate")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> Deactivate([FromRoute] int id)
-    {
-        try
-        {
-            await _opportunityApp.DeactivateAsync(id);
-
-            return NoContent();
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(new { message = ex.Message });
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new { message = ex.Message });
-        }
-    }
-
-    /// <summary>
-    /// Ativa uma opportunity.
-    /// </summary>
-    /// <param name="id">Identificador da opportunity a ser ativada.</param>
-    /// <returns>
-    /// Retorna status 204 quando a ativação é realizada com sucesso.
-    /// Retorna status 404 quando a opportunity não é localizada.
-    /// Retorna status 500 em caso de erro interno.
-    /// </returns>
-    [Authorize]
-    [HttpPatch("{id:int}/activate")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> Activate([FromRoute] int id)
-    {
-        try
-        {
-            await _opportunityApp.ActivateAsync(id);
-
-            return NoContent();
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(new { message = ex.Message });
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new { message = ex.Message });
-        }
-    }
-
-    /// <summary>
     /// Altera o stage de uma opportunity (usado pelo Kanban).
     /// </summary>
     /// <param name="id">Identificador da opportunity.</param>
@@ -420,7 +312,7 @@ public class OpportunityController : ControllerBase
     {
         try
         {
-            await _opportunityApp.ChangeStageAsync(id, (OpportunityStage)request.Stage);
+            await _opportunityApp.ChangeStageAsync(id, request.Stage);
 
             return NoContent();
         }
@@ -452,10 +344,7 @@ public class OpportunityController : ControllerBase
     {
         try
         {
-            var items = request.Items.Select(i =>
-                (i.Id, (OpportunityStage)i.Stage, i.SortOrder));
-
-            await _opportunityApp.UpdateSortOrderAsync(items);
+            await _opportunityApp.UpdateSortOrderAsync(request.Items);
 
             return NoContent();
         }

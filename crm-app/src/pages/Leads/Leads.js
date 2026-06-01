@@ -15,6 +15,7 @@ import { Button } from "../../components/Button/Button";
 import { Sidebar } from "../../components/Sidebar/Sidebar";
 import { Topbar } from "../../components/Topbar/Topbar";
 import { ListingHeader } from "../../components/ListingHeader/ListingHeader";
+import { useAuth } from "../../context/AuthContext";
 import { leadAPI } from "../../services/leadApi";
 
 import formatPhoneNumberUtil from "../../utils/FormatPhoneNumberUtil";
@@ -33,6 +34,7 @@ const INITIAL_LEAD_STATE = {
 };
 
 export function Leads() {
+  const { isAuthenticated } = useAuth();
   const [allLeads, setAllLeads] = useState([]);
   const [totalRecords, setTotalRecords] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -92,8 +94,15 @@ export function Leads() {
   }, []);
 
   useEffect(() => {
+    if (!isAuthenticated) {
+      setAllLeads([]);
+      setTotalRecords(0);
+      setIsLoading(false);
+      return;
+    }
+
     fetchLeads(getStatusParam(statusFilter), currentPage);
-  }, [currentPage, statusFilter, fetchLeads, getStatusParam]);
+  }, [currentPage, statusFilter, fetchLeads, getStatusParam, isAuthenticated]);
 
   const closeLeadFormModal = () => {
     setLeadFormMode(null);
@@ -297,6 +306,7 @@ export function Leads() {
                   <th>Nome</th>
                   <th>E-mail</th>
                   <th>Telefone</th>
+                  <th>Status</th>
                   <th className={style["coluna-acoes"]}></th>
                 </tr>
               </thead>
@@ -314,6 +324,15 @@ export function Leads() {
                       <td>{lead.name}</td>
                       <td>{lead.email}</td>
                       <td>{formatPhoneNumberUtil(lead.phoneNumber || "")}</td>
+                      <td>
+                        <span
+                          className={`${style.badge} ${
+                            lead.isActive ? style.ativo : style.inativo
+                          }`}
+                        >
+                          {lead.isActive ? "Ativo" : "Inativo"}
+                        </span>
+                      </td>
                       <td className={style["acoes"]}>
                         {lead.isActive ? (
                           <button

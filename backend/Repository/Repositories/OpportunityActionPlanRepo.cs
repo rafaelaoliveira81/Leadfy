@@ -17,7 +17,6 @@ public class OpportunityActionPlanRepo : BaseRepo, IOpportunityActionPlanRepo
         var parameters = new
         {
             OpportunityId = actionPlan.OpportunityId,
-            AiConfigId = actionPlan.AiConfigId,
             ActionPlan = actionPlan.ActionPlan,
             GeneratedAt = actionPlan.GeneratedAt
         };
@@ -43,7 +42,6 @@ public class OpportunityActionPlanRepo : BaseRepo, IOpportunityActionPlanRepo
     {
         return await _context.OpportunityActionPlans
             .Where(ap => ap.OpportunityId == opportunityId)
-            .Include(ap => ap.AiConfig)
             .OrderByDescending(ap => ap.GeneratedAt)
             .ToListAsync();
     }

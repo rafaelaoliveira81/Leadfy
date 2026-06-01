@@ -1,10 +1,8 @@
 using Application.DTO;
-using Domain.Entities;
-using Repository.Repositories;
 
 public interface ILeadApp
 {
-    Task<int> AddAsync(LeadRequest lead);
+    Task<int> AddAsync(LeadRequest lead, int idUser);
     Task<LeadResponse> GetByIdAsync(int idLead);
     Task<LeadPagedResponse> GetAllAsync(bool? status, int pagina, int quantidadePorPagina);
     Task UpdateAsync(LeadRequest lead);
