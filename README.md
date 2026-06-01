@@ -232,9 +232,11 @@ Principais tabelas do sistema:
 * `Opportunities`;
 * `OpportunityActionPlans`;
 * `Interactions`;
-* `AiConfigs`.
+* `Prompts`.
 
 A estrutura atual do banco atende o cadastro de dados comerciais, gerenciamento do pipeline de vendas, histórico de interações e funcionalidades relacionadas à IA.
+
+![Diagrama ERD](./Diagrama.png)
 
 ---
 
