@@ -36,16 +36,34 @@ public class ProductRepo : BaseRepo, IProductRepo
         }
     }
 
-    public async Task<IEnumerable<Product>> GetAllAsync(bool? statusProduct)
+   public async Task<PagedResult<Product>> GetPagedAsync(
+        bool? isActive,
+        int pagina,
+        int quantidadePorPagina)
     {
-        var query = "sp_GetAllProducts";
-        var parameters = new { IsActive = statusProduct };
+        using var connection = GetConnection();
 
-        using (var connection = GetConnection())
+        using var multi = await connection.QueryMultipleAsync(
+            "sp_GetProductsPaginado",
+            new
+            {
+                Status = isActive.HasValue ? (isActive.Value ? 1 : 0) : (int?)null,
+                Pagina = pagina,
+                QuantidadePorPagina = quantidadePorPagina
+            },
+            commandType: System.Data.CommandType.StoredProcedure
+        );
+
+        var totalRegistros = await multi.ReadFirstAsync<int>();
+        var products = (await multi.ReadAsync<Product>()).ToList();
+
+        return new PagedResult<Product>
         {
-            return await connection.QueryAsync<Product>(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
-        }
+            TotalRegistros = totalRegistros,
+            Dados = products
+        };
     }
+    
     public async Task UpdateAsync(Product product)
     {
         var query = "sp_UpdateProduct";

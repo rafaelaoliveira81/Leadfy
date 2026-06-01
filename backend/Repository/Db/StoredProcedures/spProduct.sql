@@ -27,18 +27,33 @@ BEGIN
 END;
 GO
 
-CREATE PROCEDURE sp_GetAllProducts
-    @IsActive BIT = NULL
+CREATE PROCEDURE sp_GetProductsPaginado
+    @Status INT = NULL,
+    @Pagina INT = 1,
+    @QuantidadePorPagina INT = 10
 AS
 BEGIN
-    SELECT 
-        ID,
+    SET NOCOUNT ON;
+
+    IF @Pagina < 1
+        SET @Pagina = 1;
+
+    SELECT COUNT(*) AS TotalRegistros
+    FROM Products
+    WHERE (@Status IS NULL OR IsActive = @Status);
+
+    SELECT
+        Id,
         Name,
+        Description,
+        Price,
         IsActive,
         CreatedAt
     FROM Products
-    WHERE (@IsActive IS NULL OR IsActive = @IsActive)
-    ORDER BY Name DESC;
+    WHERE (@Status IS NULL OR IsActive = @Status)
+    ORDER BY Id DESC
+    OFFSET (@Pagina - 1) * @QuantidadePorPagina ROWS
+    FETCH NEXT @QuantidadePorPagina ROWS ONLY;
 END;
 GO
 

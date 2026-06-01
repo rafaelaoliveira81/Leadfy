@@ -25,13 +25,17 @@ public class ProductApp : IProductApp
 
         return MapToProductResponse(product);
     }
-    public async Task<IEnumerable<ProductResponse>> GetAllAsync(bool? statusProduct)
+    public async Task<ProductPagedResponse> GetAllAsync(bool? statusProduct, int pagina, int quantidadePorPagina)
     {
-        var products = await _productRepo.GetAllAsync(statusProduct);
+        var products = await _productRepo.GetPagedAsync(statusProduct, pagina, quantidadePorPagina);
 
-        var response = products.Select(p => MapToProductResponse(p)).ToList();
+        var response = products.Dados.Select(p => MapToProductResponse(p)).ToList();
 
-        return response;
+        return new ProductPagedResponse
+        {
+            TotalRegistros = products.TotalRegistros,
+            Dados = response
+        };
     }
     public async Task UpdateAsync(ProductRequest request)
     {
