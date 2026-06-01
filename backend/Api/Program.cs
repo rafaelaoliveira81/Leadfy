@@ -55,7 +55,7 @@ builder.Services.AddScoped<IProductApp, ProductApp>();
 builder.Services.AddScoped<IOpportunityApp, OpportunityApp>();
 builder.Services.AddScoped<IOpportunityActionPlanApp, OpportunityActionPlanApp>();
 builder.Services.AddScoped<IInteractionApp, InteractionApp>();
-builder.Services.AddScoped<IAiConfigApp, AiConfigApp>();
+builder.Services.AddScoped<IPromptApp, PromptApp>();
 builder.Services.AddScoped<IApiKeyEncryptionService, ApiKeyEncryptionService>();
 
 builder.Services.AddScoped<IAiService, AiService>();
@@ -68,7 +68,7 @@ builder.Services.AddScoped<IProductRepo, ProductRepo>();
 builder.Services.AddScoped<IOpportunityRepo, OpportunityRepo>();
 builder.Services.AddScoped<IOpportunityActionPlanRepo, OpportunityActionPlanRepo>();
 builder.Services.AddScoped<IInteractionRepo, InteractionRepo>();
-builder.Services.AddScoped<IAiConfigRepo, AiConfigRepo>();
+builder.Services.AddScoped<IPromptRepo, PromptRepo>();
 
 // Adiciona os serviços
 builder.Services.AddControllers();

@@ -12,9 +12,11 @@ public class AiService : IAiService
         _config = config;
     }
 
-    public async Task<string?> GetResponseFromModel(string prompt, string modelName, string apiKey)
+    public async Task<string?> GetResponseFromModel(string prompt)
     {
         var url = _config["GitHubModels:BaseUrl"];
+        var modelName = _config["GitHubModels:ModelName"];
+        var apiKey = _config["GitHubModels:Token"];
 
         using var httpClient = new HttpClient();
         httpClient.DefaultRequestHeaders.Authorization =

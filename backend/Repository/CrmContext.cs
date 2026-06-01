@@ -17,7 +17,6 @@ public class CRMContext : DbContext
     public DbSet<Opportunity> Opportunities { get; set; }
     public DbSet<OpportunityActionPlan> OpportunityActionPlans { get; set; }
     public DbSet<Interaction> Interactions { get; set; }
-    public DbSet<AiConfig> AiConfigs { get; set; }
     public DbSet<Prompt> Prompts { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -29,7 +28,6 @@ public class CRMContext : DbContext
         modelBuilder.ApplyConfiguration(new OpportunityConfig());
         modelBuilder.ApplyConfiguration(new OpportunityActionPlanConfig());
         modelBuilder.ApplyConfiguration(new InteractionConfig());
-        modelBuilder.ApplyConfiguration(new AiConfigConfig());
         modelBuilder.ApplyConfiguration(new PromptConfig());
 
         base.OnModelCreating(modelBuilder);

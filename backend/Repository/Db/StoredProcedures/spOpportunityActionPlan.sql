@@ -1,6 +1,5 @@
 CREATE PROCEDURE sp_CreateOpportunityActionPlan
     @OpportunityId INT,
-    @AiConfigId INT,
     @ActionPlan NVARCHAR(MAX),
     @GeneratedAt DATETIME2(7)
 AS

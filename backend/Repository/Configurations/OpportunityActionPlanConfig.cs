@@ -22,17 +22,9 @@ public class OpportunityActionPlanConfig : IEntityTypeConfiguration<OpportunityA
         builder.Property(ap => ap.OpportunityId)
                .IsRequired();
 
-        builder.Property(ap => ap.AiConfigId)
-               .IsRequired();
-
         builder.HasOne(ap => ap.Opportunity)
                .WithMany(o => o.ActionPlans)
                .HasForeignKey(ap => ap.OpportunityId)
                .OnDelete(DeleteBehavior.Cascade);
-
-        builder.HasOne(ap => ap.AiConfig)
-               .WithMany()
-               .HasForeignKey(ap => ap.AiConfigId)
-               .OnDelete(DeleteBehavior.Restrict);
     }
 }
