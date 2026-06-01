@@ -121,7 +121,7 @@ public class OpportunityActionPlanApp : IOpportunityActionPlanApp
         prompt.AppendLine("Contexto da oportunidade:");
         prompt.AppendLine($"- Stage atual: {opportunity.Stage}");
         prompt.AppendLine($"- Valor: {opportunity.Amount.ToString("C", culture)}");
-        prompt.AppendLine($"- Fechamento previsto: {opportunity.ExpectedCloseDate.ToString("dd/MM/yyyy", culture)}");
+        prompt.AppendLine($"- Fechamento previsto: {opportunity.ExpectedCloseDate?.ToString("dd/MM/yyyy", culture) ?? "Nao informado"}");
         prompt.AppendLine($"- Produto: {product?.Name ?? "Nao informado"}");
         prompt.AppendLine();
         prompt.AppendLine("Dados do lead vinculado:");

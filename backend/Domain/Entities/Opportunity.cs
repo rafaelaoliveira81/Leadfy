@@ -7,11 +7,11 @@ public class Opportunity
     public int ID { get; set; }
     public int LeadId { get; set; }
     public int UserId { get; set; }
-    public int ProductId { get; set; }
+    public int? ProductId { get; set; }
     public decimal Amount { get; set; }
     public OpportunityStage Stage { get; set; }
     public int SortOrder { get; set; }
-    public DateTime ExpectedCloseDate { get; set; }
+    public DateTime? ExpectedCloseDate { get; set; }
     public DateTime CreatedAt { get; set; }
 
 

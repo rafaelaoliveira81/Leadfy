@@ -1,10 +1,10 @@
 CREATE PROCEDURE sp_CreateOpportunity
     @LeadId INT,
-    @ProductId INT,
+    @ProductId INT = NULL,
     @UserId INT,
     @Stage INT,
     @Amount DECIMAL(18, 2),
-    @ExpectedCloseDate DATETIME,
+    @ExpectedCloseDate DATETIME = NULL,
     @SortOrder INT
 AS
 BEGIN
@@ -26,7 +26,6 @@ BEGIN
         @Amount,
         @ExpectedCloseDate,
         GETUTCDATE(),
-        1,
         @SortOrder
     );
 
@@ -74,10 +73,10 @@ GO
 CREATE PROCEDURE sp_UpdateOpportunity
     @ID INT,
     @LeadId INT,
-    @ProductId INT,
+    @ProductId INT = NULL,
     @Stage INT,
     @Amount DECIMAL(18, 2),
-    @ExpectedCloseDate DATETIME,
+    @ExpectedCloseDate DATETIME = NULL,
     @SortOrder INT
 AS
 BEGIN

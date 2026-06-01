@@ -65,7 +65,6 @@ public class OpportunityRepo : BaseRepo, IOpportunityRepo
         {
             ID = opportunity.ID,
             LeadId = opportunity.LeadId,
-            UserId = opportunity.UserId,
             ProductId = opportunity.ProductId,
             Stage = (int)opportunity.Stage,
             Amount = opportunity.Amount,

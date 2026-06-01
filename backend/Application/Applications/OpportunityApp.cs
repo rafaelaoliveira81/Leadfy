@@ -84,18 +84,19 @@ public class OpportunityApp : IOpportunityApp
         if (opportunity.LeadId <= 0)
             throw new ArgumentException("O lead vinculado à opportunity deve ser informado.");
 
-        if (opportunity.ProductId <= 0)
-            throw new ArgumentException("O produto vinculado à opportunity deve ser informado.");
+        if (opportunity.ProductId.HasValue && opportunity.ProductId.Value <= 0)
+            throw new ArgumentException("Quando informado, o produto vinculado à opportunity deve ser válido.");
 
         if (opportunity.Amount <= 0)
             throw new ArgumentException("O amount deve ser maior que zero.");
 
-        if (opportunity.ExpectedCloseDate < DateTime.UtcNow.Date)
+        if (opportunity.ExpectedCloseDate.HasValue && opportunity.ExpectedCloseDate.Value < DateTime.UtcNow.Date)
             throw new ArgumentException("A data esperada de encerramento não pode ser anterior a hoje.");
 
         await ValidateLeadExistsByIdAsync(opportunity.LeadId);
 
-        await ValidateProductExistsByIdAsync(opportunity.ProductId);
+        if (opportunity.ProductId.HasValue)
+            await ValidateProductExistsByIdAsync(opportunity.ProductId.Value);
     }
     private async Task<Opportunity> ValidateOpportunityExistsByIdAsync(int idOpportunity)
     {
