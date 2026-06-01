@@ -21,7 +21,7 @@ export function Sidebar({ children }) {
     <div className={style.container}>
       <div className={style["container-sidebar"]}>
         <div className={style["header"]}>
-          <Link to="/home">
+          <Link to="/dashboard">
             <img src={logo} alt="Logo-Leadfy" className={style.logo} />
           </Link>
         </div>

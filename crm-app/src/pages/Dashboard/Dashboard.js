@@ -101,7 +101,6 @@ export function Dashboard() {
 
           {isLoading && (
             <div className={style["loading-box"]}>
-              <Spinner animation="border" size="sm" />
               <span>Carregando dashboard...</span>
             </div>
           )}
