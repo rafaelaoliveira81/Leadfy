@@ -7,6 +7,7 @@ import NotFound from "../pages/NotFound/NotFound";
 import Login from "../pages/Login/Login";
 import { Users } from "../pages/Users/Users";
 import Kanban from "../pages/Kanban/Kanban";
+import { Prompts } from "../pages/Prompts/Prompts";
 
 function ProtectedRoute() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -47,7 +48,7 @@ export function Rotas() {
 
         <Route element={<ProtectedRoute />}>
           <Route path="/leads" element={<Leads />} />
-          {/* <Route path="/dashboard" element={<Dashboard />} /> */}
+          <Route path="/prompts" element={<Prompts />} />
           <Route path="/usuarios" element={<Users />} />
           <Route path="/kanban" element={<Kanban />} />
           <Route path="/*" element={<NotFound />} />
