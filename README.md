@@ -1,4 +1,3 @@
-````md
 # Leadfy - Documentação do Projeto
 
 ## Introdução
@@ -77,7 +76,7 @@ Hardware recomendado:
 ```bash
 cd crm-app
 npm install
-````
+```
 
 #### 2. Restaurar dependências do backend
 
