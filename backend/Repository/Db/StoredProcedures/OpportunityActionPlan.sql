@@ -18,7 +18,6 @@ BEGIN
     SELECT
         Id,
         OpportunityId,
-        AiConfigId,
         ActionPlan,
         GeneratedAt
     FROM OpportunityActionPlans

@@ -109,11 +109,11 @@ const opportunityAPI = {
     }
   },
 
-  async GenerateActionPlan(opportunityId, configId) {
+  async GenerateActionPlan(opportunityId, promptId) {
     try {
       const response = await HTTPClient.post(
         `/opportunities/${opportunityId}/generate-action-plan`,
-        { configId },
+        { promptId },
       );
       return response.data;
     } catch (error) {

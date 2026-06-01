@@ -168,7 +168,7 @@ public class OpportunityController : ControllerBase
     /// Gera um plano de ação para a opportunity informada usando o prompt de IA escolhido.
     /// </summary>
     /// <param name="id">Identificador da opportunity.</param>
-    /// <param name="promptId">Identificador do prompt de IA a ser utilizado.</param>
+    /// <param name="request">Dados da requisição contendo o identificador do prompt de IA.</param>
     /// <returns>Plano de ação gerado e persistido.</returns>
     [Authorize]
     [HttpPost("{id:int}/generate-action-plan")]
@@ -176,11 +176,11 @@ public class OpportunityController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> GenerateActionPlan([FromRoute] int id, [FromBody] int promptId)
+    public async Task<ActionResult> GenerateActionPlan([FromRoute] int id, [FromBody] GenerateActionPlanRequest request)
     {
         try
         {
-            var dto = await _opportunityActionPlanApp.GenerateAsync(id, promptId);
+            var dto = await _opportunityActionPlanApp.GenerateAsync(id, request.PromptId);
 
             return Ok(dto);
         }

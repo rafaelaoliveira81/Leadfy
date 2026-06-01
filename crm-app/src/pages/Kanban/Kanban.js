@@ -12,6 +12,7 @@ import { Topbar } from "../../components/Topbar/Topbar";
 import opportunityAPI from "../../services/opportunityApi";
 import { productAPI } from "../../services/productApi";
 import interactionApi from "../../services/interactionApi";
+import { promptAPI } from "../../services/promptApi";
 import { useAuth } from "../../context/AuthContext";
 
 import style from "./_kanban.module.css";
@@ -77,6 +78,12 @@ function Kanban() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const currentUserId = Number(claims?.usuarioId);
+  const [prompts, setPrompts] = useState([]);
+  const [selectedPromptId, setSelectedPromptId] = useState("");
+  const [isGeneratingPlan, setIsGeneratingPlan] = useState(false);
+  const [actionPlans, setActionPlans] = useState([]);
+  const [isActionPlansLoading, setIsActionPlansLoading] = useState(false);
+  const [isActionPlansOpen, setIsActionPlansOpen] = useState(false);
 
   const fetchBoard = useCallback(async () => {
     setIsLoading(true);
@@ -116,6 +123,23 @@ function Kanban() {
     fetchProducts();
   }, []);
 
+  useEffect(() => {
+    async function fetchPrompts() {
+      try {
+        const data = await promptAPI.GetPaged({
+          isActive: true,
+          pagina: 1,
+          quantidadePorPagina: 100,
+        });
+        setPrompts(Array.isArray(data?.dados) ? data.dados : []);
+      } catch {
+        setPrompts([]);
+      }
+    }
+
+    fetchPrompts();
+  }, []);
+
   const fetchInteractions = useCallback(async (opportunityId) => {
     if (!opportunityId) {
       setInteractions([]);
@@ -135,6 +159,24 @@ function Kanban() {
     }
   }, []);
 
+  const fetchActionPlans = useCallback(async (opportunityId) => {
+    if (!opportunityId) {
+      setActionPlans([]);
+      return;
+    }
+
+    setIsActionPlansLoading(true);
+
+    try {
+      const data = await opportunityAPI.GetActionPlans(opportunityId);
+      setActionPlans(Array.isArray(data) ? data : []);
+    } catch {
+      setActionPlans([]);
+    } finally {
+      setIsActionPlansLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     if (!isModalOpen || !selectedOpportunity?.id) {
       setInteractions([]);
@@ -145,6 +187,16 @@ function Kanban() {
 
     fetchInteractions(selectedOpportunity.id);
   }, [fetchInteractions, isModalOpen, selectedOpportunity]);
+
+  useEffect(() => {
+    if (!isModalOpen || !selectedOpportunity?.id) {
+      setActionPlans([]);
+      setIsActionPlansLoading(false);
+      return;
+    }
+
+    fetchActionPlans(selectedOpportunity.id);
+  }, [fetchActionPlans, isModalOpen, selectedOpportunity]);
 
   async function handleDragEnd(result) {
     const { source, destination } = result;
@@ -214,6 +266,11 @@ function Kanban() {
     setIsInteractionSectionOpen(false);
     setOpportunityForm({ amount: "", productId: "", expectedCloseDate: "" });
     setIsSaving(false);
+    setSelectedPromptId("");
+    setIsGeneratingPlan(false);
+    setActionPlans([]);
+    setIsActionPlansLoading(false);
+    setIsActionPlansOpen(false);
   }
 
   function handleOpportunityFieldChange(field, value) {
@@ -328,6 +385,31 @@ function Kanban() {
       toast.error(error?.message || "Erro ao adicionar interação.");
     } finally {
       setIsAddingInteraction(false);
+    }
+  }
+
+  async function handleGeneratePlan() {
+    if (!selectedOpportunity?.id) return;
+
+    if (!selectedPromptId) {
+      toast.error("Selecione um prompt antes de gerar o plano.");
+      return;
+    }
+
+    setIsGeneratingPlan(true);
+
+    try {
+      const newPlan = await opportunityAPI.GenerateActionPlan(
+        selectedOpportunity.id,
+        Number(selectedPromptId),
+      );
+      setActionPlans((prev) => [newPlan, ...prev]);
+      setIsActionPlansOpen(false);
+      toast.success("Plano de ação gerado com sucesso.");
+    } catch (error) {
+      toast.error(error?.message || "Erro ao gerar o plano de ação.");
+    } finally {
+      setIsGeneratingPlan(false);
     }
   }
 
@@ -633,28 +715,103 @@ function Kanban() {
                 </section>
 
                 <Card className={style["ai-card"]}>
-                  <div className={style["ai-card-content"]}>
-                    <div>
-                      <h6 className={style["ai-card-title"]}>
-                        Plano de ação com IA
-                      </h6>
+                  <div className={style["ai-card-header-row"]}>
+                    <h6 className={style["ai-card-title"]}>
+                      Plano de ação com IA
+                    </h6>
+                    <small className={style["interaction-muted-text"]}>
+                      Use IA para receber um diagnóstico e próximos passos da
+                      oportunidade.
+                    </small>
+                  </div>
 
-                      <small className={style["interaction-muted-text"]}>
-                        Use IA para receber um diagnóstico e próximos passos da
-                        oportunidade.
-                      </small>
-                    </div>
+                  <div className={style["ai-controls"]}>
+                    <Form.Control
+                      as="select"
+                      value={selectedPromptId}
+                      onChange={(e) => setSelectedPromptId(e.target.value)}
+                      disabled={isGeneratingPlan}
+                      className={style["ai-prompt-select"]}
+                    >
+                      <option value="">Selecione um prompt</option>
+                      {prompts.map((prompt) => (
+                        <option key={prompt.id} value={prompt.id}>
+                          {prompt.title}
+                        </option>
+                      ))}
+                    </Form.Control>
 
                     <Button
                       variant="danger"
-                      buttonLabel="Gerar plano"
-                      onButtonClick={() =>
-                        toast.info(
-                          "Funcionalidade de IA ainda não implementada.",
-                        )
+                      buttonLabel={
+                        isGeneratingPlan ? "Gerando..." : "Gerar plano"
                       }
+                      onButtonClick={handleGeneratePlan}
+                      disabled={isGeneratingPlan}
                     />
                   </div>
+
+                  {isActionPlansLoading ? (
+                    <small className={style["interaction-muted-text"]}>
+                      Carregando planos...
+                    </small>
+                  ) : actionPlans.length === 0 ? (
+                    <small className={style["interaction-muted-text"]}>
+                      Nenhum plano gerado ainda.
+                    </small>
+                  ) : (
+                    <div className={style["ai-plans-section"]}>
+                      <div className={style["ai-latest-plan"]}>
+                        <div className={style["ai-latest-plan-header"]}>
+                          <span className={style["ai-latest-label"]}>
+                            Último plano gerado
+                          </span>
+                          <small className={style["interaction-muted-text"]}>
+                            {formatDateTime(actionPlans[0].generatedAt)}
+                          </small>
+                        </div>
+                        <p className={style["ai-plan-text"]}>
+                          {actionPlans[0].actionPlan}
+                        </p>
+                      </div>
+
+                      {actionPlans.length > 1 && (
+                        <>
+                          <button
+                            type="button"
+                            className={style["ai-history-toggle"]}
+                            onClick={() =>
+                              setIsActionPlansOpen((prev) => !prev)
+                            }
+                          >
+                            {isActionPlansOpen
+                              ? "Ocultar histórico"
+                              : `Ver histórico (${actionPlans.length - 1} anterior${actionPlans.length - 1 > 1 ? "es" : ""})`}
+                          </button>
+
+                          {isActionPlansOpen && (
+                            <div className={style["ai-history"]}>
+                              {actionPlans.slice(1).map((plan) => (
+                                <div
+                                  key={plan.id}
+                                  className={style["ai-history-item"]}
+                                >
+                                  <small
+                                    className={style["interaction-muted-text"]}
+                                  >
+                                    {formatDateTime(plan.generatedAt)}
+                                  </small>
+                                  <p className={style["ai-plan-text"]}>
+                                    {plan.actionPlan}
+                                  </p>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  )}
                 </Card>
               </>
             )}

@@ -9,6 +9,7 @@ public class OpportunityActionPlanApp : IOpportunityActionPlanApp
 {
     private readonly IOpportunityRepo _opportunityRepo;
     private readonly IOpportunityActionPlanRepo _actionPlanRepo;
+    private readonly ILeadApp _leadApp;
     private readonly IInteractionRepo _interactionRepo;
     private readonly IPromptApp _promptApp;
     private readonly IAiService _aiService;
@@ -16,12 +17,16 @@ public class OpportunityActionPlanApp : IOpportunityActionPlanApp
     public OpportunityActionPlanApp(
         IOpportunityRepo opportunityRepo,
         IOpportunityActionPlanRepo actionPlanRepo,
+        ILeadApp leadApp,
         IInteractionRepo interactionRepo,
+        IPromptApp promptApp,
         IAiService aiService)
     {
         _opportunityRepo = opportunityRepo;
         _actionPlanRepo = actionPlanRepo;
+        _leadApp = leadApp;
         _interactionRepo = interactionRepo;
+        _promptApp = promptApp;
         _aiService = aiService;
     }
     public async Task<OpportunityActionPlanDto> GenerateAsync(int opportunityId, int promptId)
@@ -32,7 +37,9 @@ public class OpportunityActionPlanApp : IOpportunityActionPlanApp
 
         var interactions = (await _interactionRepo.GetLastInteractionsByOpportunityIdAsync(opportunityId)).ToList();
 
-        var promptRequest = BuildPrompt(prompt.Content, opportunity, interactions);
+        var lead = await _leadApp.GetByIdAsync(opportunity.LeadId);
+
+        var promptRequest = BuildPrompt(prompt.Content, opportunity, interactions, lead.Name);
 
         var generatedActionPlan = await _aiService.GetResponseFromModel(promptRequest);
 
@@ -84,10 +91,9 @@ public class OpportunityActionPlanApp : IOpportunityActionPlanApp
         return opportunity;
     }
 
-    private static string BuildPrompt(string promptTemplate, Opportunity opportunity, IEnumerable<Interaction> interactions)
+    private string BuildPrompt(string promptTemplate, Opportunity opportunity, IEnumerable<Interaction> interactions, string leadName)
     {
         var culture = new CultureInfo("pt-BR");
-        var lead = opportunity.Lead;
         var product = opportunity.Product;
         var interactionList = interactions.ToList();
 
@@ -101,7 +107,7 @@ public class OpportunityActionPlanApp : IOpportunityActionPlanApp
         prompt.AppendLine($"- Produto: {product?.Name ?? "Nao informado"}");
         prompt.AppendLine();
         prompt.AppendLine("Dados do lead vinculado:");
-        prompt.AppendLine($"- Nome: {lead?.Name ?? "Nao informado"}");
+        prompt.AppendLine($"- Nome: {leadName}");
         prompt.AppendLine();
         prompt.AppendLine("Data Atual: " + DateTime.Now.ToString("dd/MM/yyyy HH:mm", culture));
         prompt.AppendLine("Ultimas 3 interacoes registradas:");
@@ -127,11 +133,15 @@ public class OpportunityActionPlanApp : IOpportunityActionPlanApp
         prompt.AppendLine("Sempre conduza a mensagem para fechamento ou avanço claro da negociação.");
         prompt.AppendLine("A mensagem deve:");
         prompt.AppendLine("- Ser natural, persuasiva e profissional;");
+        prompt.AppendLine("- Conter o nome do lead e uma saudação agradável;");
         prompt.AppendLine("- Considerar o estágio atual da oportunidade;");
         prompt.AppendLine("- Levar em conta as objeções ou interesses demonstrados nas interações;");
         prompt.AppendLine("- Incentivar uma próxima ação clara (resposta, reunião, fechamento ou follow-up);");
         prompt.AppendLine("- Ser objetiva e pronta para envio;");
         prompt.AppendLine("- Não explicar o raciocínio, retornar apenas a mensagem final.");
+
+        Console.WriteLine("Prompt gerado para IA:");
+        Console.WriteLine(prompt.ToString());
 
         return prompt.ToString();
     }
