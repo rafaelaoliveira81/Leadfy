@@ -1,3 +1,5 @@
+using Domain.DTO;
+
 namespace Application.DTO;
 
 public class DashboardResponse
@@ -9,5 +11,5 @@ public class DashboardResponse
     public decimal? TotalPipelineValue { get; set; }
     public decimal? ConversionRate { get; set; }
     public decimal? RealRevenue { get; set; }
-    public string? StageAnalytics { get; set; }
+    public List<DashboardStageDto> StageAnalytics { get; set; } = new();
 }

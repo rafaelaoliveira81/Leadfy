@@ -27,6 +27,11 @@ export function Sidebar({ children }) {
         </div>
         <hr className={style.divider} />
         <div className={style["style.nav"]}>
+          <SidebarItem
+            texto="Dashboard"
+            link="/dashboard"
+            logo={<MdOutlineDashboard />}
+          />
           <SidebarItem texto="Kanban" link="/kanban" logo={<MdViewKanban />} />
           <hr className={style.divider} />
           <SidebarItem texto="Leads" link="/leads" logo={<MdPersonSearch />} />
@@ -38,11 +43,7 @@ export function Sidebar({ children }) {
           <SidebarItem texto="Usuários" link="/usuarios" logo={<MdPeople />} />
 
           <hr className={style.divider} />
-          <SidebarItem
-            texto="Prompts"
-            link="/prompts"
-            logo={<MdSmartToy />}
-          />
+          <SidebarItem texto="Prompts" link="/prompts" logo={<MdSmartToy />} />
         </div>
       </div>
       <div className={style["pagina-conteudo"]}>{children}</div>

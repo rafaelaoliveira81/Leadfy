@@ -340,7 +340,7 @@ export function Prompts() {
               <thead>
                 <tr>
                   <th>Título</th>
-                  <th>Conteúdo</th>
+                  <th>Prompt</th>
                   <th>Status</th>
                   <th className={style["coluna-acoes"]}></th>
                 </tr>
@@ -363,7 +363,11 @@ export function Prompts() {
                   allPrompts.map((listedPrompt) => (
                     <tr key={listedPrompt.id}>
                       <td>{listedPrompt.title}</td>
-                      <td>{listedPrompt.content}</td>
+                      <td>
+                        {listedPrompt.content?.length > 50
+                          ? `${listedPrompt.content.slice(0, 50)}...`
+                          : listedPrompt.content}
+                      </td>
                       <td>
                         <span
                           className={`${style.badge} ${

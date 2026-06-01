@@ -1,11 +1,13 @@
 using Application.DTO;
+using Domain.DTO;
+using System.Text.Json;
 namespace Application;
 
-public class Dashboard : IDashboardApp
+public class DashboardApp : IDashboardApp
 {
     private readonly IDashboardRepo _dashboardRepo;
 
-    public Dashboard(IDashboardRepo dashboardRepo)
+    public DashboardApp(IDashboardRepo dashboardRepo)
     {
         _dashboardRepo = dashboardRepo;
     }
@@ -23,9 +25,19 @@ public class Dashboard : IDashboardApp
             TotalPipelineValue = dados.TotalPipelineValue,
             ConversionRate = dados.ConversionRate,
             RealRevenue = dados.RealRevenue,
-            StageAnalytics = dados.StageAnalytics.ToString()
+            StageAnalytics = DeserializeStageAnalytics(dados.StageAnalytics)
         };
 
         return response;
+    }
+
+    private static List<DashboardStageDto> DeserializeStageAnalytics(string stageAnalytics)
+    {
+        if (string.IsNullOrWhiteSpace(stageAnalytics))
+        {
+            return new List<DashboardStageDto>();
+        }
+
+        return JsonSerializer.Deserialize<List<DashboardStageDto>>(stageAnalytics) ?? new List<DashboardStageDto>();
     }
 }

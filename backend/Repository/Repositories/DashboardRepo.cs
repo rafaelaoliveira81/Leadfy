@@ -10,7 +10,7 @@ public class DashboardRepo : BaseRepo, IDashboardRepo
     {
     }
 
-    public async Task<DashboardDto?> GetDashboardDataAsync()
+    public async Task<DashboardDto> GetDashboardDataAsync()
     {
         const string query = @"
             SELECT *
@@ -18,8 +18,6 @@ public class DashboardRepo : BaseRepo, IDashboardRepo
 
         using var connection = GetConnection();
 
-        var result = await connection.QueryFirstOrDefaultAsync<DashboardDto>(query);
-
-        return result;
+        return await connection.QueryFirstOrDefaultAsync<DashboardDto>(query) ?? new DashboardDto();
     }
 }

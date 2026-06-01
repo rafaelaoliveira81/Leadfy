@@ -4,25 +4,28 @@ import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { FaDollarSign } from "react-icons/fa";
-import { MdInventory2 } from "react-icons/md";
+import { MdExpandMore, MdInventory2 } from "react-icons/md";
 import { BsCalendarCheck } from "react-icons/bs";
 
 import { Sidebar } from "../../components/Sidebar/Sidebar";
 import { Topbar } from "../../components/Topbar/Topbar";
 import opportunityAPI from "../../services/opportunityApi";
+import { productAPI } from "../../services/productApi";
+import interactionApi from "../../services/interactionApi";
+import { useAuth } from "../../context/AuthContext";
 
 import style from "./_kanban.module.css";
 import { ListingHeader } from "../../components/ListingHeader/ListingHeader";
 import { Button } from "../../components/Button/Button";
 
 const STAGES = [
-  { id: 1, label: "Novo Lead", color: "#2563EB" },
-  { id: 2, label: "Em contato", color: "#0891B2" },
-  { id: 3, label: "Qualificado", color: "#7C3AED" },
-  { id: 4, label: "Proposta Enviada", color: "#EA580C" },
-  { id: 5, label: "Negociação", color: "#CA8A04" },
-  { id: 6, label: "Ganho", color: "#15803D" },
-  { id: 7, label: "Perdido", color: "#B91C1C" },
+  { id: 1, label: "Novo Lead", headerClassName: "stage-blue" },
+  { id: 2, label: "Em contato", headerClassName: "stage-cyan" },
+  { id: 3, label: "Qualificado", headerClassName: "stage-purple" },
+  { id: 4, label: "Proposta Enviada", headerClassName: "stage-orange" },
+  { id: 5, label: "Negociação", headerClassName: "stage-yellow" },
+  { id: 6, label: "Ganho", headerClassName: "stage-green" },
+  { id: 7, label: "Perdido", headerClassName: "stage-red" },
 ];
 
 function formatDate(dateString) {
@@ -30,18 +33,50 @@ function formatDate(dateString) {
   return new Date(dateString).toLocaleDateString("pt-BR");
 }
 
-function formatCurrency(value) {
+function formatDateTime(dateString) {
+  if (!dateString) return "—";
+  return new Date(dateString).toLocaleString("pt-BR");
+}
+
+function formatCurrencyInput(value) {
+  const numericValue = Number(value || 0);
+
   return new Intl.NumberFormat("pt-BR", {
     style: "currency",
     currency: "BRL",
-  }).format(value);
+  }).format(numericValue);
+}
+
+function parseCurrencyInput(value) {
+  const digitsOnly = value.replace(/\D/g, "");
+
+  if (!digitsOnly) {
+    return "";
+  }
+
+  return (Number(digitsOnly) / 100).toFixed(2);
 }
 
 function Kanban() {
+  const { claims } = useAuth();
   const [board, setBoard] = useState({});
   const [isLoading, setIsLoading] = useState(true);
+  const [products, setProducts] = useState([]);
   const [selectedOpportunity, setSelectedOpportunity] = useState(null);
+  const [interactions, setInteractions] = useState([]);
+  const [isInteractionsLoading, setIsInteractionsLoading] = useState(false);
+  const [interactionDescription, setInteractionDescription] = useState("");
+  const [isAddingInteraction, setIsAddingInteraction] = useState(false);
+  const [isInteractionSectionOpen, setIsInteractionSectionOpen] =
+    useState(false);
+  const [opportunityForm, setOpportunityForm] = useState({
+    amount: "",
+    productId: "",
+    expectedCloseDate: "",
+  });
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const currentUserId = Number(claims?.usuarioId);
 
   const fetchBoard = useCallback(async () => {
     setIsLoading(true);
@@ -66,6 +101,50 @@ function Kanban() {
   useEffect(() => {
     fetchBoard();
   }, [fetchBoard]);
+
+  useEffect(() => {
+    async function fetchProducts() {
+      try {
+        const data = await productAPI.GetPaged(true, 1, 1000);
+        setProducts(Array.isArray(data?.dados) ? data.dados : []);
+      } catch {
+        setProducts([]);
+        toast.error("Erro ao carregar os produtos.");
+      }
+    }
+
+    fetchProducts();
+  }, []);
+
+  const fetchInteractions = useCallback(async (opportunityId) => {
+    if (!opportunityId) {
+      setInteractions([]);
+      return;
+    }
+
+    setIsInteractionsLoading(true);
+
+    try {
+      const data = await interactionApi.GetByOpportunityId(opportunityId);
+      setInteractions(Array.isArray(data) ? data : []);
+    } catch {
+      setInteractions([]);
+      toast.error("Erro ao carregar o histórico de interações.");
+    } finally {
+      setIsInteractionsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!isModalOpen || !selectedOpportunity?.id) {
+      setInteractions([]);
+      setInteractionDescription("");
+      setIsInteractionsLoading(false);
+      return;
+    }
+
+    fetchInteractions(selectedOpportunity.id);
+  }, [fetchInteractions, isModalOpen, selectedOpportunity]);
 
   async function handleDragEnd(result) {
     const { source, destination } = result;
@@ -107,10 +186,7 @@ function Kanban() {
     }));
 
     try {
-      const patchResult = await opportunityAPI.PatchStage(
-        movedCard.id,
-        destStageId,
-      );
+      await opportunityAPI.PatchStage(movedCard.id, destStageId);
     } catch {
       setBoard(savedBoard);
       toast.error("Erro ao mover a oportunidade. Tente novamente.");
@@ -119,17 +195,141 @@ function Kanban() {
 
   function handleCardClick(opportunity) {
     setSelectedOpportunity(opportunity);
+    setIsInteractionSectionOpen(false);
+    setOpportunityForm({
+      amount: String(opportunity.amount ?? ""),
+      productId: opportunity.productId ? String(opportunity.productId) : "",
+      expectedCloseDate: opportunity.expectedCloseDate?.split("T")[0] || "",
+    });
     setIsModalOpen(true);
   }
 
   function handleCloseModal() {
     setIsModalOpen(false);
     setSelectedOpportunity(null);
+    setInteractions([]);
+    setInteractionDescription("");
+    setIsInteractionsLoading(false);
+    setIsAddingInteraction(false);
+    setIsInteractionSectionOpen(false);
+    setOpportunityForm({ amount: "", productId: "", expectedCloseDate: "" });
+    setIsSaving(false);
   }
 
-  const handleClickAddLead = () => {
-    toast.info("Funcionalidade de adicionar lead ainda não implementada.");
-  };
+  function handleOpportunityFieldChange(field, value) {
+    setOpportunityForm((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  }
+
+  function handleProductChange(productId) {
+    const selectedProduct = products.find(
+      (product) => String(product.id) === productId,
+    );
+
+    setOpportunityForm((prev) => ({
+      ...prev,
+      productId,
+      amount:
+        selectedProduct?.price !== undefined && selectedProduct?.price !== null
+          ? String(selectedProduct.price)
+          : "",
+    }));
+  }
+
+  async function handleSaveOpportunity() {
+    if (!selectedOpportunity) return;
+
+    const amount = Number(opportunityForm.amount);
+
+    if (Number.isNaN(amount) || amount <= 0) {
+      toast.error("Informe um valor maior que zero.");
+      return;
+    }
+
+    const payload = {
+      leadId: selectedOpportunity.leadId,
+      productId: opportunityForm.productId
+        ? Number(opportunityForm.productId)
+        : null,
+      stage: selectedOpportunity.stage,
+      amount,
+      expectedCloseDate: opportunityForm.expectedCloseDate || null,
+    };
+
+    setIsSaving(true);
+
+    try {
+      await opportunityAPI.Update(selectedOpportunity.id, payload);
+
+      const selectedProduct = products.find(
+        (product) => product.id === payload.productId,
+      );
+
+      const updatedOpportunity = {
+        ...selectedOpportunity,
+        amount,
+        productId: payload.productId,
+        productName: selectedProduct?.name || "",
+        expectedCloseDate: payload.expectedCloseDate,
+      };
+
+      setBoard((prev) => ({
+        ...prev,
+        [selectedOpportunity.stage]: (
+          prev[selectedOpportunity.stage] || []
+        ).map((opportunity) =>
+          opportunity.id === selectedOpportunity.id
+            ? updatedOpportunity
+            : opportunity,
+        ),
+      }));
+
+      toast.success("Oportunidade atualizada com sucesso.");
+      handleCloseModal();
+    } catch (error) {
+      toast.error(error?.message || "Erro ao salvar a oportunidade.");
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  async function handleAddInteraction() {
+    if (!selectedOpportunity?.id) return;
+
+    const description = interactionDescription.trim();
+
+    if (!description) {
+      toast.error("Descreva a interação antes de salvar.");
+      return;
+    }
+
+    if (!Number.isInteger(currentUserId) || currentUserId <= 0) {
+      toast.error("Não foi possível identificar o usuário logado.");
+      return;
+    }
+
+    setIsAddingInteraction(true);
+
+    try {
+      await interactionApi.AddToOpportunity(selectedOpportunity.id, {
+        description,
+        userId: currentUserId,
+        fromStage: selectedOpportunity.stage ?? null,
+        toStage: selectedOpportunity.stage ?? null,
+        interactionDate: new Date().toISOString(),
+      });
+
+      await fetchInteractions(selectedOpportunity.id);
+      setInteractionDescription("");
+      toast.success("Interação adicionada com sucesso.");
+    } catch (error) {
+      toast.error(error?.message || "Erro ao adicionar interação.");
+    } finally {
+      setIsAddingInteraction(false);
+    }
+  }
 
   return (
     <Sidebar>
@@ -150,8 +350,7 @@ function Kanban() {
                   return (
                     <div key={stage.id} className={style["kanban-column"]}>
                       <div
-                        className={style["column-header"]}
-                        style={{ backgroundColor: stage.color }}
+                        className={`${style["column-header"]} ${style[stage.headerClassName]}`}
                       >
                         <span className={style["column-title"]}>
                           {stage.label}
@@ -224,9 +423,11 @@ function Kanban() {
 
         <Modal show={isModalOpen} onHide={handleCloseModal} centered size="lg">
           <Modal.Header closeButton>
-            <div className="d-flex flex-row align-items-center gap-3">
-              <h4 className="mb-0">{selectedOpportunity?.leadName}</h4>
-              <Badge bg="primary" className="mb-2">
+            <div className={style["modal-header-content"]}>
+              <h4 className={style["modal-title"]}>
+                {selectedOpportunity?.leadName}
+              </h4>
+              <Badge bg="primary" className={style["modal-stage-badge"]}>
                 {STAGES.find((s) => s.id === selectedOpportunity?.stage)
                   ?.label || "NOVO LEAD"}
               </Badge>
@@ -236,7 +437,30 @@ function Kanban() {
           <Modal.Body>
             {selectedOpportunity && (
               <>
-                <Row className="mb-4">
+                <Row className={style["modal-form-row"]}>
+                  <Col md={4}>
+                    <Form.Group>
+                      <Form.Label>
+                        {" "}
+                        <MdInventory2 /> Produto
+                      </Form.Label>
+
+                      <Form.Control
+                        as="select"
+                        value={opportunityForm.productId}
+                        onChange={(event) =>
+                          handleProductChange(event.target.value)
+                        }
+                      >
+                        <option value="">Selecione um produto</option>
+                        {products.map((product) => (
+                          <option key={product.id} value={product.id}>
+                            {product.name}
+                          </option>
+                        ))}
+                      </Form.Control>
+                    </Form.Group>
+                  </Col>
                   <Col md={4}>
                     <Form.Group>
                       <Form.Label>
@@ -246,22 +470,14 @@ function Kanban() {
 
                       <Form.Control
                         type="text"
-                        defaultValue={formatCurrency(
-                          selectedOpportunity.amount,
-                        )}
-                      />
-                    </Form.Group>
-                  </Col>
-                  <Col md={4}>
-                    <Form.Group>
-                      <Form.Label>
-                        {" "}
-                        <MdInventory2 /> Produto
-                      </Form.Label>
-
-                      <Form.Control
-                        type="text"
-                        defaultValue={selectedOpportunity.productName}
+                        inputMode="numeric"
+                        value={formatCurrencyInput(opportunityForm.amount)}
+                        onChange={(event) =>
+                          handleOpportunityFieldChange(
+                            "amount",
+                            parseCurrencyInput(event.target.value),
+                          )
+                        }
                       />
                     </Form.Group>
                   </Col>
@@ -273,55 +489,157 @@ function Kanban() {
 
                       <Form.Control
                         type="date"
-                        defaultValue={
-                          selectedOpportunity.expectedCloseDate?.split("T")[0]
+                        value={opportunityForm.expectedCloseDate}
+                        onChange={(event) =>
+                          handleOpportunityFieldChange(
+                            "expectedCloseDate",
+                            event.target.value,
+                          )
                         }
                       />
                     </Form.Group>
-                  </Col>{" "}
+                  </Col>
                 </Row>
 
-                {/* Registrar interação */}
-                <div className="mb-4">
-                  <h6>Registrar interação</h6>
-
-                  <Form.Control
-                    as="textarea"
-                    rows={4}
-                    placeholder="O que foi conversado com o lead?"
-                  />
-
-                  <div className="d-flex justify-content-end mt-2">
-                    <Button
-                      variant="success"
-                      buttonLabel="Adicionar interação"
-                      onButtonClick={() =>
-                        toast.info(
-                          "Funcionalidade de registrar interação ainda não implementada.",
-                        )
-                      }
+                <section className={style["interaction-section"]}>
+                  <button
+                    type="button"
+                    className={style["interaction-toggle"]}
+                    onClick={() =>
+                      setIsInteractionSectionOpen((current) => !current)
+                    }
+                    aria-expanded={isInteractionSectionOpen}
+                  >
+                    <div className={style["interaction-toggle-text"]}>
+                      <h6 className={style["interaction-section-title"]}>
+                        Interações
+                      </h6>
+                      <span className={style["interaction-counter"]}>
+                        {interactions.length} registradas
+                      </span>
+                    </div>
+                    <MdExpandMore
+                      className={`${style["interaction-toggle-icon"]} ${
+                        isInteractionSectionOpen
+                          ? style["interaction-toggle-icon-open"]
+                          : ""
+                      }`}
                     />
-                  </div>
-                </div>
+                  </button>
 
-                {/* Histórico */}
-                <div className="mb-4">
-                  <h6>Histórico (0)</h6>
+                  {isInteractionSectionOpen && (
+                    <div className={style["interaction-content"]}>
+                      <div className={style["interaction-composer"]}>
+                        <h6 className={style["interaction-subtitle"]}>
+                          Registrar interação
+                        </h6>
 
-                  <Card className="p-3 bg-light">
-                    <small className="text-muted">
-                      Nenhuma interação registrada ainda.
-                    </small>
-                  </Card>
-                </div>
+                        <Form.Control
+                          as="textarea"
+                          rows={4}
+                          placeholder="O que foi conversado com o lead?"
+                          value={interactionDescription}
+                          onChange={(event) =>
+                            setInteractionDescription(event.target.value)
+                          }
+                          disabled={isAddingInteraction}
+                          className={style["interaction-textarea"]}
+                        />
 
-                {/* IA */}
-                <Card className="p-3">
-                  <div className="d-flex justify-content-between align-items-center">
+                        <div className={style["interaction-actions"]}>
+                          <Button
+                            variant="success"
+                            buttonLabel={
+                              isAddingInteraction
+                                ? "Adicionando..."
+                                : "Adicionar interação"
+                            }
+                            onButtonClick={handleAddInteraction}
+                            disabled={isAddingInteraction}
+                          />
+                        </div>
+                      </div>
+
+                      <div className={style["interaction-history"]}>
+                        <h6 className={style["interaction-subtitle"]}>
+                          Histórico ({interactions.length})
+                        </h6>
+
+                        {isInteractionsLoading ? (
+                          <Card className={style["interaction-empty-card"]}>
+                            <small className={style["interaction-muted-text"]}>
+                              Carregando interações...
+                            </small>
+                          </Card>
+                        ) : interactions.length === 0 ? (
+                          <Card className={style["interaction-empty-card"]}>
+                            <small className={style["interaction-muted-text"]}>
+                              Nenhuma interação registrada ainda.
+                            </small>
+                          </Card>
+                        ) : (
+                          interactions.map((interaction) => {
+                            const stageLabel = STAGES.find(
+                              (stage) => stage.id === interaction.toStage,
+                            )?.label;
+
+                            return (
+                              <Card
+                                key={interaction.id}
+                                className={style["interaction-card"]}
+                              >
+                                <div
+                                  className={style["interaction-card-header"]}
+                                >
+                                  <div>
+                                    <strong
+                                      className={style["interaction-user"]}
+                                    >
+                                      {interaction.userName ||
+                                        `Usuário #${interaction.userId}`}
+                                    </strong>
+                                    <div>
+                                      <small
+                                        className={
+                                          style["interaction-muted-text"]
+                                        }
+                                      >
+                                        {formatDateTime(
+                                          interaction.interactionDate,
+                                        )}
+                                      </small>
+                                    </div>
+                                  </div>
+
+                                  <span className={style["interaction-stage"]}>
+                                    {stageLabel ||
+                                      interaction.toStageName ||
+                                      "Sem etapa"}
+                                  </span>
+                                </div>
+
+                                <small
+                                  className={style["interaction-description"]}
+                                >
+                                  {interaction.description}
+                                </small>
+                              </Card>
+                            );
+                          })
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </section>
+
+                <Card className={style["ai-card"]}>
+                  <div className={style["ai-card-content"]}>
                     <div>
-                      <h6 className="mb-1">Plano de ação com IA</h6>
+                      <h6 className={style["ai-card-title"]}>
+                        Plano de ação com IA
+                      </h6>
 
-                      <small className="text-muted">
+                      <small className={style["interaction-muted-text"]}>
                         Use IA para receber um diagnóstico e próximos passos da
                         oportunidade.
                       </small>
@@ -344,9 +662,16 @@ function Kanban() {
 
           <Modal.Footer>
             <Button
+              variant="success"
+              buttonLabel={isSaving ? "Salvando..." : "Salvar"}
+              onButtonClick={handleSaveOpportunity}
+              disabled={isSaving}
+            />
+            <Button
               variant="secondary"
               buttonLabel="Fechar"
-              onClick={handleCloseModal}
+              onButtonClick={handleCloseModal}
+              disabled={isSaving}
             />
           </Modal.Footer>
         </Modal>

@@ -16,5 +16,5 @@ public class DashboardDto
 
     public decimal? RealRevenue { get; set; }
 
-    public List<DashboardStageDto> StageAnalytics { get; set; } = new();
+    public string StageAnalytics { get; set; }
 }

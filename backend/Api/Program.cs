@@ -56,8 +56,9 @@ builder.Services.AddScoped<IOpportunityApp, OpportunityApp>();
 builder.Services.AddScoped<IOpportunityActionPlanApp, OpportunityActionPlanApp>();
 builder.Services.AddScoped<IInteractionApp, InteractionApp>();
 builder.Services.AddScoped<IPromptApp, PromptApp>();
-builder.Services.AddScoped<IApiKeyEncryptionService, ApiKeyEncryptionService>();
+builder.Services.AddScoped<IDashboardApp, DashboardApp>();
 
+builder.Services.AddScoped<IApiKeyEncryptionService, ApiKeyEncryptionService>();
 builder.Services.AddScoped<IAiService, AiService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 
@@ -69,6 +70,7 @@ builder.Services.AddScoped<IOpportunityRepo, OpportunityRepo>();
 builder.Services.AddScoped<IOpportunityActionPlanRepo, OpportunityActionPlanRepo>();
 builder.Services.AddScoped<IInteractionRepo, InteractionRepo>();
 builder.Services.AddScoped<IPromptRepo, PromptRepo>();
+builder.Services.AddScoped<IDashboardRepo, DashboardRepo>();
 
 // Adiciona os serviços
 builder.Services.AddControllers();
@@ -142,8 +144,8 @@ app.UseCors("Frontend");
 
 app.UseHttpsRedirection();
 
-app.UseAuthentication(); // ADICIONAR
-app.UseAuthorization();  // ADICIONAR
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 

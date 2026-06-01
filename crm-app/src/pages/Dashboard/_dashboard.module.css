@@ -1,0 +1,172 @@
+.dashboard-container {
+  background: #f5f7f8;
+  min-height: 100vh;
+  padding: 24px;
+}
+
+.dashboard-header h1 {
+  font-size: 28px;
+  color: #0f3f17;
+  margin-bottom: 4px;
+}
+
+.dashboard-header p {
+  color: #6b7280;
+}
+
+.loading-box {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 40px 0;
+}
+
+.dashboard-card {
+  border-radius: 12px;
+  padding: 18px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+  transition: 0.2s;
+  color: #ffffff;
+}
+
+.card-blue {
+  background-color: #2563eb;
+}
+
+.card-cyan {
+  background-color: #0891b2;
+}
+
+.card-orange {
+  background-color: #ea580c;
+}
+
+.card-purple {
+  background-color: #7c3aed;
+}
+
+.card-green {
+  background-color: #15803d;
+}
+
+.card-dark-green {
+  background-color: #0f3f17;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
+}
+
+.dashboard-card span {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 14px;
+}
+
+.dashboard-card h3 {
+  margin-top: 10px;
+  color: #ffffff;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.dashboard-panel {
+  background: white;
+  padding: 22px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+}
+
+.dashboard-panel h4 {
+  color: #0f3f17;
+  margin-bottom: 20px;
+}
+
+.stage-item {
+  margin-bottom: 18px;
+}
+
+.stage-info {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.progress-custom {
+  width: 100%;
+  height: 10px;
+  appearance: none;
+  -webkit-appearance: none;
+  border: none;
+  background: #e5e7eb;
+  border-radius: 30px;
+  overflow: hidden;
+}
+
+.progress-custom::-webkit-progress-bar {
+  background: #e5e7eb;
+  border-radius: 30px;
+}
+
+.progress-custom::-webkit-progress-value {
+  background: #0f3f17;
+  border-radius: 30px;
+}
+
+.progress-custom::-moz-progress-bar {
+  background: #0f3f17;
+  border-radius: 30px;
+}
+
+.value-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.value-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.stage-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #0f3f17;
+}
+
+.stage-blue {
+  background: #2563eb;
+}
+
+.stage-cyan {
+  background: #0891b2;
+}
+
+.stage-purple {
+  background: #7c3aed;
+}
+
+.stage-orange {
+  background: #ea580c;
+}
+
+.stage-yellow {
+  background: #ca8a04;
+}
+
+.stage-green {
+  background: #15803d;
+}
+
+.stage-red {
+  background: #b91c1c;
+}
+
+.stage-dark-green {
+  background: #0f3f17;
+}
