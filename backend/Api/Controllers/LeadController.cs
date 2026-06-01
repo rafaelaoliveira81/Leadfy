@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Application.DTO;
 using Microsoft.AspNetCore.Authorization;
+using Api.Helpers;
 
 namespace Api.Controllers;
 
@@ -40,7 +41,9 @@ public class LeadController : ControllerBase
     {
         try
         {
-            var idLead = await _leadApp.AddAsync(leadRequest);
+            var idUser = User.GetAuthenticatedUserId();
+
+            var idLead = await _leadApp.AddAsync(leadRequest, idUser);
 
             return CreatedAtAction(nameof(GetById), new { id = idLead }, new { id = idLead });
         }

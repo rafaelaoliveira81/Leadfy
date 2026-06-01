@@ -2,7 +2,6 @@ using System.Globalization;
 using System.Text;
 using Application.DTOs;
 using Domain.Entities;
-using Application.Extensions;
 
 namespace Application;
 
@@ -10,38 +9,39 @@ public class OpportunityActionPlanApp : IOpportunityActionPlanApp
 {
     private readonly IOpportunityRepo _opportunityRepo;
     private readonly IOpportunityActionPlanRepo _actionPlanRepo;
+    private readonly ILeadApp _leadApp;
     private readonly IInteractionRepo _interactionRepo;
-    private readonly IAiConfigApp _aiConfigApp;
+    private readonly IPromptApp _promptApp;
     private readonly IAiService _aiService;
 
     public OpportunityActionPlanApp(
         IOpportunityRepo opportunityRepo,
         IOpportunityActionPlanRepo actionPlanRepo,
+        ILeadApp leadApp,
         IInteractionRepo interactionRepo,
-        IAiConfigApp aiConfigApp,
+        IPromptApp promptApp,
         IAiService aiService)
     {
         _opportunityRepo = opportunityRepo;
         _actionPlanRepo = actionPlanRepo;
+        _leadApp = leadApp;
         _interactionRepo = interactionRepo;
-        _aiConfigApp = aiConfigApp;
+        _promptApp = promptApp;
         _aiService = aiService;
     }
-    public async Task<OpportunityActionPlanDto> GenerateAsync(int opportunityId, int configId)
+    public async Task<OpportunityActionPlanDto> GenerateAsync(int opportunityId, int promptId)
     {
         var opportunity = await GetOpportunityAsync(opportunityId);
 
-        var config = await GetAiConfig(configId);
+        var prompt = await _promptApp.GetByIdAsync(promptId);
 
         var interactions = (await _interactionRepo.GetLastInteractionsByOpportunityIdAsync(opportunityId)).ToList();
 
-        var prompt = BuildPrompt(config, opportunity, interactions);
+        var lead = await _leadApp.GetByIdAsync(opportunity.LeadId);
 
-        var plainApiKey = _aiConfigApp.DecryptApiKey(config.ApiKeyHash);
+        var promptRequest = BuildPrompt(prompt.Content, opportunity, interactions, lead.Name);
 
-        var modelName = config.Model.GetDescription();
-
-        var generatedActionPlan = await _aiService.GetResponseFromModel(prompt, modelName, plainApiKey);
+        var generatedActionPlan = await _aiService.GetResponseFromModel(promptRequest);
 
         if (string.IsNullOrWhiteSpace(generatedActionPlan))
             throw new InvalidOperationException("A IA não retornou um plano de ação válido.");
@@ -49,7 +49,6 @@ public class OpportunityActionPlanApp : IOpportunityActionPlanApp
         var actionPlan = new OpportunityActionPlan
         {
             OpportunityId = opportunityId,
-            AiConfigId = configId,
             ActionPlan = generatedActionPlan.Trim(),
             GeneratedAt = DateTime.UtcNow
         };
@@ -57,7 +56,7 @@ public class OpportunityActionPlanApp : IOpportunityActionPlanApp
         var id = await _actionPlanRepo.AddAsync(actionPlan);
         actionPlan.Id = id;
 
-        return MapToDto(actionPlan, config.Title);
+        return MapToDto(actionPlan);
     }
 
     public async Task<IEnumerable<OpportunityActionPlanDto>> GetByOpportunityIdAsync(int opportunityId)
@@ -66,32 +65,18 @@ public class OpportunityActionPlanApp : IOpportunityActionPlanApp
 
         var actionPlans = await _actionPlanRepo.GetByOpportunityIdAsync(opportunityId);
 
-        return actionPlans.Select(ap => MapToDto(ap, ap.AiConfig?.Title));
+        return actionPlans.Select(ap => MapToDto(ap));
     }
 
-    private static OpportunityActionPlanDto MapToDto(OpportunityActionPlan actionPlan, string aiConfigTitle)
+    private static OpportunityActionPlanDto MapToDto(OpportunityActionPlan actionPlan)
     {
         return new OpportunityActionPlanDto
         {
             Id = actionPlan.Id,
             OpportunityId = actionPlan.OpportunityId,
-            AiConfigId = actionPlan.AiConfigId,
-            AiConfigTitle = aiConfigTitle,
             ActionPlan = actionPlan.ActionPlan,
             GeneratedAt = actionPlan.GeneratedAt
         };
-    }
-
-    private async Task<AiConfig> GetAiConfig(int configId)
-    {
-        if (configId <= 0)
-            throw new ArgumentException("A configuração de IA informada é inválida.");
-
-        var config = await _aiConfigApp.GetByIdAsync(configId);
-
-        if (!config.IsActive)
-            throw new ArgumentException("A configuração de IA informada está inativa.");
-        return config;
     }
 
     private async Task<Opportunity> GetOpportunityAsync(int opportunityId)
@@ -106,26 +91,23 @@ public class OpportunityActionPlanApp : IOpportunityActionPlanApp
         return opportunity;
     }
 
-    private static string BuildPrompt(AiConfig config, Opportunity opportunity, IEnumerable<Interaction> interactions)
+    private string BuildPrompt(string promptTemplate, Opportunity opportunity, IEnumerable<Interaction> interactions, string leadName)
     {
         var culture = new CultureInfo("pt-BR");
-        var lead = opportunity.Lead;
         var product = opportunity.Product;
         var interactionList = interactions.ToList();
-
-        var promptTemplate = config.PromptTemplate;
 
         var prompt = new StringBuilder();
         prompt.AppendLine(promptTemplate.Trim());
         prompt.AppendLine();
         prompt.AppendLine("Contexto da oportunidade:");
         prompt.AppendLine($"- Stage atual: {opportunity.Stage}");
-        prompt.AppendLine($"- Valor: {opportunity.Amount.ToString("C", culture)}");
-        prompt.AppendLine($"- Fechamento previsto: {opportunity.ExpectedCloseDate.ToString("dd/MM/yyyy", culture)}");
+        prompt.AppendLine($"- Valor: {opportunity.Amount.ToString("C", culture) ?? "Nao informado"}");
+        prompt.AppendLine($"- Fechamento previsto: {opportunity.ExpectedCloseDate?.ToString("dd/MM/yyyy", culture) ?? "Nao informado"}");
         prompt.AppendLine($"- Produto: {product?.Name ?? "Nao informado"}");
         prompt.AppendLine();
         prompt.AppendLine("Dados do lead vinculado:");
-        prompt.AppendLine($"- Nome: {lead?.Name ?? "Nao informado"}");
+        prompt.AppendLine($"- Nome: {leadName}");
         prompt.AppendLine();
         prompt.AppendLine("Data Atual: " + DateTime.Now.ToString("dd/MM/yyyy HH:mm", culture));
         prompt.AppendLine("Ultimas 3 interacoes registradas:");
@@ -151,11 +133,15 @@ public class OpportunityActionPlanApp : IOpportunityActionPlanApp
         prompt.AppendLine("Sempre conduza a mensagem para fechamento ou avanço claro da negociação.");
         prompt.AppendLine("A mensagem deve:");
         prompt.AppendLine("- Ser natural, persuasiva e profissional;");
+        prompt.AppendLine("- Conter o nome do lead e uma saudação agradável;");
         prompt.AppendLine("- Considerar o estágio atual da oportunidade;");
         prompt.AppendLine("- Levar em conta as objeções ou interesses demonstrados nas interações;");
         prompt.AppendLine("- Incentivar uma próxima ação clara (resposta, reunião, fechamento ou follow-up);");
         prompt.AppendLine("- Ser objetiva e pronta para envio;");
         prompt.AppendLine("- Não explicar o raciocínio, retornar apenas a mensagem final.");
+
+        Console.WriteLine("Prompt gerado para IA:");
+        Console.WriteLine(prompt.ToString());
 
         return prompt.ToString();
     }

@@ -8,11 +8,13 @@ const AUTH_STORAGE_KEY = "authToken";
 export function AuthProvider({ children }) {
   const [token, setToken] = useState(null);
   const [claims, setClaims] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const storedToken = localStorage.getItem(AUTH_STORAGE_KEY);
 
     if (!storedToken) {
+      setIsLoading(false);
       return;
     }
 
@@ -28,6 +30,7 @@ export function AuthProvider({ children }) {
 
         if (expirationDate < Date.now()) {
           localStorage.removeItem(AUTH_STORAGE_KEY);
+          setIsLoading(false);
           return;
         }
       }
@@ -38,6 +41,8 @@ export function AuthProvider({ children }) {
       console.error("Erro ao ler token:", error);
 
       localStorage.removeItem(AUTH_STORAGE_KEY);
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
@@ -59,6 +64,7 @@ export function AuthProvider({ children }) {
 
       setToken(newToken);
       setClaims(parsedClaims);
+      setIsLoading(false);
 
       return response;
     } catch (error) {
@@ -80,6 +86,7 @@ export function AuthProvider({ children }) {
       value={{
         token,
         claims,
+        isLoading,
         isAuthenticated,
         login,
         logout,

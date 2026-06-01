@@ -12,25 +12,23 @@ public class CRMContext : DbContext
     }
 
     public DbSet<User> Users { get; set; }
-    public DbSet<PasswordRecovery> PasswordRecoveries { get; set; }
     public DbSet<Lead> Leads { get; set; }
     public DbSet<Product> Products { get; set; }
     public DbSet<Opportunity> Opportunities { get; set; }
     public DbSet<OpportunityActionPlan> OpportunityActionPlans { get; set; }
     public DbSet<Interaction> Interactions { get; set; }
-    public DbSet<AiConfig> AiConfigs { get; set; }
+    public DbSet<Prompt> Prompts { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfiguration(new UserConfig());
 
-        modelBuilder.ApplyConfiguration(new PasswordRecoveryConfig());
         modelBuilder.ApplyConfiguration(new LeadConfig());
         modelBuilder.ApplyConfiguration(new ProductConfig());
         modelBuilder.ApplyConfiguration(new OpportunityConfig());
         modelBuilder.ApplyConfiguration(new OpportunityActionPlanConfig());
         modelBuilder.ApplyConfiguration(new InteractionConfig());
-        modelBuilder.ApplyConfiguration(new AiConfigConfig());
+        modelBuilder.ApplyConfiguration(new PromptConfig());
 
         base.OnModelCreating(modelBuilder);
     }

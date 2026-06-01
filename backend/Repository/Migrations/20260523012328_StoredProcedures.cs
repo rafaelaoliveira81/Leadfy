@@ -241,7 +241,7 @@ CREATE PROCEDURE sp_CreateOpportunity
     @ProductId INT,
     @Stage INT,
     @Amount DECIMAL(18,2),
-    @ExpectedCloseDate DATETIME,
+    @ExpectedCloseDate DATETIME = NULL,
     @SortOrder INT
 AS
 BEGIN
@@ -283,7 +283,7 @@ CREATE PROCEDURE sp_UpdateOpportunity
     @ProductId INT,
     @Stage INT,
     @Amount DECIMAL(18,2),
-    @ExpectedCloseDate DATETIME,
+    @ExpectedCloseDate DATETIME = NULL,
     @SortOrder INT,
     @IsActive BIT
 AS

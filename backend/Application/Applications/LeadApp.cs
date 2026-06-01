@@ -1,24 +1,36 @@
 using Application.DTO;
 using Domain.Entities;
-using System.Net;
-using System.Text.RegularExpressions;
+using Domain.Enuns;
 
 namespace Application;
 
 public class LeadApp : ILeadApp
 {
     private readonly ILeadRepo _leadRepo;
-    public LeadApp(ILeadRepo leadRepo)
+    private readonly IOpportunityRepo _opportunityRepo;
+    public LeadApp(ILeadRepo leadRepo, IOpportunityRepo opportunityRepo)
     {
         _leadRepo = leadRepo;
+        _opportunityRepo = opportunityRepo;
     }
-    public async Task<int> AddAsync(LeadRequest request)
+    public async Task<int> AddAsync(LeadRequest request, int idUser)
     {
         await ValidateLeadInformation(request);
 
         var lead = MapToLeadRequest(request);
 
-        return await _leadRepo.AddAsync(lead);
+        var idLead = await _leadRepo.AddAsync(lead);
+
+        var idOpportunity = await _opportunityRepo.AddAsync(new Opportunity
+        {
+            LeadId = idLead,
+            UserId = idUser,
+            Amount = 0,
+            Stage = OpportunityStage.NewLead,
+            ExpectedCloseDate = null
+        });
+
+        return idLead;
     }
 
     public async Task<LeadResponse> GetByIdAsync(int idLead)
