@@ -72,7 +72,7 @@ public class OpportunityApp : IOpportunityApp
         await _opportunityRepo.DeleteAsync(opportunityEntity);
     }
 
-    #region Métodos auxiliares
+    #region Utils
     private async Task ValidateOpportunityInformation(Opportunity opportunity)
     {
         if (opportunity == null)

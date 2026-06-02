@@ -128,7 +128,7 @@ public class UserApp : IUserApp
         await _userRepo.UpdateAsync(userEntity);
     }
 
-    #region Métodos auxiliares
+    #region Utils
     private static void ValidateUserInformation(UserRequest request)
     {
         if (request == null)

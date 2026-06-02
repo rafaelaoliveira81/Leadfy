@@ -68,6 +68,8 @@ public class OpportunityActionPlanApp : IOpportunityActionPlanApp
         return actionPlans.Select(ap => MapToDto(ap));
     }
 
+
+    #region Utils
     private static OpportunityActionPlanDto MapToDto(OpportunityActionPlan actionPlan)
     {
         return new OpportunityActionPlanDto
@@ -145,4 +147,6 @@ public class OpportunityActionPlanApp : IOpportunityActionPlanApp
 
         return prompt.ToString();
     }
+
+    #endregion
 }

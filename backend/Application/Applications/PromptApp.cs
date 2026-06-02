@@ -76,7 +76,7 @@ public class PromptApp : IPromptApp
         await _promptRepo.UpdateAsync(promptEntity);
     }
 
-    #region Métodos auxiliares
+    #region Utils
     private async Task ValidatePromptInformation(PromptRequest prompt)
     {
         if (prompt == null)

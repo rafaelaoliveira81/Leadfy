@@ -1,5 +1,4 @@
 using Application.DTO;
-using Domain.Enuns;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -44,17 +43,7 @@ public class InteractionController : ControllerBase
     {
         try
         {
-            var interaction = new Domain.Entities.Interaction
-            {
-                Description = interactionRequest.Description,
-                UserId = interactionRequest.UserId,
-                FromStage = interactionRequest.FromStage,
-                ToStage = interactionRequest.ToStage,
-                InteractionDate = interactionRequest.InteractionDate ?? DateTime.UtcNow,
-                NextContactDate = interactionRequest.NextContactDate
-            };
-
-            var interactionId = await _interactionApp.AddToOpportunityAsync(opportunityId, interaction);
+            var interactionId = await _interactionApp.AddToOpportunityAsync(opportunityId, interactionRequest);
 
             return CreatedAtAction(nameof(GetById), new { id = interactionId }, new { id = interactionId });
         }
@@ -94,7 +83,7 @@ public class InteractionController : ControllerBase
         {
             var interactions = await _interactionApp.GetByOpportunityIdAsync(opportunityId);
 
-            return Ok(interactions.Select(MapResponse));
+            return Ok(interactions);
         }
         catch (KeyNotFoundException ex)
         {
@@ -132,7 +121,7 @@ public class InteractionController : ControllerBase
         {
             var interaction = await _interactionApp.GetByIdAsync(id);
 
-            return Ok(MapResponse(interaction));
+            return Ok(interaction);
         }
         catch (KeyNotFoundException ex)
         {
@@ -186,31 +175,4 @@ public class InteractionController : ControllerBase
         }
     }
 
-    /// <summary>
-    /// Converte a entidade de interação em modelo de resposta da API.
-    /// </summary>
-    /// <param name="interaction">Entidade de interação a ser convertida.</param>
-    /// <returns>Modelo de resposta preenchido com os dados da interação.</returns>
-    private static InteractionResponse MapResponse(Domain.Entities.Interaction interaction)
-    {
-        return new InteractionResponse
-        {
-            Id = interaction.Id,
-            OpportunityId = interaction.OpportunityId,
-            FromStage = interaction.FromStage,
-            FromStageName = interaction.FromStage.HasValue
-                ? ((OpportunityStage)interaction.FromStage.Value).ToString()
-                : null,
-            ToStage = interaction.ToStage,
-            ToStageName = interaction.ToStage.HasValue
-                ? ((OpportunityStage)interaction.ToStage.Value).ToString()
-                : null,
-            Description = interaction.Description,
-            InteractionDate = interaction.InteractionDate,
-            CreatedAt = interaction.CreatedAt,
-            UserId = interaction.UserId,
-            UserName = interaction.User?.Name,
-            NextContactDate = interaction.NextContactDate
-        };
-    }
 }

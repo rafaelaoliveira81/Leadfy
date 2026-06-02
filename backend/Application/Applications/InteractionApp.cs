@@ -1,3 +1,4 @@
+using Application.DTO;
 using Domain.Entities;
 using Domain.Enuns;
 
@@ -14,8 +15,10 @@ public class InteractionApp : IInteractionApp
         _opportunityRepo = opportunityRepo;
         _userRepo = userRepo;
     }
-    public async Task<int> AddToOpportunityAsync(int opportunityId, Interaction interaction)
+    public async Task<int> AddToOpportunityAsync(int opportunityId, InteractionAdd interactionRequest)
     {
+        var interaction = MapToEntity(interactionRequest);
+
         await ValidateOpportunityExistsAsync(opportunityId);
         await ValidateInteractionAsync(interaction);
 
@@ -27,31 +30,27 @@ public class InteractionApp : IInteractionApp
 
         return await _interactionRepo.AddAsync(interaction);
     }
-    public async Task<Interaction> GetByIdAsync(int idInteraction)
+    public async Task<InteractionResponse> GetByIdAsync(int idInteraction)
     {
-        if (idInteraction <= 0)
-            throw new ArgumentException("O identificador da interação é inválido.");
+        var interactionEntity = await GetEntityByIdAsync(idInteraction);
 
-        var interactionEntity = await _interactionRepo.GetByIdAsync(idInteraction);
-
-        if (interactionEntity == null)
-            throw new KeyNotFoundException("Interação não localizada.");
-
-        await ValidateOpportunityExistsAsync(interactionEntity.OpportunityId);
-
-        return interactionEntity;
+        return MapToResponse(interactionEntity);
     }
-    public async Task<IEnumerable<Interaction>> GetByOpportunityIdAsync(int opportunityId)
+    public async Task<IEnumerable<InteractionResponse>> GetByOpportunityIdAsync(int opportunityId)
     {
         await ValidateOpportunityExistsAsync(opportunityId);
 
-        return await _interactionRepo.GetAllByOpportunityIdAsync(opportunityId);
+        var interactions = await _interactionRepo.GetAllByOpportunityIdAsync(opportunityId);
+
+        return interactions.Select(MapToResponse);
     }
     public async Task DeleteAsync(int idInteraction)
     {
-        var interactionEntity = await GetByIdAsync(idInteraction);
+        var interactionEntity = await GetEntityByIdAsync(idInteraction);
         await _interactionRepo.DeleteAsync(interactionEntity);
     }
+
+    #region Utils
     private async Task ValidateInteractionAsync(Interaction interaction)
     {
         if (interaction == null)
@@ -94,4 +93,59 @@ public class InteractionApp : IInteractionApp
 
         return opportunityEntity;
     }
+
+    private async Task<Interaction> GetEntityByIdAsync(int idInteraction)
+    {
+        if (idInteraction <= 0)
+            throw new ArgumentException("O identificador da interação é inválido.");
+
+        var interactionEntity = await _interactionRepo.GetByIdAsync(idInteraction);
+
+        if (interactionEntity == null)
+            throw new KeyNotFoundException("Interação não localizada.");
+
+        await ValidateOpportunityExistsAsync(interactionEntity.OpportunityId);
+
+        return interactionEntity;
+    }
+
+    private static Interaction MapToEntity(InteractionAdd request)
+    {
+        if (request == null)
+            return null;
+
+        return new Interaction
+        {
+            Description = request.Description,
+            UserId = request.UserId,
+            FromStage = request.FromStage,
+            ToStage = request.ToStage,
+            InteractionDate = request.InteractionDate ?? DateTime.UtcNow,
+            NextContactDate = request.NextContactDate
+        };
+    }
+
+    private static InteractionResponse MapToResponse(Interaction interaction)
+    {
+        return new InteractionResponse
+        {
+            Id = interaction.Id,
+            OpportunityId = interaction.OpportunityId,
+            FromStage = interaction.FromStage,
+            FromStageName = interaction.FromStage.HasValue
+                ? ((OpportunityStage)interaction.FromStage.Value).ToString()
+                : null,
+            ToStage = interaction.ToStage,
+            ToStageName = interaction.ToStage.HasValue
+                ? ((OpportunityStage)interaction.ToStage.Value).ToString()
+                : null,
+            Description = interaction.Description,
+            InteractionDate = interaction.InteractionDate,
+            CreatedAt = interaction.CreatedAt,
+            UserId = interaction.UserId,
+            UserName = interaction.User?.Name,
+            NextContactDate = interaction.NextContactDate
+        };
+    }
+    #endregion
 }

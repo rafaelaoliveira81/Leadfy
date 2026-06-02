@@ -90,7 +90,7 @@ public class LeadApp : ILeadApp
         await _leadRepo.UpdateAsync(leadEntity);
     }
 
-    #region Métodos auxiliares
+    #region Utils
     private async Task ValidateLeadInformation(LeadRequest lead)
     {
         if (lead == null)

@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Application.DTO;
 using Microsoft.AspNetCore.Authorization;
-using Api.Helpers;
 
 namespace Api.Controllers;
 

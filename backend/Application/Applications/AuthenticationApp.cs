@@ -33,10 +33,11 @@ public class AuthenticationApp : IAuthenticationApp
         {
             Token = token,
             Name = user.Name,
-            UserId = user.ID,
-            Email = user.Email
+            Message = "Login efetuado com sucesso."
         };
     }
+
+    #region Utils
 
     private bool VerifyPassword(string password, string storedHash)
     {
@@ -57,4 +58,6 @@ public class AuthenticationApp : IAuthenticationApp
 
         return generatedKey == savedKey;
     }
+
+    #endregion
 }
