@@ -21,7 +21,7 @@ Atualmente, o projeto também possui funcionalidades de IA para geração de pla
 
 O sistema cobre funcionalidades ligadas ao gerenciamento comercial, incluindo cadastro de usuários, leads, produtos, oportunidades e acompanhamento das etapas do funil de vendas.
 
-Nesta versão do projeto, não fazem parte do escopo funcionalidades como integrações externas, automações mais avançadas ou dashboards analíticos completos.
+Nesta versão do projeto, não fazem parte do escopo funcionalidades como integrações externas, automações mais avançadas, dashboards analíticos completos, gestão pós venda ou gestão financeira aprofundada.
 
 ---
 
@@ -111,8 +111,9 @@ npm start
 
 Backend:
 
-* Configurar a string de conexão em `backend/Api/appsettings.json` ou `backend/Api/appsettings.Development.json`;
+* Configurar a string de conexão em `backend/Api/appsettings.json`;
 * Configurar os dados de autenticação JWT no arquivo `appsettings.json`;
+* Configurar os dados do token e modelo do GitHub Models.
 * Ajustar as origens permitidas em `CorsOrigins`, se necessário.
 
 Frontend:
@@ -210,10 +211,12 @@ A documentação contém:
 A interface do Leadfy possui as seguintes telas e funcionalidades:
 
 * Tela de login;
+* Tela de registro para novo usuário;
 * Listagem e gerenciamento de leads;
-* Tela de usuários;
+* Listagem e gerenciamento de usuários;
+* Listagem e gerencimaneto de produtos;
 * Configuração de prompts;
-* Kanban Board para acompanhamento das oportunidades.
+* Kanban Board para acompanhamento das oportunidades, adicionar interações e gerar planos de ação.
 
 ---
 
@@ -233,8 +236,6 @@ Principais tabelas do sistema:
 * `Interactions`;
 * `Prompts`.
 
-A estrutura atual do banco atende o cadastro de dados comerciais, gerenciamento do pipeline de vendas, histórico de interações e funcionalidades relacionadas à IA.
-
 ![Diagrama ERD](./Diagrama.png)
 
 ---
@@ -246,11 +247,13 @@ A estrutura atual do banco atende o cadastro de dados comerciais, gerenciamento 
 Durante o desenvolvimento do Leadfy foram trabalhados conceitos como:
 
 * Arquitetura em camadas;
+* Arquitetura do frontend;
 * Desenvolvimento Full Stack;
 * Modelagem de banco de dados;
 * APIs REST;
 * Componentização com React;
-* Autenticação e autorização.
+* Autenticação e autorização;
+* Integração com IA.
 
 ### Melhores Práticas
 
@@ -269,10 +272,12 @@ Possíveis melhorias futuras para o projeto:
 
 * Integração com APIs externas;
 * Relatórios mais completos;
-* Dashboard analítico;
-* Notificações em tempo real;
+* Dashboard analítico mais completo;
 * Automação comercial;
 * Exportação de dados.
+* Kanban com etapas dinâmicas;
+* Gestão de pós-venda;
+* Separação de dados por cliente.
 
 ---
 
@@ -283,7 +288,8 @@ Possíveis melhorias futuras para o projeto:
 * Documentação React;
 * Documentação ASP.NET Core;
 * Documentação Entity Framework Core;
-* Documentação SQL Server.
+* Documentação SQL Server;
+* Documentação GitHub.
 
 ### Links Úteis
 
@@ -291,6 +297,7 @@ Possíveis melhorias futuras para o projeto:
 * https://learn.microsoft.com/aspnet/core
 * https://learn.microsoft.com/ef/core
 * https://swagger.io
+* https://docs.github.com/pt/rest/models/inference?apiVersion=2026-03-10&utm_source=chatgpt.com
 
 ### Créditos e Agradecimentos
 
