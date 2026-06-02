@@ -10,6 +10,7 @@ import Kanban from "../pages/Kanban/Kanban";
 import { Prompts } from "../pages/Prompts/Prompts";
 import { Products } from "../pages/Products/Products";
 import { Dashboard } from "../pages/Dashboard/Dashboard";
+import { Registro } from "../pages/Registro/Registro";
 
 function ProtectedRoute() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -29,7 +30,7 @@ function PublicRoute({ children }) {
   }
 
   if (isAuthenticated) {
-    return <Navigate to="/leads" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   return children;
@@ -47,6 +48,7 @@ export function Rotas() {
             </PublicRoute>
           }
         />
+        <Route path="/register" element={<PublicRoute><Registro /></PublicRoute>} />
 
         <Route element={<ProtectedRoute />}>
           <Route path="/leads" element={<Leads />} />
