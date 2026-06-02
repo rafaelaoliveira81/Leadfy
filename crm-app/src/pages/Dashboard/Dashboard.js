@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { Alert, Col, Container, Row, Spinner } from "react-bootstrap";
+import { Alert, Col, Container, Row } from "react-bootstrap";
 import style from "./_dashboard.module.css";
 
 import { Sidebar } from "../../components/Sidebar/Sidebar";
-import { Topbar } from "../../components/Topbar/Topbar";
+import { ListingHeader } from "../../components/ListingHeader/ListingHeader";
 import { dashboardAPI } from "../../services/dashboardApi";
 
 const currencyFormatter = new Intl.NumberFormat("pt-BR", {
@@ -92,100 +92,95 @@ export function Dashboard() {
 
   return (
     <Sidebar>
-      <Topbar>
-        <Container fluid className={style["dashboard-container"]}>
-          <div className={style["dashboard-header"]}>
-            <h1>Dashboard</h1>
-            <p>Resumo básico dos indicadores comerciais.</p>
+      <Container fluid className={style["dashboard-container"]}>
+        <ListingHeader
+          title="Dashboard"
+          description="Resumo básico dos indicadores comerciais."
+        />
+
+        {isLoading && (
+          <div className={style["loading-box"]}>
+            <span>Carregando dashboard...</span>
           </div>
+        )}
 
-          {isLoading && (
-            <div className={style["loading-box"]}>
-              <span>Carregando dashboard...</span>
-            </div>
-          )}
+        {!isLoading && errorMessage && (
+          <Alert variant="danger">{errorMessage}</Alert>
+        )}
 
-          {!isLoading && errorMessage && (
-            <Alert variant="danger">{errorMessage}</Alert>
-          )}
+        {!isLoading && !errorMessage && (
+          <>
+            <Row className="g-3 mb-4">
+              {summaryCards.map((card) => (
+                <Col key={card.title} xs={12} md={6} lg={4}>
+                  <div
+                    className={`${style["dashboard-card"]} ${style[card.tone]}`}
+                  >
+                    <span>{card.title}</span>
+                    <h3>{card.value}</h3>
+                  </div>
+                </Col>
+              ))}
+            </Row>
 
-          {!isLoading && !errorMessage && (
-            <>
-              <Row className="g-3 mb-4">
-                {summaryCards.map((card) => (
-                  <Col key={card.title} xs={12} md={6} lg={4}>
-                    <div
-                      className={`${style["dashboard-card"]} ${style[card.tone]}`}
-                    >
-                      <span>{card.title}</span>
-                      <h3>{card.value}</h3>
-                    </div>
-                  </Col>
-                ))}
-              </Row>
+            <Row className="g-3">
+              <Col lg={8}>
+                <div className={style["dashboard-panel"]}>
+                  <h4>Quantidade por etapa</h4>
 
-              <Row className="g-3">
-                <Col lg={8}>
-                  <div className={style["dashboard-panel"]}>
-                    <h4>Quantidade por etapa</h4>
+                  {stages.map((stage) => {
+                    const stageClassName =
+                      STAGE_CLASSNAMES[stage.stageName] || "stage-dark-green";
 
-                    {stages.map((stage) => {
-                      const stageClassName =
-                        STAGE_CLASSNAMES[stage.stageName] || "stage-dark-green";
+                    return (
+                      <div
+                        key={stage.stageName}
+                        className={style["stage-item"]}
+                      >
+                        <div className={style["stage-info"]}>
+                          <span>{stage.stageName}</span>
+                          <strong>{stage.quantity}</strong>
+                        </div>
 
-                      return (
-                        <div
-                          key={stage.stageName}
-                          className={style["stage-item"]}
-                        >
-                          <div className={style["stage-info"]}>
-                            <span>{stage.stageName}</span>
-                            <strong>{stage.quantity}</strong>
-                          </div>
+                        <progress
+                          className={`${style["progress-custom"]} ${style[stageClassName]}`}
+                          value={stage.quantity}
+                          max={maxQuantity || 1}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              </Col>
 
-                          <progress
-                            className={`${style["progress-custom"]} ${style[stageClassName]}`}
-                            value={stage.quantity}
-                            max={maxQuantity || 1}
+              <Col lg={4}>
+                <div className={style["dashboard-panel"]}>
+                  <h4>Valores por etapa</h4>
+
+                  {stages.map((stage) => {
+                    const stageClassName =
+                      STAGE_CLASSNAMES[stage.stageName] || "stage-dark-green";
+
+                    return (
+                      <div key={stage.stageName} className={style["value-row"]}>
+                        <div className={style["value-left"]}>
+                          <div
+                            className={`${style["stage-dot"]} ${style[stageClassName]}`}
                           />
+
+                          {stage.stageName}
                         </div>
-                      );
-                    })}
-                  </div>
-                </Col>
 
-                <Col lg={4}>
-                  <div className={style["dashboard-panel"]}>
-                    <h4>Valores por etapa</h4>
-
-                    {stages.map((stage) => {
-                      const stageClassName =
-                        STAGE_CLASSNAMES[stage.stageName] || "stage-dark-green";
-
-                      return (
-                        <div
-                          key={stage.stageName}
-                          className={style["value-row"]}
-                        >
-                          <div className={style["value-left"]}>
-                            <div
-                              className={`${style["stage-dot"]} ${style[stageClassName]}`}
-                            />
-
-                            {stage.stageName}
-                          </div>
-
-                          <strong>{formatCurrency(stage.totalValue)}</strong>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </Col>
-              </Row>
-            </>
-          )}
-        </Container>
-      </Topbar>
+                        <strong>{formatCurrency(stage.totalValue)}</strong>
+                      </div>
+                    );
+                  })}
+                </div>
+              </Col>
+            </Row>
+          </>
+        )}
+      </Container>
     </Sidebar>
   );
 }
