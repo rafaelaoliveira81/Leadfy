@@ -4,8 +4,8 @@ CREATE PROCEDURE sp_CreateOpportunityActionPlan
     @GeneratedAt DATETIME2(7)
 AS
 BEGIN
-    INSERT INTO OpportunityActionPlans (OpportunityId, AiConfigId, ActionPlan, GeneratedAt)
-    VALUES (@OpportunityId, @AiConfigId, @ActionPlan, @GeneratedAt);
+    INSERT INTO OpportunityActionPlans (OpportunityId, ActionPlan, GeneratedAt)
+    VALUES (@OpportunityId, @ActionPlan, @GeneratedAt);
 
     SELECT CAST(SCOPE_IDENTITY() AS INT) AS ID;
 END;

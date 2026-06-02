@@ -14,7 +14,7 @@ AS
 SELECT
     COUNT(*) AS OpportunitiesInProgress
 FROM Opportunities
-WHERE Stage NOT IN (6,7);
+WHERE Stage NOT IN (1,6,7);
 GO
 
 

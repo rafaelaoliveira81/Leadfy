@@ -35,7 +35,7 @@ public class UserController : ControllerBase
     /// Este endpoint recebe os dados de entrada e delega o processo de cadastro
     /// para a camada de aplicação.
     /// </remarks>
-    [Authorize]
+    // [Authorize]
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
