@@ -1,16 +1,19 @@
-import { toast, ToastContainer } from "react-toastify";
+import { toast, ToastContainer} from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Form from "react-bootstrap/Form";
 import { useState } from "react";
 import { MdEmail, MdLock, MdArrowForward } from "react-icons/md";
 import { useAuth } from "../../context/AuthContext";
+import userApi from "../../services/userApi";
+
 
 import logo from "../../assets/logo.png";
-import style from "./_login.module.css";
+import style from "./_registro.module.css";
 import { Link, useNavigate } from "react-router-dom";
 
-export default function Login() {
+export function Registro() {
   const INITIAL_USER_STATE = {
+    name: "",
     email: "",
     password: "",
   };
@@ -18,7 +21,7 @@ export default function Login() {
   const [user, setUser] = useState(INITIAL_USER_STATE);
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  const { login } = useAuth();
+  const { register } = useAuth();
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -34,11 +37,11 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      await login(user);
-      toast.success("Login feito com sucesso!");
-      navigate("/leads", { replace: true });
+      await userApi.Create(user);
+      toast.success("Conta criada com sucesso!");
+      navigate("/login");
     } catch (error) {
-      toast.error(error?.message ?? "Erro ao efetuar login");
+      toast.error(error?.message ?? "Erro ao criar conta");
     } finally {
       setIsLoading(false);
     }
@@ -46,42 +49,26 @@ export default function Login() {
 
   return (
     <main className={style["pagina-login"]}>
-      <section className={style["secao-marca"]}>
-        <div className={style.logoArea}>
-          <img src={logo} alt="Leadfy" className={style.logo} />
-        </div>
-
-        <div className={style["conteudo-marca"]}>
-          <h1>
-            Transforme leads em <em>receita previsível.</em>
-          </h1>
-          <div className={style["linha-detalhe"]} />
-        </div>
-
-        <div className={style["container-cards"]}>
-          <div className={style.card}>
-            <h1>Planos de ação com IA</h1>
-            <span>
-              Gere próximos passos estratégicos com base no histórico de
-              interações com seus leads.
-            </span>
-          </div>
-          <div className={style.card}>
-            <h1>Funil sempre organizado</h1>
-            <span>
-              Visualize cada etapa da jornada comercial e mantenha o time
-              alinhado.
-            </span>
-          </div>
-        </div>
-      </section>
-
       <section className={style["secao-login"]}>
         <div className={style["caixa-login"]}>
-          <h2>Bem-vindo de volta</h2>
-          <p>Entre na sua conta para continuar.</p>
+          <h2>Crie sua conta</h2>
+          <p>Preencha os campos abaixo para criar sua conta.</p>
 
           <Form onSubmit={handleSubmit} className={style.form}>
+            <Form.Group className={style.formGroup}>
+              <Form.Label>Nome</Form.Label>
+
+              <div className={style["campo-input"]}>
+                <MdEmail className={style["icone-input"]} />
+                <Form.Control
+                  type="text"
+                  name="name"
+                  placeholder="Seu nome"
+                  value={user.name}
+                  onChange={handleInputChange}
+                />
+              </div>
+            </Form.Group>
             <Form.Group className={style.formGroup}>
               <Form.Label>E-mail</Form.Label>
 
@@ -117,18 +104,47 @@ export default function Login() {
               className={style.botaoEntrar}
               disabled={isLoading}
             >
-              {isLoading ? "Carregando..." : "Entrar"}
+              {isLoading ? "Carregando..." : "Criar conta"}
               <MdArrowForward />
             </button>
               <hr />
             <p className={style.textoCadastro}>
-              Não tem uma conta?{" "}
-              <Link to="/register">Crie uma agora</Link>
+              Já tem uma conta?{" "}
+              <Link to="/login">Faça login</Link>
             </p>
           </Form>
         </div>
-        <ToastContainer />
       </section>
+      <section className={style["secao-marca"]}>
+        <div className={style.logoArea}>
+          <img src={logo} alt="Leadfy" className={style.logo} />
+        </div>
+
+        <div className={style["conteudo-marca"]}>
+          <h1>
+            Transforme leads em <em>receita previsível.</em>
+          </h1>
+          <div className={style["linha-detalhe"]} />
+        </div>
+
+        <div className={style["container-cards"]}>
+          <div className={style.card}>
+            <h1>Planos de ação com IA</h1>
+            <span>
+              Gere próximos passos estratégicos com base no histórico de
+              interações com seus leads.
+            </span>
+          </div>
+          <div className={style.card}>
+            <h1>Funil sempre organizado</h1>
+            <span>
+              Visualize cada etapa da jornada comercial e mantenha o time
+              alinhado.
+            </span>
+          </div>
+        </div>
+      </section>
+      <ToastContainer />
     </main>
   );
 }
