@@ -79,8 +79,7 @@
     border-color 0.25s ease;
 }
 
-.sidebar-usuario:hover,
-.sidebar-usuario:focus-visible {
+.sidebar-usuario:hover {
   color: #f1e527;
   transform: translateY(-4px);
   background: rgba(255, 255, 255, 0.08);
@@ -144,8 +143,7 @@
     color 0.2s ease;
 }
 
-.sidebar-usuario-menu-item:hover,
-.sidebar-usuario-menu-item:focus-visible {
+.sidebar-usuario-menu-item:hover{
   background: rgba(255, 255, 255, 0.08);
   color: #f1e527;
   outline: none;

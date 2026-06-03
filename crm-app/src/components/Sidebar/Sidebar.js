@@ -19,6 +19,7 @@ import { MdPerson } from "react-icons/md";
 import logo from "../../assets/logo.png";
 import { useAuth } from "../../context/AuthContext";
 import userApi from "../../services/userApi";
+import { Button } from "../../components/Button/Button";
 
 export function Sidebar({ children }) {
   const navigate = useNavigate();
@@ -132,10 +133,11 @@ export function Sidebar({ children }) {
             logo={<MdShoppingCart />}
           />
           <SidebarItem texto="Usuários" link="/usuarios" logo={<MdPeople />} />
-
           <hr className={style.divider} />
           <SidebarItem texto="Prompts" link="/prompts" logo={<MdSmartToy />} />
+          <hr className={style.divider} />
         </div>
+
         <hr className={style.divider} />
         <div className={style["sidebar-usuario-wrapper"]} ref={menuRef}>
           <button
@@ -174,7 +176,7 @@ export function Sidebar({ children }) {
       </div>
       <div className={style["pagina-conteudo"]}>{children}</div>
 
-      <Modal show={isPasswordModalOpen} onHide={closePasswordModal} centered>
+      <Modal show={isPasswordModalOpen} onHide={closePasswordModal}>
         <Modal.Header closeButton>
           <Modal.Title>Trocar senha</Modal.Title>
         </Modal.Header>
@@ -203,21 +205,18 @@ export function Sidebar({ children }) {
             </Form.Group>
           </Modal.Body>
           <Modal.Footer>
-            <button
-              type="button"
-              className={style["sidebar-modal-secondary"]}
-              onClick={closePasswordModal}
-              disabled={isSubmittingPassword}
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              className={style["sidebar-modal-primary"]}
-              disabled={isSubmittingPassword}
-            >
-              {isSubmittingPassword ? "Salvando..." : "Salvar"}
-            </button>
+            <Button
+                  variant="secondary"
+                  buttonLabel="Cancelar"
+                  onButtonClick={closePasswordModal}
+                  disabled={isSubmittingPassword}
+                />
+              <Button
+                  variant="success"
+                  type="submit"
+                  buttonLabel={isSubmittingPassword ? "Salvando..." : "Salvar"}
+                  disabled={isSubmittingPassword}
+                />
           </Modal.Footer>
         </Form>
       </Modal>
