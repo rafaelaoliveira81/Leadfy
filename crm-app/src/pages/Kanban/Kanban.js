@@ -6,6 +6,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { FaDollarSign } from "react-icons/fa";
 import { MdExpandMore, MdInventory2 } from "react-icons/md";
 import { BsCalendarCheck } from "react-icons/bs";
+import { FaWhatsapp } from "react-icons/fa";
 
 import { Sidebar } from "../../components/Sidebar/Sidebar";
 import opportunityAPI from "../../services/opportunityApi";
@@ -55,6 +56,12 @@ function parseCurrencyInput(value) {
   }
 
   return (Number(digitsOnly) / 100).toFixed(2);
+}
+
+function handleClickWhatsApp(phoneNumber, message) {
+  const cleanedNumber = phoneNumber.replace(/\D/g, "");
+  const whatsappUrl = `https://wa.me/55${cleanedNumber}?text=${encodeURIComponent(message)}`;
+  window.open(whatsappUrl, "_blank");
 }
 
 function Kanban() {
@@ -503,14 +510,26 @@ function Kanban() {
       <Modal show={isModalOpen} onHide={handleCloseModal} centered size="lg">
         <Modal.Header closeButton>
           <div className={style["modal-header-content"]}>
-            <h4 className={style["modal-title"]}>
-              {selectedOpportunity?.leadName}
-            </h4>
-            <Badge bg="primary" className={style["modal-stage-badge"]}>
-              {STAGES.find((s) => s.id === selectedOpportunity?.stage)?.label ||
-                "NOVO LEAD"}
-            </Badge>
+            <div className={style["modal-title-group"]}>
+              <h4 className={style["modal-title"]}>
+                {selectedOpportunity?.leadName}
+              </h4>
+              <button
+                type="button"
+                className={style["whatsapp-button"]}
+                onClick={() => handleClickWhatsApp(selectedOpportunity?.phoneNumber || "", "")}
+              >
+                <FaWhatsapp size={20} />
+              </button>
+            </div>
+            <div className={style["modal-subtitle"]}>
+              <Badge bg="primary" className={style["modal-stage-badge"]}>
+                {STAGES.find((s) => s.id === selectedOpportunity?.stage)?.label ||
+                  "NOVO LEAD"}
+              </Badge>
+            </div>
           </div>
+
         </Modal.Header>
 
         <Modal.Body>
@@ -771,6 +790,13 @@ function Kanban() {
                           <span className={style["ai-latest-message-label"]}>
                             Mensagem
                           </span>
+                          <button
+                            type="button"
+                            className={style["whatsapp-button"]}
+                            onClick={() => handleClickWhatsApp(selectedOpportunity?.phoneNumber || "", actionPlans[0].message || "")}
+                          >
+                            <FaWhatsapp size={20} />
+                          </button>
                         </div>
                         <p className={style["ai-message-text"]}>
                           {actionPlans[0].message || "—"}

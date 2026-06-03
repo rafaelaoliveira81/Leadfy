@@ -153,6 +153,7 @@ public class OpportunityApp : IOpportunityApp
             ID = opportunity.ID,
             LeadId = opportunity.LeadId,
             LeadName = opportunity.Lead?.Name,
+            PhoneNumber = opportunity.Lead?.PhoneNumber,
             ProductId = opportunity.ProductId,
             ProductName = opportunity.Product?.Name,
             Stage = (int)opportunity.Stage,

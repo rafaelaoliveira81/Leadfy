@@ -54,6 +54,7 @@ public class OpportunityRepo : BaseRepo, IOpportunityRepo
         return await _context.Opportunities
             .Where(o => (int)o.Stage == stage)
             .Include(o => o.Lead)
+            .Where(o => o.Lead.IsActive)
             .Include(o => o.Product)
             .OrderBy(o => o.SortOrder)
             .ToListAsync();

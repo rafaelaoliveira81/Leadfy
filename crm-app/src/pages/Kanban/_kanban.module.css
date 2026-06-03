@@ -214,8 +214,9 @@
 .modal-header-content {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 12px;
-  flex-wrap: wrap;
+  width: 100%;
 }
 
 .modal-title {
@@ -223,6 +224,15 @@
   font-size: 24px;
   font-weight: 700;
   color: #111827;
+  min-width: 0;
+}
+
+.modal-title-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
 }
 
 .modal-stage-badge {
@@ -423,6 +433,7 @@
   border: 1px solid #a7f3d0;
   border-radius: 10px;
   padding: 14px;
+  margin-top: 8px;
 }
 
 .ai-latest-plan-message-header {
@@ -510,6 +521,39 @@
   gap: 6px;
 }
 
+.whatsapp-button {
+  border: 1px solid #cbd5e1;
+  background-color: transparent;
+  color: #25d366;
+
+  min-width: 36px;
+  height: 36px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease,
+    transform 0.25s ease;
+}
+
+.whatsapp-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.modal-subtitle {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
 @media (max-width: 768px) {
   .pagina-kanban {
     padding: 20px;
@@ -533,5 +577,13 @@
 
   .interaction-actions {
     justify-content: stretch;
+  }
+
+  .modal-header-content {
+    flex-wrap: wrap;
+  }
+
+  .modal-subtitle {
+    width: 100%;
   }
 }
