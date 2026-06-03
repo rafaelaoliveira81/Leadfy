@@ -766,6 +766,16 @@ function Kanban() {
                       <p className={style["ai-plan-text"]}>
                         {actionPlans[0].actionPlan}
                       </p>
+                      <div className={style["ai-latest-plan"]}>
+                        <div className={style["ai-latest-plan-header"]}>
+                          <span className={style["ai-latest-label"]}>
+                            Mensagem
+                          </span>
+                        </div>
+                        <p className={style["ai-plan-text"]}>
+                          {actionPlans[0].message || "—"}
+                        </p>
+                      </div>
                     </div>
 
                     {actionPlans.length > 1 && (
@@ -794,6 +804,9 @@ function Kanban() {
                                 </small>
                                 <p className={style["ai-plan-text"]}>
                                   {plan.actionPlan}
+                                </p>
+                                <p className={style["ai-plan-text"]}>
+                                  {plan.message || "—"}
                                 </p>
                               </div>
                             ))}

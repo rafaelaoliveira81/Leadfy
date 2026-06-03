@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Text;
 using Application.DTOs;
 using Domain.Entities;
+using System.Text.Json;
 
 namespace Application;
 
@@ -29,6 +30,7 @@ public class OpportunityActionPlanApp : IOpportunityActionPlanApp
         _promptApp = promptApp;
         _aiService = aiService;
     }
+
     public async Task<OpportunityActionPlanDto> GenerateAsync(int opportunityId, int promptId)
     {
         var opportunity = await GetOpportunityAsync(opportunityId);
@@ -46,17 +48,45 @@ public class OpportunityActionPlanApp : IOpportunityActionPlanApp
         if (string.IsNullOrWhiteSpace(generatedActionPlan))
             throw new InvalidOperationException("A IA não retornou um plano de ação válido.");
 
-        var actionPlan = new OpportunityActionPlan
+        try
         {
-            OpportunityId = opportunityId,
-            ActionPlan = generatedActionPlan.Trim(),
-            GeneratedAt = DateTime.UtcNow
-        };
+            using var json = JsonDocument.Parse(generatedActionPlan);
 
-        var id = await _actionPlanRepo.AddAsync(actionPlan);
-        actionPlan.Id = id;
+            var root = json.RootElement;
 
-        return MapToDto(actionPlan);
+            var actionPlanText = root
+                .GetProperty("plano_acao")
+                .GetString();
+
+            var message = root
+                .GetProperty("mensagem")
+                .GetString();
+
+            var actionPlan = new OpportunityActionPlan
+            {
+                OpportunityId = opportunityId,
+                Message = message?.Trim(),
+                ActionPlan = actionPlanText?.Trim(),
+                GeneratedAt = DateTime.UtcNow
+            };
+
+            var id = await _actionPlanRepo.AddAsync(actionPlan);
+            actionPlan.Id = id;
+
+            return new OpportunityActionPlanDto
+            {
+                Id = actionPlan.Id,
+                OpportunityId = actionPlan.OpportunityId,
+                ActionPlan = actionPlan.ActionPlan,
+                Message = message,
+                GeneratedAt = actionPlan.GeneratedAt
+            };
+        }
+        catch (Exception)
+        {
+            throw new InvalidOperationException(
+                "A IA retornou um JSON inválido.");
+        }
     }
 
     public async Task<IEnumerable<OpportunityActionPlanDto>> GetByOpportunityIdAsync(int opportunityId)
@@ -76,6 +106,7 @@ public class OpportunityActionPlanApp : IOpportunityActionPlanApp
         {
             Id = actionPlan.Id,
             OpportunityId = actionPlan.OpportunityId,
+            Message = actionPlan.Message ?? string.Empty,
             ActionPlan = actionPlan.ActionPlan,
             GeneratedAt = actionPlan.GeneratedAt
         };
@@ -100,17 +131,21 @@ public class OpportunityActionPlanApp : IOpportunityActionPlanApp
         var interactionList = interactions.ToList();
 
         var prompt = new StringBuilder();
+
         prompt.AppendLine(promptTemplate.Trim());
         prompt.AppendLine();
+
         prompt.AppendLine("Contexto da oportunidade:");
         prompt.AppendLine($"- Stage atual: {opportunity.Stage}");
         prompt.AppendLine($"- Valor: {opportunity.Amount.ToString("C", culture) ?? "Nao informado"}");
         prompt.AppendLine($"- Fechamento previsto: {opportunity.ExpectedCloseDate?.ToString("dd/MM/yyyy", culture) ?? "Nao informado"}");
         prompt.AppendLine($"- Produto: {product?.Name ?? "Nao informado"}");
         prompt.AppendLine();
+
         prompt.AppendLine("Dados do lead vinculado:");
         prompt.AppendLine($"- Nome: {leadName}");
         prompt.AppendLine();
+
         prompt.AppendLine("Data Atual: " + DateTime.Now.ToString("dd/MM/yyyy HH:mm", culture));
         prompt.AppendLine("Ultimas 3 interacoes registradas:");
 
@@ -128,19 +163,47 @@ public class OpportunityActionPlanApp : IOpportunityActionPlanApp
         }
 
         prompt.AppendLine();
-        prompt.AppendLine();
         prompt.AppendLine("Instruções de saída:");
-        prompt.AppendLine("Com base no contexto da oportunidade e nas interações anteriores, gere uma mensagem comercial personalizada para enviar ao lead pelo WhatsApp.");
-        prompt.AppendLine("O objetivo principal da mensagem é converter o lead em cliente.");
-        prompt.AppendLine("Sempre conduza a mensagem para fechamento ou avanço claro da negociação.");
-        prompt.AppendLine("A mensagem deve:");
-        prompt.AppendLine("- Ser natural, persuasiva e profissional;");
+        prompt.AppendLine("Com base no contexto da oportunidade e nas interações anteriores, gere uma resposta em JSON válido.");
+        prompt.AppendLine("O objetivo principal é maximizar as chances de converter o lead em cliente.");
+        prompt.AppendLine();
+        prompt.AppendLine("O JSON deve conter exatamente os seguintes campos:");
+        prompt.AppendLine();
+        prompt.AppendLine("{");
+        prompt.AppendLine("  \"plano_acao\": \"texto\",");
+        prompt.AppendLine("  \"mensagem\": \"texto\"");
+        prompt.AppendLine("}");
+        prompt.AppendLine();
+
+        prompt.AppendLine("Regras para cada campo:");
+        prompt.AppendLine();
+
+        prompt.AppendLine("1. plano_acao:");
+        prompt.AppendLine("- Deve conter orientações práticas, objetivas e estratégicas para ajudar na conversão do lead;");
+        prompt.AppendLine("- Considerar o estágio atual da oportunidade;");
+        prompt.AppendLine("- Levar em conta histórico, interesses, objeções ou sinais demonstrados nas interações;");
+        prompt.AppendLine("- Indicar abordagem recomendada, gatilhos de venda, próximos passos e estratégia de follow-up;");
+        prompt.AppendLine("- Focar em como aumentar a probabilidade de fechamento ou avanço da negociação;");
+        prompt.AppendLine("- Não escrever uma mensagem pronta para o cliente neste campo.");
+
+        prompt.AppendLine();
+
+        prompt.AppendLine("2. mensagem:");
+        prompt.AppendLine("- Deve ser uma mensagem comercial personalizada pronta para envio via WhatsApp;");
+        prompt.AppendLine("- Ser natural, persuasiva, profissional e objetiva;");
         prompt.AppendLine("- Conter o nome do lead e uma saudação agradável;");
         prompt.AppendLine("- Considerar o estágio atual da oportunidade;");
-        prompt.AppendLine("- Levar em conta as objeções ou interesses demonstrados nas interações;");
+        prompt.AppendLine("- Levar em conta objeções, interesses ou contexto das interações;");
         prompt.AppendLine("- Incentivar uma próxima ação clara (resposta, reunião, fechamento ou follow-up);");
-        prompt.AppendLine("- Ser objetiva e pronta para envio;");
-        prompt.AppendLine("- Não explicar o raciocínio, retornar apenas a mensagem final.");
+        prompt.AppendLine("- Conduzir a conversa para avanço ou fechamento da negociação;");
+        prompt.AppendLine("- Retornar apenas a mensagem final pronta para envio.");
+
+        prompt.AppendLine();
+        prompt.AppendLine("Importante:");
+        prompt.AppendLine("- Retorne apenas JSON válido.");
+        prompt.AppendLine("- Não use markdown.");
+        prompt.AppendLine("- Não explique o raciocínio.");
+        prompt.AppendLine("- Não adicione campos extras.");
 
         return prompt.ToString();
     }
