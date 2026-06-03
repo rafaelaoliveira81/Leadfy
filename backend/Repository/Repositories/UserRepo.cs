@@ -111,7 +111,7 @@ public class UserRepository : BaseRepo, IUserRepo
             await connection.ExecuteAsync(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
         }
     }
-    public async Task<User> GetByEmailWithGroupAsync(string emailUser)
+    public async Task<User> GetActiveByEmailAsync(string emailUser)
     {
         return await _context.Users
             .FirstOrDefaultAsync(u => u.Email == emailUser && u.IsActive);
