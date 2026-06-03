@@ -199,3 +199,18 @@
   background-color: #fee2e2;
   color: #b91c1c;
 }
+
+.textarea-wrapper {
+  position: relative;
+}
+
+.textarea-field {
+  padding-right: 52px;
+  padding-bottom: 44px;
+}
+
+.ia {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+}

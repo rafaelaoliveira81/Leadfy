@@ -271,6 +271,7 @@ Algumas práticas adotadas durante o desenvolvimento:
 Possíveis melhorias futuras para o projeto:
 
 * Integração com APIs externas;
+* Permissionamento;
 * Relatórios mais completos;
 * Dashboard analítico mais completo;
 * Automação comercial;

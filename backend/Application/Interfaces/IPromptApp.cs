@@ -9,4 +9,5 @@ public interface IPromptApp
     Task DeleteAsync(int idPrompt);
     Task DeactivateAsync(int idPrompt);
     Task ActivateAsync(int idPrompt);
+    Task<PromptOptimizeDTO> OptimizePromptAsync(PromptOptimizeDTO prompt);
 }

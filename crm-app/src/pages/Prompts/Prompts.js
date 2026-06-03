@@ -11,6 +11,7 @@ import {
   MdBlock,
   MdCheckCircleOutline,
 } from "react-icons/md";
+import { BsStars } from "react-icons/bs";
 import { Button } from "../../components/Button/Button";
 import { Sidebar } from "../../components/Sidebar/Sidebar";
 
@@ -134,6 +135,10 @@ export function Prompts() {
     content: currentPrompt.content?.trim() ?? "",
   });
 
+  const buildPromptOptimizePayload = (currentPrompt) => ({
+    content: currentPrompt.content?.trim() ?? "",
+  });
+
   const formatDate = (dateValue) => {
     if (!dateValue) {
       return "-";
@@ -163,6 +168,35 @@ export function Prompts() {
   const handleStatusFilterChange = (event) => {
     setStatusFilter(event.target.value);
     setCurrentPage(1);
+  };
+
+  const handleClickOptimizePrompt = async (e) => {
+    e.preventDefault();
+
+    if (!isFormValid()) {
+      return;
+    }
+
+    setIsSaving(true);
+
+    try {
+      const response = await promptAPI.OptimizePrompt(buildPromptOptimizePayload(prompt));
+
+      if (!response?.optimizedPrompt?.trim()) {
+        throw new Error("A API não retornou um prompt otimizado.");
+      }
+
+      setPrompt((prev) => ({
+        ...prev,
+        content: response.optimizedPrompt,
+      }));
+
+      toast.success("Prompt otimizado com sucesso.");
+    } catch (error) {
+      toast.error(error?.message || "Erro ao otimizar prompt.");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleClickAddPrompt = () => {
@@ -511,11 +545,13 @@ export function Prompts() {
                 </Form.Control.Feedback>
               </Form.Group>
 
-              <Form.Group className="mb-3">
-                <Form.Label>Conteúdo</Form.Label>
+              <Form.Group className="position-relative">
+              <div className={style["textarea-wrapper"]}>
+                <Form.Label>Prompt</Form.Label>
                 <Form.Control
                   as="textarea"
                   rows={6}
+                  className={style["textarea-field"]}
                   name="content"
                   placeholder="Digite o conteúdo do prompt"
                   value={prompt.content}
@@ -531,10 +567,21 @@ export function Prompts() {
                   }}
                   isInvalid={errors?.content}
                 />
-                <Form.Control.Feedback type="invalid">
-                  Conteúdo é obrigatório.
-                </Form.Control.Feedback>
-              </Form.Group>
+                <div className={style["paginacao-acoes"]} >
+                <button
+                  type="button"
+                  className={style.ia}
+                  onClick={handleClickOptimizePrompt}
+                >
+                  <BsStars />
+                </button>
+                </div>
+              </div>
+
+              <Form.Control.Feedback type="invalid">
+                Conteúdo é obrigatório.
+              </Form.Control.Feedback>
+            </Form.Group>
 
               <Modal.Footer>
                 <Button

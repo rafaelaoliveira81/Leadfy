@@ -142,9 +142,6 @@ public class OpportunityActionPlanApp : IOpportunityActionPlanApp
         prompt.AppendLine("- Ser objetiva e pronta para envio;");
         prompt.AppendLine("- Não explicar o raciocínio, retornar apenas a mensagem final.");
 
-        Console.WriteLine("Prompt gerado para IA:");
-        Console.WriteLine(prompt.ToString());
-
         return prompt.ToString();
     }
 
