@@ -1,15 +1,18 @@
 using Application.DTO;
 using Domain.Entities;
-using Domain.Enuns;
+using System.Text;
+
 
 namespace Application;
 
 public class PromptApp : IPromptApp
 {
     private readonly IPromptRepo _promptRepo;
-    public PromptApp(IPromptRepo promptRepo)
+    private readonly IAiService _aiService;
+    public PromptApp(IPromptRepo promptRepo, IAiService aiService)
     {
         _promptRepo = promptRepo;
+        _aiService = aiService;
     }
     public async Task<int> AddAsync(PromptRequest request)
     {
@@ -76,6 +79,21 @@ public class PromptApp : IPromptApp
         await _promptRepo.UpdateAsync(promptEntity);
     }
 
+    public async Task<PromptOptimizeDTO> OptimizePromptAsync(PromptOptimizeDTO prompt)
+    {
+        if (string.IsNullOrWhiteSpace(prompt.Title))
+            throw new ArgumentException("Titulo não pode ser vazio.");
+
+        if (string.IsNullOrWhiteSpace(prompt.Content))
+            throw new ArgumentException("Prompt não pode ser vazio.");
+
+        var promptRequest = BuildPrompt(prompt);
+
+        var response = await _aiService.GetResponseFromModel(promptRequest);
+
+        return new PromptOptimizeDTO { Content = response };
+    }
+
     #region Utils
     private async Task ValidatePromptInformation(PromptRequest prompt)
     {
@@ -123,6 +141,45 @@ public class PromptApp : IPromptApp
             Content = prompt.Content,
             IsActive = prompt.IsActive
         };
+    }
+
+    private string BuildPrompt(PromptOptimizeDTO userPrompt)
+    {
+        var prompt = new StringBuilder();
+        prompt.AppendLine("Você é um especialista em engenharia de prompts para IA aplicada a vendas, CRM e conversão de leads.");
+        prompt.AppendLine();
+        prompt.AppendLine("Sua tarefa é melhorar, otimizar e reestruturar o prompt enviado pelo usuário, mantendo a intenção original, mas tornando-o significativamente mais claro, específico, interpretável e eficiente para um modelo de IA.");
+        prompt.AppendLine();
+        prompt.AppendLine("Contexto importante:");
+        prompt.AppendLine("O prompt otimizado será utilizado posteriormente junto com dados dinâmicos de uma oportunidade comercial:");
+        prompt.AppendLine();
+        prompt.AppendLine("Regras para otimização:");
+        prompt.AppendLine("1. Preserve a intenção principal do usuário.");
+        prompt.AppendLine("2. Reescreva o prompt para aumentar:");
+        prompt.AppendLine("   - clareza;");
+        prompt.AppendLine("   - precisão;");
+        prompt.AppendLine("   - objetividade;");
+        prompt.AppendLine("   - contexto operacional;");
+        prompt.AppendLine("   - qualidade das instruções para IA.");
+        prompt.AppendLine("3. Elimine ambiguidades, redundâncias, inconsistências ou instruções vagas.");
+        prompt.AppendLine("4. Transforme pedidos genéricos em orientações mais acionáveis e mensuráveis.");
+        prompt.AppendLine("5. Sempre que fizer sentido, fortaleça orientações relacionadas a:");
+        prompt.AppendLine("   - personalização;");
+        prompt.AppendLine("   - persuasão comercial;");
+        prompt.AppendLine("   - adaptação ao estágio da oportunidade;");
+        prompt.AppendLine("   - consideração das interações anteriores;");
+        prompt.AppendLine("   - condução para próximo passo ou fechamento;");
+        prompt.AppendLine("   - tom profissional, natural e humano.");
+        prompt.AppendLine("6. Não invente requisitos completamente novos que mudem a intenção original.");
+        prompt.AppendLine("7. Produza um prompt pronto para uso em produção.");
+        prompt.AppendLine("8. Retorne somente o prompt melhorado, sem explicações, comentários, análise ou justificativas.");
+        prompt.AppendLine("9. O prompt final deve ter no máximo 1000 caracteres.");
+        prompt.AppendLine();
+        prompt.AppendLine("Prompt enviado pelo usuário:");
+        prompt.AppendLine($"Título: {userPrompt.Title}");
+        prompt.AppendLine($"Conteúdo: {userPrompt.Content}");
+
+        return prompt.ToString();
     }
 
     #endregion

@@ -85,4 +85,14 @@ export const promptAPI = {
       return mapApiError(error);
     }
   },
+
+  async OptimizePrompt(prompt) {
+    try {
+      const response = await HTTPClient.post(
+        `/prompts/optimize`, prompt);
+      return response.data;
+    } catch (error) {
+      return mapApiError(error);
+    }
+  },
 };

@@ -17,6 +17,7 @@ public class OpportunityActionPlanRepo : BaseRepo, IOpportunityActionPlanRepo
         var parameters = new
         {
             OpportunityId = actionPlan.OpportunityId,
+            Message = actionPlan.Message,
             ActionPlan = actionPlan.ActionPlan,
             GeneratedAt = actionPlan.GeneratedAt
         };

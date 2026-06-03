@@ -57,6 +57,7 @@ export function Rotas() {
           <Route path="/usuarios" element={<Users />} />
           <Route path="/kanban" element={<Kanban />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/" element={<Dashboard />} />
           <Route path="/*" element={<NotFound />} />
         </Route>
       </Routes>
