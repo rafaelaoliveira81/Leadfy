@@ -8,7 +8,6 @@ import { MdExpandMore, MdInventory2 } from "react-icons/md";
 import { BsCalendarCheck } from "react-icons/bs";
 
 import { Sidebar } from "../../components/Sidebar/Sidebar";
-import { Topbar } from "../../components/Topbar/Topbar";
 import opportunityAPI from "../../services/opportunityApi";
 import { productAPI } from "../../services/productApi";
 import interactionApi from "../../services/interactionApi";
@@ -415,424 +414,415 @@ function Kanban() {
 
   return (
     <Sidebar>
-      <Topbar>
-        <div className={style["pagina-kanban"]}>
-          <ListingHeader
-            title="Kanban de Oportunidades"
-            description="Gerencie suas oportunidades."
-          />
+      <div className={style["pagina-kanban"]}>
+        <ListingHeader
+          title="Kanban de Oportunidades"
+          description="Gerencie suas oportunidades."
+        />
 
-          {isLoading ? (
-            <div className={style["kanban-loading"]}>Carregando board...</div>
-          ) : (
-            <DragDropContext onDragEnd={handleDragEnd}>
-              <div className={style["kanban-board"]}>
-                {STAGES.map((stage) => {
-                  const cards = board[stage.id] || [];
-                  return (
-                    <div key={stage.id} className={style["kanban-column"]}>
-                      <div
-                        className={`${style["column-header"]} ${style[stage.headerClassName]}`}
-                      >
-                        <span className={style["column-title"]}>
-                          {stage.label}
-                        </span>
-                        <span className={style["column-count"]}>
-                          {cards.length}
-                        </span>
-                      </div>
-
-                      <Droppable droppableId={String(stage.id)}>
-                        {(provided, snapshot) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.droppableProps}
-                            className={`${style["column-body"]} ${
-                              snapshot.isDraggingOver
-                                ? style["dragging-over"]
-                                : ""
-                            }`}
-                          >
-                            {cards.length === 0 && (
-                              <p className={style["column-empty"]}>
-                                Nenhuma oportunidade
-                              </p>
-                            )}
-
-                            {cards.map((opportunity, index) => (
-                              <Draggable
-                                key={String(opportunity.id)}
-                                draggableId={String(opportunity.id)}
-                                index={index}
-                              >
-                                {(provided, snapshot) => (
-                                  <div
-                                    ref={provided.innerRef}
-                                    {...provided.draggableProps}
-                                    {...provided.dragHandleProps}
-                                    className={`${style["opp-card"]} ${
-                                      snapshot.isDragging
-                                        ? style["is-dragging"]
-                                        : ""
-                                    }`}
-                                    onClick={() => handleCardClick(opportunity)}
-                                  >
-                                    <p className={style["card-lead"]}>
-                                      {opportunity.leadName}
-                                    </p>
-                                    <p className={style["card-date"]}>
-                                      Início:{" "}
-                                      {formatDate(opportunity.createdAt)}
-                                    </p>
-                                  </div>
-                                )}
-                              </Draggable>
-                            ))}
-
-                            {provided.placeholder}
-                          </div>
-                        )}
-                      </Droppable>
-                    </div>
-                  );
-                })}
-              </div>
-            </DragDropContext>
-          )}
-
-          <ToastContainer position="top-right" autoClose={3000} />
-        </div>
-
-        <Modal show={isModalOpen} onHide={handleCloseModal} centered size="lg">
-          <Modal.Header closeButton>
-            <div className={style["modal-header-content"]}>
-              <h4 className={style["modal-title"]}>
-                {selectedOpportunity?.leadName}
-              </h4>
-              <Badge bg="primary" className={style["modal-stage-badge"]}>
-                {STAGES.find((s) => s.id === selectedOpportunity?.stage)
-                  ?.label || "NOVO LEAD"}
-              </Badge>
-            </div>
-          </Modal.Header>
-
-          <Modal.Body>
-            {selectedOpportunity && (
-              <>
-                <Row className={style["modal-form-row"]}>
-                  <Col md={4}>
-                    <Form.Group>
-                      <Form.Label>
-                        {" "}
-                        <MdInventory2 /> Produto
-                      </Form.Label>
-
-                      <Form.Control
-                        as="select"
-                        value={opportunityForm.productId}
-                        onChange={(event) =>
-                          handleProductChange(event.target.value)
-                        }
-                      >
-                        <option value="">Selecione um produto</option>
-                        {products.map((product) => (
-                          <option key={product.id} value={product.id}>
-                            {product.name}
-                          </option>
-                        ))}
-                      </Form.Control>
-                    </Form.Group>
-                  </Col>
-                  <Col md={4}>
-                    <Form.Group>
-                      <Form.Label>
-                        {" "}
-                        <FaDollarSign /> Valor
-                      </Form.Label>
-
-                      <Form.Control
-                        type="text"
-                        inputMode="numeric"
-                        value={formatCurrencyInput(opportunityForm.amount)}
-                        onChange={(event) =>
-                          handleOpportunityFieldChange(
-                            "amount",
-                            parseCurrencyInput(event.target.value),
-                          )
-                        }
-                      />
-                    </Form.Group>
-                  </Col>
-                  <Col md={4}>
-                    <Form.Group>
-                      <Form.Label>
-                        <BsCalendarCheck /> Previsão
-                      </Form.Label>
-
-                      <Form.Control
-                        type="date"
-                        value={opportunityForm.expectedCloseDate}
-                        onChange={(event) =>
-                          handleOpportunityFieldChange(
-                            "expectedCloseDate",
-                            event.target.value,
-                          )
-                        }
-                      />
-                    </Form.Group>
-                  </Col>
-                </Row>
-
-                <section className={style["interaction-section"]}>
-                  <button
-                    type="button"
-                    className={style["interaction-toggle"]}
-                    onClick={() =>
-                      setIsInteractionSectionOpen((current) => !current)
-                    }
-                    aria-expanded={isInteractionSectionOpen}
-                  >
-                    <div className={style["interaction-toggle-text"]}>
-                      <h6 className={style["interaction-section-title"]}>
-                        Interações
-                      </h6>
-                      <span className={style["interaction-counter"]}>
-                        {interactions.length} registradas
+        {isLoading ? (
+          <div className={style["kanban-loading"]}>Carregando board...</div>
+        ) : (
+          <DragDropContext onDragEnd={handleDragEnd}>
+            <div className={style["kanban-board"]}>
+              {STAGES.map((stage) => {
+                const cards = board[stage.id] || [];
+                return (
+                  <div key={stage.id} className={style["kanban-column"]}>
+                    <div
+                      className={`${style["column-header"]} ${style[stage.headerClassName]}`}
+                    >
+                      <span className={style["column-title"]}>
+                        {stage.label}
+                      </span>
+                      <span className={style["column-count"]}>
+                        {cards.length}
                       </span>
                     </div>
-                    <MdExpandMore
-                      className={`${style["interaction-toggle-icon"]} ${
-                        isInteractionSectionOpen
-                          ? style["interaction-toggle-icon-open"]
-                          : ""
-                      }`}
-                    />
-                  </button>
 
-                  {isInteractionSectionOpen && (
-                    <div className={style["interaction-content"]}>
-                      <div className={style["interaction-composer"]}>
-                        <h6 className={style["interaction-subtitle"]}>
-                          Registrar interação
-                        </h6>
+                    <Droppable droppableId={String(stage.id)}>
+                      {(provided, snapshot) => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.droppableProps}
+                          className={`${style["column-body"]} ${
+                            snapshot.isDraggingOver
+                              ? style["dragging-over"]
+                              : ""
+                          }`}
+                        >
+                          {cards.length === 0 && (
+                            <p className={style["column-empty"]}>
+                              Nenhuma oportunidade
+                            </p>
+                          )}
 
-                        <Form.Control
-                          as="textarea"
-                          rows={4}
-                          placeholder="O que foi conversado com o lead?"
-                          value={interactionDescription}
-                          onChange={(event) =>
-                            setInteractionDescription(event.target.value)
-                          }
-                          disabled={isAddingInteraction}
-                          className={style["interaction-textarea"]}
-                        />
-
-                        <div className={style["interaction-actions"]}>
-                          <Button
-                            variant="success"
-                            buttonLabel={
-                              isAddingInteraction
-                                ? "Adicionando..."
-                                : "Adicionar interação"
-                            }
-                            onButtonClick={handleAddInteraction}
-                            disabled={isAddingInteraction}
-                          />
-                        </div>
-                      </div>
-
-                      <div className={style["interaction-history"]}>
-                        <h6 className={style["interaction-subtitle"]}>
-                          Histórico ({interactions.length})
-                        </h6>
-
-                        {isInteractionsLoading ? (
-                          <Card className={style["interaction-empty-card"]}>
-                            <small className={style["interaction-muted-text"]}>
-                              Carregando interações...
-                            </small>
-                          </Card>
-                        ) : interactions.length === 0 ? (
-                          <Card className={style["interaction-empty-card"]}>
-                            <small className={style["interaction-muted-text"]}>
-                              Nenhuma interação registrada ainda.
-                            </small>
-                          </Card>
-                        ) : (
-                          interactions.map((interaction) => {
-                            const stageLabel = STAGES.find(
-                              (stage) => stage.id === interaction.toStage,
-                            )?.label;
-
-                            return (
-                              <Card
-                                key={interaction.id}
-                                className={style["interaction-card"]}
-                              >
+                          {cards.map((opportunity, index) => (
+                            <Draggable
+                              key={String(opportunity.id)}
+                              draggableId={String(opportunity.id)}
+                              index={index}
+                            >
+                              {(provided, snapshot) => (
                                 <div
-                                  className={style["interaction-card-header"]}
+                                  ref={provided.innerRef}
+                                  {...provided.draggableProps}
+                                  {...provided.dragHandleProps}
+                                  className={`${style["opp-card"]} ${
+                                    snapshot.isDragging
+                                      ? style["is-dragging"]
+                                      : ""
+                                  }`}
+                                  onClick={() => handleCardClick(opportunity)}
                                 >
-                                  <div>
-                                    <strong
-                                      className={style["interaction-user"]}
-                                    >
-                                      {interaction.userName ||
-                                        `Usuário #${interaction.userId}`}
-                                    </strong>
-                                    <div>
-                                      <small
-                                        className={
-                                          style["interaction-muted-text"]
-                                        }
-                                      >
-                                        {formatDateTime(
-                                          interaction.interactionDate,
-                                        )}
-                                      </small>
-                                    </div>
-                                  </div>
-
-                                  <span className={style["interaction-stage"]}>
-                                    {stageLabel ||
-                                      interaction.toStageName ||
-                                      "Sem etapa"}
-                                  </span>
+                                  <p className={style["card-lead"]}>
+                                    {opportunity.leadName}
+                                  </p>
+                                  <p className={style["card-date"]}>
+                                    Início: {formatDate(opportunity.createdAt)}
+                                  </p>
                                 </div>
+                              )}
+                            </Draggable>
+                          ))}
 
-                                <small
-                                  className={style["interaction-description"]}
-                                >
-                                  {interaction.description}
-                                </small>
-                              </Card>
-                            );
-                          })
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </section>
-
-                <Card className={style["ai-card"]}>
-                  <div className={style["ai-card-header-row"]}>
-                    <h6 className={style["ai-card-title"]}>
-                      Plano de ação com IA
-                    </h6>
-                    <small className={style["interaction-muted-text"]}>
-                      Use IA para receber um diagnóstico e próximos passos da
-                      oportunidade.
-                    </small>
+                          {provided.placeholder}
+                        </div>
+                      )}
+                    </Droppable>
                   </div>
+                );
+              })}
+            </div>
+          </DragDropContext>
+        )}
 
-                  <div className={style["ai-controls"]}>
+        <ToastContainer position="top-right" autoClose={3000} />
+      </div>
+
+      <Modal show={isModalOpen} onHide={handleCloseModal} centered size="lg">
+        <Modal.Header closeButton>
+          <div className={style["modal-header-content"]}>
+            <h4 className={style["modal-title"]}>
+              {selectedOpportunity?.leadName}
+            </h4>
+            <Badge bg="primary" className={style["modal-stage-badge"]}>
+              {STAGES.find((s) => s.id === selectedOpportunity?.stage)?.label ||
+                "NOVO LEAD"}
+            </Badge>
+          </div>
+        </Modal.Header>
+
+        <Modal.Body>
+          {selectedOpportunity && (
+            <>
+              <Row className={style["modal-form-row"]}>
+                <Col md={4}>
+                  <Form.Group>
+                    <Form.Label>
+                      {" "}
+                      <MdInventory2 /> Produto
+                    </Form.Label>
+
                     <Form.Control
                       as="select"
-                      value={selectedPromptId}
-                      onChange={(e) => setSelectedPromptId(e.target.value)}
-                      disabled={isGeneratingPlan}
-                      className={style["ai-prompt-select"]}
+                      value={opportunityForm.productId}
+                      onChange={(event) =>
+                        handleProductChange(event.target.value)
+                      }
                     >
-                      <option value="">Selecione um prompt</option>
-                      {prompts.map((prompt) => (
-                        <option key={prompt.id} value={prompt.id}>
-                          {prompt.title}
+                      <option value="">Selecione um produto</option>
+                      {products.map((product) => (
+                        <option key={product.id} value={product.id}>
+                          {product.name}
                         </option>
                       ))}
                     </Form.Control>
+                  </Form.Group>
+                </Col>
+                <Col md={4}>
+                  <Form.Group>
+                    <Form.Label>
+                      {" "}
+                      <FaDollarSign /> Valor
+                    </Form.Label>
 
-                    <Button
-                      variant="danger"
-                      buttonLabel={
-                        isGeneratingPlan ? "Gerando..." : "Gerar plano"
+                    <Form.Control
+                      type="text"
+                      inputMode="numeric"
+                      value={formatCurrencyInput(opportunityForm.amount)}
+                      onChange={(event) =>
+                        handleOpportunityFieldChange(
+                          "amount",
+                          parseCurrencyInput(event.target.value),
+                        )
                       }
-                      onButtonClick={handleGeneratePlan}
-                      disabled={isGeneratingPlan}
                     />
+                  </Form.Group>
+                </Col>
+                <Col md={4}>
+                  <Form.Group>
+                    <Form.Label>
+                      <BsCalendarCheck /> Previsão
+                    </Form.Label>
+
+                    <Form.Control
+                      type="date"
+                      value={opportunityForm.expectedCloseDate}
+                      onChange={(event) =>
+                        handleOpportunityFieldChange(
+                          "expectedCloseDate",
+                          event.target.value,
+                        )
+                      }
+                    />
+                  </Form.Group>
+                </Col>
+              </Row>
+
+              <section className={style["interaction-section"]}>
+                <button
+                  type="button"
+                  className={style["interaction-toggle"]}
+                  onClick={() =>
+                    setIsInteractionSectionOpen((current) => !current)
+                  }
+                  aria-expanded={isInteractionSectionOpen}
+                >
+                  <div className={style["interaction-toggle-text"]}>
+                    <h6 className={style["interaction-section-title"]}>
+                      Interações
+                    </h6>
+                    <span className={style["interaction-counter"]}>
+                      {interactions.length} registradas
+                    </span>
                   </div>
+                  <MdExpandMore
+                    className={`${style["interaction-toggle-icon"]} ${
+                      isInteractionSectionOpen
+                        ? style["interaction-toggle-icon-open"]
+                        : ""
+                    }`}
+                  />
+                </button>
 
-                  {isActionPlansLoading ? (
-                    <small className={style["interaction-muted-text"]}>
-                      Carregando planos...
-                    </small>
-                  ) : actionPlans.length === 0 ? (
-                    <small className={style["interaction-muted-text"]}>
-                      Nenhum plano gerado ainda.
-                    </small>
-                  ) : (
-                    <div className={style["ai-plans-section"]}>
-                      <div className={style["ai-latest-plan"]}>
-                        <div className={style["ai-latest-plan-header"]}>
-                          <span className={style["ai-latest-label"]}>
-                            Último plano gerado
-                          </span>
-                          <small className={style["interaction-muted-text"]}>
-                            {formatDateTime(actionPlans[0].generatedAt)}
-                          </small>
-                        </div>
-                        <p className={style["ai-plan-text"]}>
-                          {actionPlans[0].actionPlan}
-                        </p>
+                {isInteractionSectionOpen && (
+                  <div className={style["interaction-content"]}>
+                    <div className={style["interaction-composer"]}>
+                      <h6 className={style["interaction-subtitle"]}>
+                        Registrar interação
+                      </h6>
+
+                      <Form.Control
+                        as="textarea"
+                        rows={4}
+                        placeholder="O que foi conversado com o lead?"
+                        value={interactionDescription}
+                        onChange={(event) =>
+                          setInteractionDescription(event.target.value)
+                        }
+                        disabled={isAddingInteraction}
+                        className={style["interaction-textarea"]}
+                      />
+
+                      <div className={style["interaction-actions"]}>
+                        <Button
+                          variant="success"
+                          buttonLabel={
+                            isAddingInteraction
+                              ? "Adicionando..."
+                              : "Adicionar interação"
+                          }
+                          onButtonClick={handleAddInteraction}
+                          disabled={isAddingInteraction}
+                        />
                       </div>
+                    </div>
 
-                      {actionPlans.length > 1 && (
-                        <>
-                          <button
-                            type="button"
-                            className={style["ai-history-toggle"]}
-                            onClick={() =>
-                              setIsActionPlansOpen((prev) => !prev)
-                            }
-                          >
-                            {isActionPlansOpen
-                              ? "Ocultar histórico"
-                              : `Ver histórico (${actionPlans.length - 1} anterior${actionPlans.length - 1 > 1 ? "es" : ""})`}
-                          </button>
+                    <div className={style["interaction-history"]}>
+                      <h6 className={style["interaction-subtitle"]}>
+                        Histórico ({interactions.length})
+                      </h6>
 
-                          {isActionPlansOpen && (
-                            <div className={style["ai-history"]}>
-                              {actionPlans.slice(1).map((plan) => (
-                                <div
-                                  key={plan.id}
-                                  className={style["ai-history-item"]}
-                                >
-                                  <small
-                                    className={style["interaction-muted-text"]}
-                                  >
-                                    {formatDateTime(plan.generatedAt)}
-                                  </small>
-                                  <p className={style["ai-plan-text"]}>
-                                    {plan.actionPlan}
-                                  </p>
+                      {isInteractionsLoading ? (
+                        <Card className={style["interaction-empty-card"]}>
+                          <small className={style["interaction-muted-text"]}>
+                            Carregando interações...
+                          </small>
+                        </Card>
+                      ) : interactions.length === 0 ? (
+                        <Card className={style["interaction-empty-card"]}>
+                          <small className={style["interaction-muted-text"]}>
+                            Nenhuma interação registrada ainda.
+                          </small>
+                        </Card>
+                      ) : (
+                        interactions.map((interaction) => {
+                          const stageLabel = STAGES.find(
+                            (stage) => stage.id === interaction.toStage,
+                          )?.label;
+
+                          return (
+                            <Card
+                              key={interaction.id}
+                              className={style["interaction-card"]}
+                            >
+                              <div className={style["interaction-card-header"]}>
+                                <div>
+                                  <strong className={style["interaction-user"]}>
+                                    {interaction.userName ||
+                                      `Usuário #${interaction.userId}`}
+                                  </strong>
+                                  <div>
+                                    <small
+                                      className={
+                                        style["interaction-muted-text"]
+                                      }
+                                    >
+                                      {formatDateTime(
+                                        interaction.interactionDate,
+                                      )}
+                                    </small>
+                                  </div>
                                 </div>
-                              ))}
-                            </div>
-                          )}
-                        </>
+
+                                <span className={style["interaction-stage"]}>
+                                  {stageLabel ||
+                                    interaction.toStageName ||
+                                    "Sem etapa"}
+                                </span>
+                              </div>
+
+                              <small
+                                className={style["interaction-description"]}
+                              >
+                                {interaction.description}
+                              </small>
+                            </Card>
+                          );
+                        })
                       )}
                     </div>
-                  )}
-                </Card>
-              </>
-            )}
-          </Modal.Body>
+                  </div>
+                )}
+              </section>
 
-          <Modal.Footer>
-            <Button
-              variant="success"
-              buttonLabel={isSaving ? "Salvando..." : "Salvar"}
-              onButtonClick={handleSaveOpportunity}
-              disabled={isSaving}
-            />
-            <Button
-              variant="secondary"
-              buttonLabel="Fechar"
-              onButtonClick={handleCloseModal}
-              disabled={isSaving}
-            />
-          </Modal.Footer>
-        </Modal>
-      </Topbar>
+              <Card className={style["ai-card"]}>
+                <div className={style["ai-card-header-row"]}>
+                  <h6 className={style["ai-card-title"]}>
+                    Plano de ação com IA
+                  </h6>
+                  <small className={style["interaction-muted-text"]}>
+                    Use IA para receber um diagnóstico e próximos passos da
+                    oportunidade.
+                  </small>
+                </div>
+
+                <div className={style["ai-controls"]}>
+                  <Form.Control
+                    as="select"
+                    value={selectedPromptId}
+                    onChange={(e) => setSelectedPromptId(e.target.value)}
+                    disabled={isGeneratingPlan}
+                    className={style["ai-prompt-select"]}
+                  >
+                    <option value="">Selecione um prompt</option>
+                    {prompts.map((prompt) => (
+                      <option key={prompt.id} value={prompt.id}>
+                        {prompt.title}
+                      </option>
+                    ))}
+                  </Form.Control>
+
+                  <Button
+                    variant="danger"
+                    buttonLabel={
+                      isGeneratingPlan ? "Gerando..." : "Gerar plano"
+                    }
+                    onButtonClick={handleGeneratePlan}
+                    disabled={isGeneratingPlan}
+                  />
+                </div>
+
+                {isActionPlansLoading ? (
+                  <small className={style["interaction-muted-text"]}>
+                    Carregando planos...
+                  </small>
+                ) : actionPlans.length === 0 ? (
+                  <small className={style["interaction-muted-text"]}>
+                    Nenhum plano gerado ainda.
+                  </small>
+                ) : (
+                  <div className={style["ai-plans-section"]}>
+                    <div className={style["ai-latest-plan"]}>
+                      <div className={style["ai-latest-plan-header"]}>
+                        <span className={style["ai-latest-label"]}>
+                          Último plano gerado
+                        </span>
+                        <small className={style["interaction-muted-text"]}>
+                          {formatDateTime(actionPlans[0].generatedAt)}
+                        </small>
+                      </div>
+                      <p className={style["ai-plan-text"]}>
+                        {actionPlans[0].actionPlan}
+                      </p>
+                    </div>
+
+                    {actionPlans.length > 1 && (
+                      <>
+                        <button
+                          type="button"
+                          className={style["ai-history-toggle"]}
+                          onClick={() => setIsActionPlansOpen((prev) => !prev)}
+                        >
+                          {isActionPlansOpen
+                            ? "Ocultar histórico"
+                            : `Ver histórico (${actionPlans.length - 1} anterior${actionPlans.length - 1 > 1 ? "es" : ""})`}
+                        </button>
+
+                        {isActionPlansOpen && (
+                          <div className={style["ai-history"]}>
+                            {actionPlans.slice(1).map((plan) => (
+                              <div
+                                key={plan.id}
+                                className={style["ai-history-item"]}
+                              >
+                                <small
+                                  className={style["interaction-muted-text"]}
+                                >
+                                  {formatDateTime(plan.generatedAt)}
+                                </small>
+                                <p className={style["ai-plan-text"]}>
+                                  {plan.actionPlan}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
+                )}
+              </Card>
+            </>
+          )}
+        </Modal.Body>
+
+        <Modal.Footer>
+          <Button
+            variant="success"
+            buttonLabel={isSaving ? "Salvando..." : "Salvar"}
+            onButtonClick={handleSaveOpportunity}
+            disabled={isSaving}
+          />
+          <Button
+            variant="secondary"
+            buttonLabel="Fechar"
+            onButtonClick={handleCloseModal}
+            disabled={isSaving}
+          />
+        </Modal.Footer>
+      </Modal>
     </Sidebar>
   );
 }

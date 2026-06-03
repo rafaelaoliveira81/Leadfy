@@ -13,7 +13,7 @@ import {
 } from "react-icons/md";
 import { Button } from "../../components/Button/Button";
 import { Sidebar } from "../../components/Sidebar/Sidebar";
-import { Topbar } from "../../components/Topbar/Topbar";
+
 import { ListingHeader } from "../../components/ListingHeader/ListingHeader";
 import { useAuth } from "../../context/AuthContext";
 import { productAPI } from "../../services/productApi";
@@ -131,7 +131,13 @@ export function Products() {
     }
 
     fetchProducts(getStatusParam(statusFilter), currentPage);
-  }, [currentPage, statusFilter, fetchProducts, getStatusParam, isAuthenticated]);
+  }, [
+    currentPage,
+    statusFilter,
+    fetchProducts,
+    getStatusParam,
+    isAuthenticated,
+  ]);
 
   const closeProductFormModal = () => {
     setProductFormMode(null);
@@ -323,7 +329,7 @@ export function Products() {
 
   return (
     <Sidebar>
-      <Topbar>
+      <>
         <div className={style["pagina-listagem"]}>
           <ListingHeader
             title="Produtos"
@@ -581,7 +587,7 @@ export function Products() {
             </Form>
           </Modal.Body>
         </Modal>
-      </Topbar>
+      </>
     </Sidebar>
   );
 }

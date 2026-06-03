@@ -13,7 +13,7 @@ import {
 } from "react-icons/md";
 import { Button } from "../../components/Button/Button";
 import { Sidebar } from "../../components/Sidebar/Sidebar";
-import { Topbar } from "../../components/Topbar/Topbar";
+
 import { ListingHeader } from "../../components/ListingHeader/ListingHeader";
 import { useAuth } from "../../context/AuthContext";
 import userApi from "../../services/userApi";
@@ -309,7 +309,7 @@ export function Users() {
 
   return (
     <Sidebar>
-      <Topbar>
+      <>
         <div className={style["pagina-listagem"]}>
           <ListingHeader
             title="Usuários"
@@ -564,7 +564,7 @@ export function Users() {
             </Form>
           </Modal.Body>
         </Modal>
-      </Topbar>
+      </>
     </Sidebar>
   );
 }
