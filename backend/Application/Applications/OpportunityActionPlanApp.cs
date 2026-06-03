@@ -3,6 +3,7 @@ using System.Text;
 using Application.DTOs;
 using Domain.Entities;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Application;
 
@@ -48,25 +49,18 @@ public class OpportunityActionPlanApp : IOpportunityActionPlanApp
         if (string.IsNullOrWhiteSpace(generatedActionPlan))
             throw new InvalidOperationException("A IA não retornou um plano de ação válido.");
 
+        Console.WriteLine("Resposta bruta da IA:");
+        Console.WriteLine(generatedActionPlan);
+
         try
         {
-            using var json = JsonDocument.Parse(generatedActionPlan);
-
-            var root = json.RootElement;
-
-            var actionPlanText = root
-                .GetProperty("plano_acao")
-                .GetString();
-
-            var message = root
-                .GetProperty("mensagem")
-                .GetString();
+            var parsedActionPlan = ParseGeneratedActionPlan(generatedActionPlan);
 
             var actionPlan = new OpportunityActionPlan
             {
                 OpportunityId = opportunityId,
-                Message = message?.Trim(),
-                ActionPlan = actionPlanText?.Trim(),
+                Message = parsedActionPlan.Message,
+                ActionPlan = parsedActionPlan.ActionPlan,
                 GeneratedAt = DateTime.UtcNow
             };
 
@@ -78,14 +72,14 @@ public class OpportunityActionPlanApp : IOpportunityActionPlanApp
                 Id = actionPlan.Id,
                 OpportunityId = actionPlan.OpportunityId,
                 ActionPlan = actionPlan.ActionPlan,
-                Message = message,
+                Message = actionPlan.Message,
                 GeneratedAt = actionPlan.GeneratedAt
             };
         }
-        catch (Exception)
+        catch (Exception ex) when (ex is JsonException or InvalidOperationException)
         {
             throw new InvalidOperationException(
-                "A IA retornou um JSON inválido.");
+                "A IA retornou um JSON inválido.", ex);
         }
     }
 
@@ -100,6 +94,98 @@ public class OpportunityActionPlanApp : IOpportunityActionPlanApp
 
 
     #region Utils
+    private static OpportunityActionPlanContent ParseGeneratedActionPlan(string generatedActionPlan)
+    {
+        var normalizedJson = ExtractJsonObject(generatedActionPlan);
+
+        var content = JsonSerializer.Deserialize<OpportunityActionPlanContent>(
+            normalizedJson,
+            new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+
+        if (content == null)
+            throw new InvalidOperationException("A IA não retornou um objeto JSON válido.");
+
+        var actionPlan = content.ActionPlan?.Trim();
+        var message = content.Message?.Trim();
+
+        if (string.IsNullOrWhiteSpace(actionPlan) || string.IsNullOrWhiteSpace(message))
+            throw new InvalidOperationException("A IA retornou um JSON sem os campos obrigatórios.");
+
+        return new OpportunityActionPlanContent
+        {
+            ActionPlan = actionPlan,
+            Message = message
+        };
+    }
+
+    private static string ExtractJsonObject(string rawContent)
+    {
+        var candidate = rawContent.Trim();
+
+        if (candidate.StartsWith("```") && candidate.EndsWith("```"))
+        {
+            var lines = candidate
+                .Split(new[] { "\r\n", "\n" }, StringSplitOptions.None)
+                .ToList();
+
+            if (lines.Count >= 2)
+            {
+                lines.RemoveAt(0);
+                lines.RemoveAt(lines.Count - 1);
+                candidate = string.Join(Environment.NewLine, lines).Trim();
+            }
+        }
+
+        if (TryExtractFromJson(candidate, out var normalizedJson))
+            return normalizedJson;
+
+        var firstBrace = candidate.IndexOf('{');
+        var lastBrace = candidate.LastIndexOf('}');
+
+        if (firstBrace >= 0 && lastBrace > firstBrace)
+        {
+            var jsonSlice = candidate.Substring(firstBrace, lastBrace - firstBrace + 1);
+
+            if (TryExtractFromJson(jsonSlice, out normalizedJson))
+                return normalizedJson;
+        }
+
+        throw new JsonException("Não foi possível localizar um objeto JSON válido na resposta da IA.");
+    }
+
+    private static bool TryExtractFromJson(string candidate, out string normalizedJson)
+    {
+        try
+        {
+            using var document = JsonDocument.Parse(candidate);
+
+            if (document.RootElement.ValueKind == JsonValueKind.String)
+            {
+                var innerJson = document.RootElement.GetString();
+
+                if (!string.IsNullOrWhiteSpace(innerJson))
+                {
+                    normalizedJson = ExtractJsonObject(innerJson);
+                    return true;
+                }
+            }
+
+            if (document.RootElement.ValueKind != JsonValueKind.Object)
+                throw new JsonException("A resposta da IA não contém um objeto JSON na raiz.");
+
+            normalizedJson = document.RootElement.GetRawText();
+            return true;
+        }
+        catch (JsonException)
+        {
+            normalizedJson = string.Empty;
+            return false;
+        }
+    }
+
     private static OpportunityActionPlanDto MapToDto(OpportunityActionPlan actionPlan)
     {
         return new OpportunityActionPlanDto
@@ -209,4 +295,13 @@ public class OpportunityActionPlanApp : IOpportunityActionPlanApp
     }
 
     #endregion
+}
+
+internal sealed class OpportunityActionPlanContent
+{
+    [JsonPropertyName("plano_acao")]
+    public string ActionPlan { get; set; }
+
+    [JsonPropertyName("mensagem")]
+    public string Message { get; set; }
 }

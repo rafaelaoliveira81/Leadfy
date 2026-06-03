@@ -766,13 +766,13 @@ function Kanban() {
                       <p className={style["ai-plan-text"]}>
                         {actionPlans[0].actionPlan}
                       </p>
-                      <div className={style["ai-latest-plan"]}>
-                        <div className={style["ai-latest-plan-header"]}>
-                          <span className={style["ai-latest-label"]}>
+                      <div className={style["ai-latest-plan-message"]}>
+                        <div className={style["ai-latest-plan-message-header"]}>
+                          <span className={style["ai-latest-message-label"]}>
                             Mensagem
                           </span>
                         </div>
-                        <p className={style["ai-plan-text"]}>
+                        <p className={style["ai-message-text"]}>
                           {actionPlans[0].message || "—"}
                         </p>
                       </div>
