@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Modal from "react-bootstrap/Modal";
+import Spinner from "react-bootstrap/Spinner";
 import Form from "react-bootstrap/Form";
 import {
   MdEdit,
@@ -37,6 +38,7 @@ export function Prompts() {
   const [totalRecords, setTotalRecords] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isOptimizing, setIsOptimizing] = useState(false);
   const [errors, setErrors] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState("active");
@@ -136,6 +138,7 @@ export function Prompts() {
   });
 
   const buildPromptOptimizePayload = (currentPrompt) => ({
+    title: currentPrompt.title?.trim() ?? "",
     content: currentPrompt.content?.trim() ?? "",
   });
 
@@ -177,25 +180,27 @@ export function Prompts() {
       return;
     }
 
-    setIsSaving(true);
+    setIsOptimizing(true);
 
     try {
-      const response = await promptAPI.OptimizePrompt(buildPromptOptimizePayload(prompt));
+      const response = await promptAPI.OptimizePrompt(
+        buildPromptOptimizePayload(prompt),
+      );
 
-      if (!response?.optimizedPrompt?.trim()) {
+      if (!response?.optimizedPrompt?.content.trim()) {
         throw new Error("A API não retornou um prompt otimizado.");
       }
 
       setPrompt((prev) => ({
         ...prev,
-        content: response.optimizedPrompt,
+        content: response.optimizedPrompt.content.trim(),
       }));
 
       toast.success("Prompt otimizado com sucesso.");
     } catch (error) {
       toast.error(error?.message || "Erro ao otimizar prompt.");
     } finally {
-      setIsSaving(false);
+      setIsOptimizing(false);
     }
   };
 
@@ -546,42 +551,47 @@ export function Prompts() {
               </Form.Group>
 
               <Form.Group className="position-relative">
-              <div className={style["textarea-wrapper"]}>
-                <Form.Label>Prompt</Form.Label>
-                <Form.Control
-                  as="textarea"
-                  rows={6}
-                  className={style["textarea-field"]}
-                  name="content"
-                  placeholder="Digite o conteúdo do prompt"
-                  value={prompt.content}
-                  onChange={(e) => {
-                    handleInputChange(e);
+                <div className={style["textarea-wrapper"]}>
+                  <Form.Label>Prompt</Form.Label>
+                  <Form.Control
+                    as="textarea"
+                    rows={6}
+                    className={style["textarea-field"]}
+                    name="content"
+                    placeholder="Digite o conteúdo do prompt"
+                    value={prompt.content}
+                    onChange={(e) => {
+                      handleInputChange(e);
 
-                    if (errors?.content) {
-                      setErrors((prev) => ({
-                        ...prev,
-                        content: false,
-                      }));
-                    }
-                  }}
-                  isInvalid={errors?.content}
-                />
-                <div className={style["paginacao-acoes"]} >
-                <button
-                  type="button"
-                  className={style.ia}
-                  onClick={handleClickOptimizePrompt}
-                >
-                  <BsStars />
-                </button>
+                      if (errors?.content) {
+                        setErrors((prev) => ({
+                          ...prev,
+                          content: false,
+                        }));
+                      }
+                    }}
+                    isInvalid={errors?.content}
+                  />
+                  <div className={style["paginacao-acoes"]}>
+                    <button
+                      type="button"
+                      className={style.ia}
+                      onClick={handleClickOptimizePrompt}
+                      disabled={isOptimizing}
+                    >
+                      {isOptimizing ? (
+                        <Spinner animation="border" role="status" size="sm" />
+                      ) : (
+                        <BsStars />
+                      )}
+                    </button>
+                  </div>
                 </div>
-              </div>
 
-              <Form.Control.Feedback type="invalid">
-                Conteúdo é obrigatório.
-              </Form.Control.Feedback>
-            </Form.Group>
+                <Form.Control.Feedback type="invalid">
+                  Conteúdo é obrigatório.
+                </Form.Control.Feedback>
+              </Form.Group>
 
               <Modal.Footer>
                 <Button

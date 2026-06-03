@@ -81,10 +81,13 @@ public class PromptApp : IPromptApp
 
     public async Task<PromptOptimizeDTO> OptimizePromptAsync(PromptOptimizeDTO prompt)
     {
+        if (string.IsNullOrWhiteSpace(prompt.Title))
+            throw new ArgumentException("Titulo não pode ser vazio.");
+
         if (string.IsNullOrWhiteSpace(prompt.Content))
             throw new ArgumentException("Prompt não pode ser vazio.");
 
-        var promptRequest = BuildPrompt(prompt.Content);
+        var promptRequest = BuildPrompt(prompt);
 
         var response = await _aiService.GetResponseFromModel(promptRequest);
 
@@ -140,7 +143,7 @@ public class PromptApp : IPromptApp
         };
     }
 
-    private string BuildPrompt(string userPrompt)
+    private string BuildPrompt(PromptOptimizeDTO userPrompt)
     {
         var prompt = new StringBuilder();
         prompt.AppendLine("Você é um especialista em engenharia de prompts para IA aplicada a vendas, CRM e conversão de leads.");
@@ -148,16 +151,7 @@ public class PromptApp : IPromptApp
         prompt.AppendLine("Sua tarefa é melhorar, otimizar e reestruturar o prompt enviado pelo usuário, mantendo a intenção original, mas tornando-o significativamente mais claro, específico, interpretável e eficiente para um modelo de IA.");
         prompt.AppendLine();
         prompt.AppendLine("Contexto importante:");
-        prompt.AppendLine("O prompt otimizado será utilizado posteriormente junto com dados dinâmicos de uma oportunidade comercial, incluindo:");
-        prompt.AppendLine("- estágio da negociação;");
-        prompt.AppendLine("- valor da oportunidade;");
-        prompt.AppendLine("- data prevista de fechamento;");
-        prompt.AppendLine("- produto relacionado;");
-        prompt.AppendLine("- nome do lead;");
-        prompt.AppendLine("- histórico recente de interações;");
-        prompt.AppendLine("- data atual.");
-        prompt.AppendLine();
-        prompt.AppendLine("O objetivo final da IA será gerar mensagens comerciais personalizadas para WhatsApp com foco em conversão do lead.");
+        prompt.AppendLine("O prompt otimizado será utilizado posteriormente junto com dados dinâmicos de uma oportunidade comercial:");
         prompt.AppendLine();
         prompt.AppendLine("Regras para otimização:");
         prompt.AppendLine("1. Preserve a intenção principal do usuário.");
@@ -182,8 +176,9 @@ public class PromptApp : IPromptApp
         prompt.AppendLine("9. O prompt final deve ter no máximo 1000 caracteres.");
         prompt.AppendLine();
         prompt.AppendLine("Prompt enviado pelo usuário:");
-        prompt.AppendLine(userPrompt);
- 
+        prompt.AppendLine($"Título: {userPrompt.Title}");
+        prompt.AppendLine($"Conteúdo: {userPrompt.Content}");
+
         return prompt.ToString();
     }
 
