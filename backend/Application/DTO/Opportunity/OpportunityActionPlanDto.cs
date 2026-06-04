@@ -1,4 +1,4 @@
-namespace Application.DTOs;
+namespace Application.DTO;
 
 public class OpportunityActionPlanDto
 {

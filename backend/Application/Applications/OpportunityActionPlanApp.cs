@@ -1,9 +1,9 @@
 using System.Globalization;
 using System.Text;
-using Application.DTOs;
 using Domain.Entities;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Application.DTO;
 
 namespace Application;
 
@@ -54,32 +54,20 @@ public class OpportunityActionPlanApp : IOpportunityActionPlanApp
 
         try
         {
-            var parsedActionPlan = ParseGeneratedActionPlan(generatedActionPlan);
+            var parsedActionPlan = JsonSerializer.Deserialize<ActionPlanServiceResponse>(generatedActionPlan);
 
-            var actionPlan = new OpportunityActionPlan
-            {
-                OpportunityId = opportunityId,
-                Message = parsedActionPlan.Message,
-                ActionPlan = parsedActionPlan.ActionPlan,
-                GeneratedAt = DateTime.UtcNow
-            };
+            var actionPlanDto = MapToDtoByDto(parsedActionPlan);
+            var actionPlan = MapToDtEntity(actionPlanDto);
+            actionPlan.OpportunityId = opportunityId;
 
             var id = await _actionPlanRepo.AddAsync(actionPlan);
             actionPlan.Id = id;
 
-            return new OpportunityActionPlanDto
-            {
-                Id = actionPlan.Id,
-                OpportunityId = actionPlan.OpportunityId,
-                ActionPlan = actionPlan.ActionPlan,
-                Message = actionPlan.Message,
-                GeneratedAt = actionPlan.GeneratedAt
-            };
+            return MapToDto(actionPlan);
         }
-        catch (Exception ex) when (ex is JsonException or InvalidOperationException)
+        catch (Exception ex)
         {
-            throw new InvalidOperationException(
-                "A IA retornou um JSON inválido.", ex);
+            throw new InvalidOperationException(ex.Message);
         }
     }
 
@@ -92,103 +80,32 @@ public class OpportunityActionPlanApp : IOpportunityActionPlanApp
         return actionPlans.Select(ap => MapToDto(ap));
     }
 
-
     #region Utils
-    private static OpportunityActionPlanContent ParseGeneratedActionPlan(string generatedActionPlan)
-    {
-        var normalizedJson = ExtractJsonObject(generatedActionPlan);
-
-        var content = JsonSerializer.Deserialize<OpportunityActionPlanContent>(
-            normalizedJson,
-            new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            });
-
-        if (content == null)
-            throw new InvalidOperationException("A IA não retornou um objeto JSON válido.");
-
-        var actionPlan = content.ActionPlan?.Trim();
-        var message = content.Message?.Trim();
-
-        if (string.IsNullOrWhiteSpace(actionPlan) || string.IsNullOrWhiteSpace(message))
-            throw new InvalidOperationException("A IA retornou um JSON sem os campos obrigatórios.");
-
-        return new OpportunityActionPlanContent
-        {
-            ActionPlan = actionPlan,
-            Message = message
-        };
-    }
-
-    private static string ExtractJsonObject(string rawContent)
-    {
-        var candidate = rawContent.Trim();
-
-        if (candidate.StartsWith("```") && candidate.EndsWith("```"))
-        {
-            var lines = candidate
-                .Split(new[] { "\r\n", "\n" }, StringSplitOptions.None)
-                .ToList();
-
-            if (lines.Count >= 2)
-            {
-                lines.RemoveAt(0);
-                lines.RemoveAt(lines.Count - 1);
-                candidate = string.Join(Environment.NewLine, lines).Trim();
-            }
-        }
-
-        if (TryExtractFromJson(candidate, out var normalizedJson))
-            return normalizedJson;
-
-        var firstBrace = candidate.IndexOf('{');
-        var lastBrace = candidate.LastIndexOf('}');
-
-        if (firstBrace >= 0 && lastBrace > firstBrace)
-        {
-            var jsonSlice = candidate.Substring(firstBrace, lastBrace - firstBrace + 1);
-
-            if (TryExtractFromJson(jsonSlice, out normalizedJson))
-                return normalizedJson;
-        }
-
-        throw new JsonException("Não foi possível localizar um objeto JSON válido na resposta da IA.");
-    }
-
-    private static bool TryExtractFromJson(string candidate, out string normalizedJson)
-    {
-        try
-        {
-            using var document = JsonDocument.Parse(candidate);
-
-            if (document.RootElement.ValueKind == JsonValueKind.String)
-            {
-                var innerJson = document.RootElement.GetString();
-
-                if (!string.IsNullOrWhiteSpace(innerJson))
-                {
-                    normalizedJson = ExtractJsonObject(innerJson);
-                    return true;
-                }
-            }
-
-            if (document.RootElement.ValueKind != JsonValueKind.Object)
-                throw new JsonException("A resposta da IA não contém um objeto JSON na raiz.");
-
-            normalizedJson = document.RootElement.GetRawText();
-            return true;
-        }
-        catch (JsonException)
-        {
-            normalizedJson = string.Empty;
-            return false;
-        }
-    }
 
     private static OpportunityActionPlanDto MapToDto(OpportunityActionPlan actionPlan)
     {
         return new OpportunityActionPlanDto
+        {
+            Id = actionPlan.Id,
+            OpportunityId = actionPlan.OpportunityId,
+            Message = actionPlan.Message ?? string.Empty,
+            ActionPlan = actionPlan.ActionPlan,
+            GeneratedAt = actionPlan.GeneratedAt
+        };
+    }
+    private static OpportunityActionPlanDto MapToDtoByDto(ActionPlanServiceResponse actionPlan)
+    {
+        return new OpportunityActionPlanDto
+        {
+            Message = actionPlan.message ?? string.Empty,
+            ActionPlan = actionPlan.actionPlan,
+            GeneratedAt = DateTime.Now
+        };
+    }
+
+    private static OpportunityActionPlan MapToDtEntity(OpportunityActionPlanDto actionPlan)
+    {
+        return new OpportunityActionPlan
         {
             Id = actionPlan.Id,
             OpportunityId = actionPlan.OpportunityId,
@@ -256,8 +173,8 @@ public class OpportunityActionPlanApp : IOpportunityActionPlanApp
         prompt.AppendLine("O JSON deve conter exatamente os seguintes campos:");
         prompt.AppendLine();
         prompt.AppendLine("{");
-        prompt.AppendLine("  \"plano_acao\": \"texto\",");
-        prompt.AppendLine("  \"mensagem\": \"texto\"");
+        prompt.AppendLine("  \"actionPlan\": \"texto\",");
+        prompt.AppendLine("  \"message\": \"texto\"");
         prompt.AppendLine("}");
         prompt.AppendLine();
 
