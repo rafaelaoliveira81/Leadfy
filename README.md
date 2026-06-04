@@ -254,7 +254,7 @@ Principais tabelas do sistema:
 - `Interactions`;
 - `Prompts`.
 
-![Diagrama ERD](./Diagrama.png)
+![Diagrama ERD](./assets/Diagrama.png)
 
 ---
 
