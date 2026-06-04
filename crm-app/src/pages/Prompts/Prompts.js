@@ -142,23 +142,6 @@ export function Prompts() {
     content: currentPrompt.content?.trim() ?? "",
   });
 
-  const formatDate = (dateValue) => {
-    if (!dateValue) {
-      return "-";
-    }
-
-    const date = new Date(dateValue);
-
-    if (Number.isNaN(date.getTime())) {
-      return "-";
-    }
-
-    return new Intl.DateTimeFormat("pt-BR", {
-      dateStyle: "short",
-      timeStyle: "short",
-    }).format(date);
-  };
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
 

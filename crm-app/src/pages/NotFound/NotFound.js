@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom";
 import { Sidebar } from "../../components/Sidebar/Sidebar";
 
 import style from "./_notfound.module.css";
