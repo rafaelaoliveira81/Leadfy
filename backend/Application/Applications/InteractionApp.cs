@@ -1,3 +1,4 @@
+using System.Text;
 using Application.DTO;
 using Domain.Entities;
 using Domain.Enuns;
@@ -9,11 +10,13 @@ public class InteractionApp : IInteractionApp
     private readonly IInteractionRepo _interactionRepo;
     private readonly IOpportunityRepo _opportunityRepo;
     private readonly IUserRepo _userRepo;
-    public InteractionApp(IInteractionRepo interactionRepo, IOpportunityRepo opportunityRepo, IUserRepo userRepo)
+    private readonly IAiService _aiService;
+    public InteractionApp(IInteractionRepo interactionRepo, IOpportunityRepo opportunityRepo, IUserRepo userRepo, IAiService aiService)
     {
         _interactionRepo = interactionRepo;
         _opportunityRepo = opportunityRepo;
         _userRepo = userRepo;
+        _aiService = aiService;
     }
     public async Task<int> AddToOpportunityAsync(int opportunityId, InteractionAdd interactionRequest)
     {
@@ -48,6 +51,18 @@ public class InteractionApp : IInteractionApp
     {
         var interactionEntity = await GetEntityByIdAsync(idInteraction);
         await _interactionRepo.DeleteAsync(interactionEntity);
+    }
+
+    public async Task<IteractionOptimizeDTO> OptimizeInteractionAsync(IteractionOptimizeDTO interaction)
+    {
+        if (string.IsNullOrWhiteSpace(interaction.Content))
+            throw new ArgumentException("A interação não pode ser vazio.");
+
+        var promptRequest = BuildPrompt(interaction);
+
+        var response = await _aiService.GetResponseFromModel(promptRequest);
+
+        return new IteractionOptimizeDTO { Content = response };
     }
 
     #region Utils
@@ -146,6 +161,30 @@ public class InteractionApp : IInteractionApp
             UserName = interaction.User?.Name,
             NextContactDate = interaction.NextContactDate
         };
+    }
+
+    private string BuildPrompt(IteractionOptimizeDTO userInteraction)
+    {
+        var prompt = new StringBuilder();
+
+        prompt.AppendLine("Você é um especialista em CRM, vendas e comunicação comercial.");
+        prompt.AppendLine("Sua tarefa é reescrever a descrição de uma interação com um lead, tornando o texto mais claro, profissional, organizado e objetivo.");
+        prompt.AppendLine();
+        prompt.AppendLine("Regras:");
+        prompt.AppendLine("- Preserve integralmente o significado e as informações fornecidas pelo usuário.");
+        prompt.AppendLine("- Não invente fatos, datas, valores, promessas ou informações que não estejam presentes no texto original.");
+        prompt.AppendLine("- Corrija erros gramaticais, ortográficos e de pontuação.");
+        prompt.AppendLine("- Melhore a clareza e a fluidez da escrita.");
+        prompt.AppendLine("- Organize as informações de forma lógica e profissional.");
+        prompt.AppendLine("- Utilize linguagem adequada para registros de CRM e histórico de atendimento.");
+        prompt.AppendLine("- Mantenha o texto em português do Brasil.");
+        prompt.AppendLine("- Não utilize listas, tópicos ou marcações, exceto quando forem indispensáveis para a compreensão.");
+        prompt.AppendLine("- Retorne apenas o texto melhorado, sem comentários, explicações, introduções ou observações.");
+        prompt.AppendLine();
+        prompt.AppendLine("Texto original da interação:");
+        prompt.AppendLine(userInteraction.Content);
+
+        return prompt.ToString();
     }
     #endregion
 }

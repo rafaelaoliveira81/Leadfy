@@ -6,4 +6,5 @@ public interface IInteractionApp
     Task<InteractionResponse> GetByIdAsync(int idInteraction);
     Task<IEnumerable<InteractionResponse>> GetByOpportunityIdAsync(int opportunityId);
     Task DeleteAsync(int idInteraction);
+    Task<IteractionOptimizeDTO> OptimizeInteractionAsync(IteractionOptimizeDTO interaction);
 }

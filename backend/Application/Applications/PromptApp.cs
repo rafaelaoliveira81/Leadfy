@@ -176,7 +176,6 @@ public class PromptApp : IPromptApp
         prompt.AppendLine("9. O prompt final deve ter no máximo 1000 caracteres.");
         prompt.AppendLine();
         prompt.AppendLine("Prompt enviado pelo usuário:");
-        prompt.AppendLine($"Título: {userPrompt.Title}");
         prompt.AppendLine($"Conteúdo: {userPrompt.Content}");
 
         return prompt.ToString();

@@ -555,20 +555,19 @@ export function Prompts() {
                     }}
                     isInvalid={errors?.content}
                   />
-                  <div className={style["paginacao-acoes"]}>
-                    <button
-                      type="button"
-                      className={style.ia}
-                      onClick={handleClickOptimizePrompt}
-                      disabled={isOptimizing}
-                    >
-                      {isOptimizing ? (
-                        <Spinner animation="border" role="status" size="sm" />
-                      ) : (
-                        <BsStars />
-                      )}
-                    </button>
-                  </div>
+                  <button
+                    type="button"
+                    className={style["prompt-optimize-button"]}
+                    onClick={handleClickOptimizePrompt}
+                    disabled={isOptimizing}
+                    aria-label="Otimizar prompt"
+                  >
+                    {isOptimizing ? (
+                      <Spinner animation="border" role="status" size="sm" />
+                    ) : (
+                      <BsStars />
+                    )}
+                  </button>
                 </div>
 
                 <Form.Control.Feedback type="invalid">
