@@ -13,7 +13,7 @@ public class User
     public User()
     {
         IsActive = true;
-        CreatedAt = DateTime.UtcNow;
+        CreatedAt = DateTime.Now;
         Interactions = new List<Interaction>();
     }
     public void Deactivate() => IsActive = false;

@@ -11,7 +11,7 @@ public class Prompt
     public Prompt()
     {
         IsActive = true;
-        CreatedAt = DateTime.UtcNow;
+        CreatedAt = DateTime.Now;
     }
 
     public void Deactivate() => IsActive = false;

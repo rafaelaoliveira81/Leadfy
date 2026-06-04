@@ -23,10 +23,10 @@ public class InteractionApp : IInteractionApp
         await ValidateInteractionAsync(interaction);
 
         interaction.OpportunityId = opportunityId;
-        interaction.CreatedAt = DateTime.UtcNow;
+        interaction.CreatedAt = DateTime.Now;
 
         if (interaction.InteractionDate == default)
-            interaction.InteractionDate = DateTime.UtcNow;
+            interaction.InteractionDate = DateTime.Now;
 
         return await _interactionRepo.AddAsync(interaction);
     }
@@ -120,7 +120,7 @@ public class InteractionApp : IInteractionApp
             UserId = request.UserId,
             FromStage = request.FromStage,
             ToStage = request.ToStage,
-            InteractionDate = request.InteractionDate ?? DateTime.UtcNow,
+            InteractionDate = request.InteractionDate ?? DateTime.Now,
             NextContactDate = request.NextContactDate
         };
     }

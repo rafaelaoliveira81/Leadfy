@@ -1,5 +1,4 @@
 using Application.DTO;
-using Application.DTOs;
 using Api.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
