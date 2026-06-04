@@ -11,7 +11,7 @@ public class Lead
     public Lead()
     {
         IsActive = true;
-        CreatedAt = DateTime.UtcNow;
+        CreatedAt = DateTime.Now;
     }
     public void Deactivate() => IsActive = false;
     public void Activate() => IsActive = true;

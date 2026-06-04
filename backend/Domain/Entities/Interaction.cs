@@ -18,7 +18,7 @@ public class Interaction
 
     public Interaction()
     {
-        CreatedAt = DateTime.UtcNow;
-        InteractionDate = DateTime.UtcNow;
+        CreatedAt = DateTime.Now;
+        InteractionDate = DateTime.Now;
     }
 }

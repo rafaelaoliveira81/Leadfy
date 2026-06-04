@@ -27,7 +27,6 @@ public class UserController : ControllerBase
     /// <param name="request">Dados necessários para criação do usuário.</param>
     /// <returns>
     /// Retorna status 201 com o identificador do usuário criado.
-    /// Retorna status 401 quando o usuário não está autenticado.
     /// Retorna status 400 quando os dados informados são inválidos.
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
@@ -35,7 +34,6 @@ public class UserController : ControllerBase
     /// Este endpoint recebe os dados de entrada e delega o processo de cadastro
     /// para a camada de aplicação.
     /// </remarks>
-    // [Authorize]
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]

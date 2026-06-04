@@ -23,7 +23,7 @@ public class AuthenticationApp : IAuthenticationApp
         if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
             throw new ArgumentException("Email e senha são obrigatórios.");
 
-        var user = await _userRepo.GetByEmailWithGroupAsync(request.Email.Trim());
+        var user = await _userRepo.GetActiveByEmailAsync(request.Email.Trim());
         if (user == null || !VerifyPassword(request.Password, user.PasswordHash))
             throw new UnauthorizedAccessException("Email ou senha inválidos.");
 
@@ -33,10 +33,11 @@ public class AuthenticationApp : IAuthenticationApp
         {
             Token = token,
             Name = user.Name,
-            UserId = user.ID,
-            Email = user.Email
+            Message = "Login efetuado com sucesso."
         };
     }
+
+    #region Utils
 
     private bool VerifyPassword(string password, string storedHash)
     {
@@ -57,4 +58,6 @@ public class AuthenticationApp : IAuthenticationApp
 
         return generatedKey == savedKey;
     }
+
+    #endregion
 }

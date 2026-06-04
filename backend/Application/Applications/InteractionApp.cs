@@ -1,3 +1,5 @@
+using System.Text;
+using Application.DTO;
 using Domain.Entities;
 using Domain.Enuns;
 
@@ -8,50 +10,62 @@ public class InteractionApp : IInteractionApp
     private readonly IInteractionRepo _interactionRepo;
     private readonly IOpportunityRepo _opportunityRepo;
     private readonly IUserRepo _userRepo;
-    public InteractionApp(IInteractionRepo interactionRepo, IOpportunityRepo opportunityRepo, IUserRepo userRepo)
+    private readonly IAiService _aiService;
+    public InteractionApp(IInteractionRepo interactionRepo, IOpportunityRepo opportunityRepo, IUserRepo userRepo, IAiService aiService)
     {
         _interactionRepo = interactionRepo;
         _opportunityRepo = opportunityRepo;
         _userRepo = userRepo;
+        _aiService = aiService;
     }
-    public async Task<int> AddToOpportunityAsync(int opportunityId, Interaction interaction)
+    public async Task<int> AddToOpportunityAsync(int opportunityId, InteractionAdd interactionRequest)
     {
+        var interaction = MapToEntity(interactionRequest);
+
         await ValidateOpportunityExistsAsync(opportunityId);
         await ValidateInteractionAsync(interaction);
 
         interaction.OpportunityId = opportunityId;
-        interaction.CreatedAt = DateTime.UtcNow;
+        interaction.CreatedAt = DateTime.Now;
 
         if (interaction.InteractionDate == default)
-            interaction.InteractionDate = DateTime.UtcNow;
+            interaction.InteractionDate = DateTime.Now;
 
         return await _interactionRepo.AddAsync(interaction);
     }
-    public async Task<Interaction> GetByIdAsync(int idInteraction)
+    public async Task<InteractionResponse> GetByIdAsync(int idInteraction)
     {
-        if (idInteraction <= 0)
-            throw new ArgumentException("O identificador da interação é inválido.");
+        var interactionEntity = await GetEntityByIdAsync(idInteraction);
 
-        var interactionEntity = await _interactionRepo.GetByIdAsync(idInteraction);
-
-        if (interactionEntity == null)
-            throw new KeyNotFoundException("Interação não localizada.");
-
-        await ValidateOpportunityExistsAsync(interactionEntity.OpportunityId);
-
-        return interactionEntity;
+        return MapToResponse(interactionEntity);
     }
-    public async Task<IEnumerable<Interaction>> GetByOpportunityIdAsync(int opportunityId)
+    public async Task<IEnumerable<InteractionResponse>> GetByOpportunityIdAsync(int opportunityId)
     {
         await ValidateOpportunityExistsAsync(opportunityId);
 
-        return await _interactionRepo.GetAllByOpportunityIdAsync(opportunityId);
+        var interactions = await _interactionRepo.GetAllByOpportunityIdAsync(opportunityId);
+
+        return interactions.Select(MapToResponse);
     }
     public async Task DeleteAsync(int idInteraction)
     {
-        var interactionEntity = await GetByIdAsync(idInteraction);
+        var interactionEntity = await GetEntityByIdAsync(idInteraction);
         await _interactionRepo.DeleteAsync(interactionEntity);
     }
+
+    public async Task<IteractionOptimizeDTO> OptimizeInteractionAsync(IteractionOptimizeDTO interaction)
+    {
+        if (string.IsNullOrWhiteSpace(interaction.Content))
+            throw new ArgumentException("A interação não pode ser vazio.");
+
+        var promptRequest = BuildPrompt(interaction);
+
+        var response = await _aiService.GetResponseFromModel(promptRequest);
+
+        return new IteractionOptimizeDTO { Content = response };
+    }
+
+    #region Utils
     private async Task ValidateInteractionAsync(Interaction interaction)
     {
         if (interaction == null)
@@ -94,4 +108,83 @@ public class InteractionApp : IInteractionApp
 
         return opportunityEntity;
     }
+
+    private async Task<Interaction> GetEntityByIdAsync(int idInteraction)
+    {
+        if (idInteraction <= 0)
+            throw new ArgumentException("O identificador da interação é inválido.");
+
+        var interactionEntity = await _interactionRepo.GetByIdAsync(idInteraction);
+
+        if (interactionEntity == null)
+            throw new KeyNotFoundException("Interação não localizada.");
+
+        await ValidateOpportunityExistsAsync(interactionEntity.OpportunityId);
+
+        return interactionEntity;
+    }
+
+    private static Interaction MapToEntity(InteractionAdd request)
+    {
+        if (request == null)
+            return null;
+
+        return new Interaction
+        {
+            Description = request.Description,
+            UserId = request.UserId,
+            FromStage = request.FromStage,
+            ToStage = request.ToStage,
+            InteractionDate = request.InteractionDate ?? DateTime.Now,
+            NextContactDate = request.NextContactDate
+        };
+    }
+
+    private static InteractionResponse MapToResponse(Interaction interaction)
+    {
+        return new InteractionResponse
+        {
+            Id = interaction.Id,
+            OpportunityId = interaction.OpportunityId,
+            FromStage = interaction.FromStage,
+            FromStageName = interaction.FromStage.HasValue
+                ? ((OpportunityStage)interaction.FromStage.Value).ToString()
+                : null,
+            ToStage = interaction.ToStage,
+            ToStageName = interaction.ToStage.HasValue
+                ? ((OpportunityStage)interaction.ToStage.Value).ToString()
+                : null,
+            Description = interaction.Description,
+            InteractionDate = interaction.InteractionDate,
+            CreatedAt = interaction.CreatedAt,
+            UserId = interaction.UserId,
+            UserName = interaction.User?.Name,
+            NextContactDate = interaction.NextContactDate
+        };
+    }
+
+    private string BuildPrompt(IteractionOptimizeDTO userInteraction)
+    {
+        var prompt = new StringBuilder();
+
+        prompt.AppendLine("Você é um especialista em CRM, vendas e comunicação comercial.");
+        prompt.AppendLine("Sua tarefa é reescrever a descrição de uma interação com um lead, tornando o texto mais claro, profissional, organizado e objetivo.");
+        prompt.AppendLine();
+        prompt.AppendLine("Regras:");
+        prompt.AppendLine("- Preserve integralmente o significado e as informações fornecidas pelo usuário.");
+        prompt.AppendLine("- Não invente fatos, datas, valores, promessas ou informações que não estejam presentes no texto original.");
+        prompt.AppendLine("- Corrija erros gramaticais, ortográficos e de pontuação.");
+        prompt.AppendLine("- Melhore a clareza e a fluidez da escrita.");
+        prompt.AppendLine("- Organize as informações de forma lógica e profissional.");
+        prompt.AppendLine("- Utilize linguagem adequada para registros de CRM e histórico de atendimento.");
+        prompt.AppendLine("- Mantenha o texto em português do Brasil.");
+        prompt.AppendLine("- Não utilize listas, tópicos ou marcações, exceto quando forem indispensáveis para a compreensão.");
+        prompt.AppendLine("- Retorne apenas o texto melhorado, sem comentários, explicações, introduções ou observações.");
+        prompt.AppendLine();
+        prompt.AppendLine("Texto original da interação:");
+        prompt.AppendLine(userInteraction.Content);
+
+        return prompt.ToString();
+    }
+    #endregion
 }

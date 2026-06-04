@@ -72,7 +72,7 @@ public class OpportunityApp : IOpportunityApp
         await _opportunityRepo.DeleteAsync(opportunityEntity);
     }
 
-    #region Métodos auxiliares
+    #region Utils
     private async Task ValidateOpportunityInformation(Opportunity opportunity)
     {
         if (opportunity == null)
@@ -90,7 +90,7 @@ public class OpportunityApp : IOpportunityApp
         if (opportunity.Amount <= 0)
             throw new ArgumentException("O amount deve ser maior que zero.");
 
-        if (opportunity.ExpectedCloseDate.HasValue && opportunity.ExpectedCloseDate.Value < DateTime.UtcNow.Date)
+        if (opportunity.ExpectedCloseDate.HasValue && opportunity.ExpectedCloseDate.Value < DateTime.Now.Date)
             throw new ArgumentException("A data esperada de encerramento não pode ser anterior a hoje.");
 
         await ValidateLeadExistsByIdAsync(opportunity.LeadId);
@@ -153,6 +153,7 @@ public class OpportunityApp : IOpportunityApp
             ID = opportunity.ID,
             LeadId = opportunity.LeadId,
             LeadName = opportunity.Lead?.Name,
+            PhoneNumber = opportunity.Lead?.PhoneNumber,
             ProductId = opportunity.ProductId,
             ProductName = opportunity.Product?.Name,
             Stage = (int)opportunity.Stage,

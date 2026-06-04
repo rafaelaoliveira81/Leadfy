@@ -5,6 +5,7 @@ public class OpportunityActionPlan
     public int Id { get; set; }
     public int OpportunityId { get; set; }
     public string ActionPlan { get; set; }
+    public string Message { get; set; }
     public DateTime GeneratedAt { get; set; }
 
     // Relacionamentos
@@ -12,6 +13,6 @@ public class OpportunityActionPlan
 
     public OpportunityActionPlan()
     {
-        GeneratedAt = DateTime.UtcNow;
+        GeneratedAt = DateTime.Now;
     }
 }

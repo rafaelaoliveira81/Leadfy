@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Application.DTO;
 using Microsoft.AspNetCore.Authorization;
-using Api.Helpers;
 
 namespace Api.Controllers;
 
@@ -265,6 +264,38 @@ public class PromptController : ControllerBase
         catch (KeyNotFoundException ex)
         {
             return NotFound(new { message = ex.Message });
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Otimiza o prompt com IA.
+    /// </summary>
+    /// <param name="prompt">Texto do prompt a ser otimizado.</param>
+    /// <returns>
+    /// Retorna status 200 com o prompt otimizado.
+    /// Retorna status 400 quando os dados informados são inválidos.
+    /// Retorna status 500 em caso de erro interno.
+    /// </returns>
+    [Authorize]
+    [HttpPost("optimize")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult> OptimizePrompt([FromBody] PromptOptimizeDTO prompt)
+    {
+        try
+        {
+            var optimizedPrompt = await _promptApp.OptimizePromptAsync(prompt);
+
+            return Ok(new { optimizedPrompt });
         }
         catch (ArgumentException ex)
         {

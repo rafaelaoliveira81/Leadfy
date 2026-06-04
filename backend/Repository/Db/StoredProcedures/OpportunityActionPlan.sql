@@ -1,11 +1,12 @@
 CREATE PROCEDURE sp_CreateOpportunityActionPlan
     @OpportunityId INT,
+    @Message NVARCHAR(MAX),
     @ActionPlan NVARCHAR(MAX),
     @GeneratedAt DATETIME2(7)
 AS
 BEGIN
-    INSERT INTO OpportunityActionPlans (OpportunityId, ActionPlan, GeneratedAt)
-    VALUES (@OpportunityId, @ActionPlan, @GeneratedAt);
+    INSERT INTO OpportunityActionPlans (OpportunityId, Message, ActionPlan, GeneratedAt)
+    VALUES (@OpportunityId, @Message, @ActionPlan, @GeneratedAt);
 
     SELECT CAST(SCOPE_IDENTITY() AS INT) AS ID;
 END;
@@ -18,6 +19,7 @@ BEGIN
     SELECT
         Id,
         OpportunityId,
+        Message,
         ActionPlan,
         GeneratedAt
     FROM OpportunityActionPlans

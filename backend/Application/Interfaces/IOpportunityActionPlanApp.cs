@@ -1,4 +1,4 @@
-using Application.DTOs;
+using Application.DTO;
 
 public interface IOpportunityActionPlanApp
 {

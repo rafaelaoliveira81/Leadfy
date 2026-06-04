@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Modal from "react-bootstrap/Modal";
+import Spinner from "react-bootstrap/Spinner";
 import Form from "react-bootstrap/Form";
 import {
   MdEdit,
@@ -11,9 +12,10 @@ import {
   MdBlock,
   MdCheckCircleOutline,
 } from "react-icons/md";
+import { BsStars } from "react-icons/bs";
 import { Button } from "../../components/Button/Button";
 import { Sidebar } from "../../components/Sidebar/Sidebar";
-import { Topbar } from "../../components/Topbar/Topbar";
+
 import { ListingHeader } from "../../components/ListingHeader/ListingHeader";
 import { useAuth } from "../../context/AuthContext";
 import { promptAPI } from "../../services/promptApi";
@@ -36,6 +38,7 @@ export function Prompts() {
   const [totalRecords, setTotalRecords] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isOptimizing, setIsOptimizing] = useState(false);
   const [errors, setErrors] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState("active");
@@ -134,22 +137,10 @@ export function Prompts() {
     content: currentPrompt.content?.trim() ?? "",
   });
 
-  const formatDate = (dateValue) => {
-    if (!dateValue) {
-      return "-";
-    }
-
-    const date = new Date(dateValue);
-
-    if (Number.isNaN(date.getTime())) {
-      return "-";
-    }
-
-    return new Intl.DateTimeFormat("pt-BR", {
-      dateStyle: "short",
-      timeStyle: "short",
-    }).format(date);
-  };
+  const buildPromptOptimizePayload = (currentPrompt) => ({
+    title: currentPrompt.title?.trim() ?? "",
+    content: currentPrompt.content?.trim() ?? "",
+  });
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -163,6 +154,37 @@ export function Prompts() {
   const handleStatusFilterChange = (event) => {
     setStatusFilter(event.target.value);
     setCurrentPage(1);
+  };
+
+  const handleClickOptimizePrompt = async (e) => {
+    e.preventDefault();
+
+    if (!isFormValid()) {
+      return;
+    }
+
+    setIsOptimizing(true);
+
+    try {
+      const response = await promptAPI.OptimizePrompt(
+        buildPromptOptimizePayload(prompt),
+      );
+
+      if (!response?.optimizedPrompt?.content.trim()) {
+        throw new Error("A API não retornou um prompt otimizado.");
+      }
+
+      setPrompt((prev) => ({
+        ...prev,
+        content: response.optimizedPrompt.content.trim(),
+      }));
+
+      toast.success("Prompt otimizado com sucesso.");
+    } catch (error) {
+      toast.error(error?.message || "Erro ao otimizar prompt.");
+    } finally {
+      setIsOptimizing(false);
+    }
   };
 
   const handleClickAddPrompt = () => {
@@ -319,7 +341,7 @@ export function Prompts() {
 
   return (
     <Sidebar>
-      <Topbar>
+      <>
         <div className={style["pagina-listagem"]}>
           <ListingHeader
             title="Prompts"
@@ -511,26 +533,43 @@ export function Prompts() {
                 </Form.Control.Feedback>
               </Form.Group>
 
-              <Form.Group className="mb-3">
-                <Form.Label>Conteúdo</Form.Label>
-                <Form.Control
-                  as="textarea"
-                  rows={6}
-                  name="content"
-                  placeholder="Digite o conteúdo do prompt"
-                  value={prompt.content}
-                  onChange={(e) => {
-                    handleInputChange(e);
+              <Form.Group className="position-relative">
+                <div className={style["textarea-wrapper"]}>
+                  <Form.Label>Prompt</Form.Label>
+                  <Form.Control
+                    as="textarea"
+                    rows={6}
+                    className={style["textarea-field"]}
+                    name="content"
+                    placeholder="Digite o conteúdo do prompt"
+                    value={prompt.content}
+                    onChange={(e) => {
+                      handleInputChange(e);
 
-                    if (errors?.content) {
-                      setErrors((prev) => ({
-                        ...prev,
-                        content: false,
-                      }));
-                    }
-                  }}
-                  isInvalid={errors?.content}
-                />
+                      if (errors?.content) {
+                        setErrors((prev) => ({
+                          ...prev,
+                          content: false,
+                        }));
+                      }
+                    }}
+                    isInvalid={errors?.content}
+                  />
+                  <button
+                    type="button"
+                    className={style["prompt-optimize-button"]}
+                    onClick={handleClickOptimizePrompt}
+                    disabled={isOptimizing}
+                    aria-label="Otimizar prompt"
+                  >
+                    {isOptimizing ? (
+                      <Spinner animation="border" role="status" size="sm" />
+                    ) : (
+                      <BsStars />
+                    )}
+                  </button>
+                </div>
+
                 <Form.Control.Feedback type="invalid">
                   Conteúdo é obrigatório.
                 </Form.Control.Feedback>
@@ -553,7 +592,7 @@ export function Prompts() {
             </Form>
           </Modal.Body>
         </Modal>
-      </Topbar>
+      </>
     </Sidebar>
   );
 }

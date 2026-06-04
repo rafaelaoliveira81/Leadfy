@@ -24,6 +24,6 @@ public class Opportunity
 
     public Opportunity()
     {
-        CreatedAt = DateTime.UtcNow;
+        CreatedAt = DateTime.Now;
     }
 }

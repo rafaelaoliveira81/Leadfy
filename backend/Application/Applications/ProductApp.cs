@@ -72,7 +72,7 @@ public class ProductApp : IProductApp
         await _productRepo.UpdateAsync(productEntity);
     }
 
-    #region Métodos auxiliares
+    #region Utils
     private void ValidateProductInformation(ProductRequest request)
     {
         if (string.IsNullOrWhiteSpace(request.Name))

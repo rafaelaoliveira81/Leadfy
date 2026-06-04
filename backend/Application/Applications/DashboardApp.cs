@@ -31,6 +31,7 @@ public class DashboardApp : IDashboardApp
         return response;
     }
 
+    #region Utils
     private static List<DashboardStageDto> DeserializeStageAnalytics(string stageAnalytics)
     {
         if (string.IsNullOrWhiteSpace(stageAnalytics))
@@ -40,4 +41,5 @@ public class DashboardApp : IDashboardApp
 
         return JsonSerializer.Deserialize<List<DashboardStageDto>>(stageAnalytics) ?? new List<DashboardStageDto>();
     }
+    #endregion
 }

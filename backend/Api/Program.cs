@@ -58,7 +58,6 @@ builder.Services.AddScoped<IInteractionApp, InteractionApp>();
 builder.Services.AddScoped<IPromptApp, PromptApp>();
 builder.Services.AddScoped<IDashboardApp, DashboardApp>();
 
-builder.Services.AddScoped<IApiKeyEncryptionService, ApiKeyEncryptionService>();
 builder.Services.AddScoped<IAiService, AiService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 

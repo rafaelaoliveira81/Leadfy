@@ -1,5 +1,4 @@
 using Application.DTO;
-using Domain.Enuns;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -44,17 +43,7 @@ public class InteractionController : ControllerBase
     {
         try
         {
-            var interaction = new Domain.Entities.Interaction
-            {
-                Description = interactionRequest.Description,
-                UserId = interactionRequest.UserId,
-                FromStage = interactionRequest.FromStage,
-                ToStage = interactionRequest.ToStage,
-                InteractionDate = interactionRequest.InteractionDate ?? DateTime.UtcNow,
-                NextContactDate = interactionRequest.NextContactDate
-            };
-
-            var interactionId = await _interactionApp.AddToOpportunityAsync(opportunityId, interaction);
+            var interactionId = await _interactionApp.AddToOpportunityAsync(opportunityId, interactionRequest);
 
             return CreatedAtAction(nameof(GetById), new { id = interactionId }, new { id = interactionId });
         }
@@ -94,7 +83,7 @@ public class InteractionController : ControllerBase
         {
             var interactions = await _interactionApp.GetByOpportunityIdAsync(opportunityId);
 
-            return Ok(interactions.Select(MapResponse));
+            return Ok(interactions);
         }
         catch (KeyNotFoundException ex)
         {
@@ -132,7 +121,7 @@ public class InteractionController : ControllerBase
         {
             var interaction = await _interactionApp.GetByIdAsync(id);
 
-            return Ok(MapResponse(interaction));
+            return Ok(interaction);
         }
         catch (KeyNotFoundException ex)
         {
@@ -187,30 +176,34 @@ public class InteractionController : ControllerBase
     }
 
     /// <summary>
-    /// Converte a entidade de interação em modelo de resposta da API.
+    /// Otimiza a interação com IA.
     /// </summary>
-    /// <param name="interaction">Entidade de interação a ser convertida.</param>
-    /// <returns>Modelo de resposta preenchido com os dados da interação.</returns>
-    private static InteractionResponse MapResponse(Domain.Entities.Interaction interaction)
+    /// <param name="interaction">Texto do prompt a ser otimizado.</param>
+    /// <returns>
+    /// Retorna status 200 com o prompt otimizado.
+    /// Retorna status 400 quando os dados informados são inválidos.
+    /// Retorna status 500 em caso de erro interno.
+    /// </returns>
+    [Authorize]
+    [HttpPost("interactions/optimize")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult> OptimizePrompt([FromBody] IteractionOptimizeDTO interaction)
     {
-        return new InteractionResponse
+        try
         {
-            Id = interaction.Id,
-            OpportunityId = interaction.OpportunityId,
-            FromStage = interaction.FromStage,
-            FromStageName = interaction.FromStage.HasValue
-                ? ((OpportunityStage)interaction.FromStage.Value).ToString()
-                : null,
-            ToStage = interaction.ToStage,
-            ToStageName = interaction.ToStage.HasValue
-                ? ((OpportunityStage)interaction.ToStage.Value).ToString()
-                : null,
-            Description = interaction.Description,
-            InteractionDate = interaction.InteractionDate,
-            CreatedAt = interaction.CreatedAt,
-            UserId = interaction.UserId,
-            UserName = interaction.User?.Name,
-            NextContactDate = interaction.NextContactDate
-        };
+            var optimizedInteraction = await _interactionApp.OptimizeInteractionAsync(interaction);
+
+            return Ok(new { optimizedInteraction });
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = ex.Message });
+        }
     }
 }

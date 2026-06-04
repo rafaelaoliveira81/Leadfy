@@ -27,7 +27,7 @@
   padding: 16px;
   min-height: 60px;
   gap: 8px;
-  margin: -10px;
+  margin: 5px;
 
   & .logo {
     width: 125px;
@@ -52,4 +52,123 @@
   flex: 1;
   overflow-y: auto;
   padding: 8px 0;
+}
+
+.sidebar-usuario-wrapper {
+  position: relative;
+  padding: 16px;
+}
+
+.sidebar-usuario {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  border: 1px solid transparent;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #f8fafc;
+  cursor: pointer;
+  transition:
+    transform 0.25s ease,
+    background 0.25s ease,
+    box-shadow 0.25s ease,
+    color 0.25s ease,
+    border-color 0.25s ease;
+}
+
+.sidebar-usuario:hover {
+  color: #f1e527;
+  transform: translateY(-4px);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  outline: none;
+}
+
+.sidebar-usuario svg {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+.sidebar-usuario-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.sidebar-usuario-info span {
+  font-size: 18px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar-usuario-menu {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: calc(100% - 8px);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  background: #123f1a;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
+}
+
+.sidebar-usuario-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 14px;
+  border: none;
+  border-radius: 12px;
+  background: transparent;
+  color: #f8fafc;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.sidebar-usuario-menu-item:hover{
+  background: rgba(255, 255, 255, 0.08);
+  color: #f1e527;
+  outline: none;
+}
+
+.sidebar-modal-secondary,
+.sidebar-modal-primary {
+  border: none;
+  border-radius: 10px;
+  padding: 10px 18px;
+  font-weight: 600;
+}
+
+.sidebar-modal-secondary {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.sidebar-modal-primary {
+  background: #0f3f17;
+  color: #f8fafc;
+}
+
+.sidebar-modal-secondary:disabled,
+.sidebar-modal-primary:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
 }
