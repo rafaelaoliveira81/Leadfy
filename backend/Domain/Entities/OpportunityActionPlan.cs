@@ -13,6 +13,6 @@ public class OpportunityActionPlan
 
     public OpportunityActionPlan()
     {
-        GeneratedAt = DateTime.UtcNow;
+        GeneratedAt = DateTime.Now;
     }
 }

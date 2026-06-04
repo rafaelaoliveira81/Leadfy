@@ -1,11 +1,9 @@
-import { toast, ToastContainer} from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Form from "react-bootstrap/Form";
 import { useState } from "react";
 import { MdEmail, MdLock, MdArrowForward } from "react-icons/md";
-import { useAuth } from "../../context/AuthContext";
 import userApi from "../../services/userApi";
-
 
 import logo from "../../assets/logo.png";
 import style from "./_registro.module.css";
@@ -21,7 +19,6 @@ export function Registro() {
   const [user, setUser] = useState(INITIAL_USER_STATE);
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  const { register } = useAuth();
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -107,10 +104,9 @@ export function Registro() {
               {isLoading ? "Carregando..." : "Criar conta"}
               <MdArrowForward />
             </button>
-              <hr />
+            <hr />
             <p className={style.textoCadastro}>
-              Já tem uma conta?{" "}
-              <Link to="/login">Faça login</Link>
+              Já tem uma conta? <Link to="/login">Faça login</Link>
             </p>
           </Form>
         </div>

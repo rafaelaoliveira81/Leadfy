@@ -16,7 +16,7 @@ public class PromptApp : IPromptApp
     }
     public async Task<int> AddAsync(PromptRequest request)
     {
-        await ValidatePromptInformation(request);
+        ValidatePromptInformation(request);
 
         var prompt = MapToPromptRequest(request);
 
@@ -46,7 +46,7 @@ public class PromptApp : IPromptApp
     {
         var prompt = await ValidatePromptExistsByIdAsync(request.Id);
 
-        await ValidatePromptInformation(request);
+        ValidatePromptInformation(request);
 
         prompt.Title = request.Title;
         prompt.Content = request.Content;
@@ -95,7 +95,7 @@ public class PromptApp : IPromptApp
     }
 
     #region Utils
-    private async Task ValidatePromptInformation(PromptRequest prompt)
+    private void ValidatePromptInformation(PromptRequest prompt)
     {
         if (prompt == null)
             throw new ArgumentException("Prompt não pode ser vazio.");
@@ -176,7 +176,6 @@ public class PromptApp : IPromptApp
         prompt.AppendLine("9. O prompt final deve ter no máximo 1000 caracteres.");
         prompt.AppendLine();
         prompt.AppendLine("Prompt enviado pelo usuário:");
-        prompt.AppendLine($"Título: {userPrompt.Title}");
         prompt.AppendLine($"Conteúdo: {userPrompt.Content}");
 
         return prompt.ToString();

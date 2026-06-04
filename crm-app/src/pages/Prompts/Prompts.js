@@ -142,23 +142,6 @@ export function Prompts() {
     content: currentPrompt.content?.trim() ?? "",
   });
 
-  const formatDate = (dateValue) => {
-    if (!dateValue) {
-      return "-";
-    }
-
-    const date = new Date(dateValue);
-
-    if (Number.isNaN(date.getTime())) {
-      return "-";
-    }
-
-    return new Intl.DateTimeFormat("pt-BR", {
-      dateStyle: "short",
-      timeStyle: "short",
-    }).format(date);
-  };
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
 
@@ -572,20 +555,19 @@ export function Prompts() {
                     }}
                     isInvalid={errors?.content}
                   />
-                  <div className={style["paginacao-acoes"]}>
-                    <button
-                      type="button"
-                      className={style.ia}
-                      onClick={handleClickOptimizePrompt}
-                      disabled={isOptimizing}
-                    >
-                      {isOptimizing ? (
-                        <Spinner animation="border" role="status" size="sm" />
-                      ) : (
-                        <BsStars />
-                      )}
-                    </button>
-                  </div>
+                  <button
+                    type="button"
+                    className={style["prompt-optimize-button"]}
+                    onClick={handleClickOptimizePrompt}
+                    disabled={isOptimizing}
+                    aria-label="Otimizar prompt"
+                  >
+                    {isOptimizing ? (
+                      <Spinner animation="border" role="status" size="sm" />
+                    ) : (
+                      <BsStars />
+                    )}
+                  </button>
                 </div>
 
                 <Form.Control.Feedback type="invalid">

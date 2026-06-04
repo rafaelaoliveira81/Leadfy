@@ -175,4 +175,35 @@ public class InteractionController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Otimiza a interação com IA.
+    /// </summary>
+    /// <param name="interaction">Texto do prompt a ser otimizado.</param>
+    /// <returns>
+    /// Retorna status 200 com o prompt otimizado.
+    /// Retorna status 400 quando os dados informados são inválidos.
+    /// Retorna status 500 em caso de erro interno.
+    /// </returns>
+    [Authorize]
+    [HttpPost("interactions/optimize")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult> OptimizePrompt([FromBody] IteractionOptimizeDTO interaction)
+    {
+        try
+        {
+            var optimizedInteraction = await _interactionApp.OptimizeInteractionAsync(interaction);
+
+            return Ok(new { optimizedInteraction });
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = ex.Message });
+        }
+    }
 }

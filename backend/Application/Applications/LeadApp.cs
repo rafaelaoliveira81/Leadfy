@@ -15,7 +15,7 @@ public class LeadApp : ILeadApp
     }
     public async Task<int> AddAsync(LeadRequest request, int idUser)
     {
-        await ValidateLeadInformation(request);
+        ValidateLeadInformation(request);
 
         var lead = MapToLeadRequest(request);
 
@@ -56,7 +56,7 @@ public class LeadApp : ILeadApp
     {
         var lead = await ValidateLeadExistsByIdAsync(request.Id);
 
-        await ValidateLeadInformation(request);
+        ValidateLeadInformation(request);
 
         lead.Name = request.Name;
         lead.Email = request.Email;
@@ -91,7 +91,7 @@ public class LeadApp : ILeadApp
     }
 
     #region Utils
-    private async Task ValidateLeadInformation(LeadRequest lead)
+    private void ValidateLeadInformation(LeadRequest lead)
     {
         if (lead == null)
             throw new ArgumentException("Lead não pode ser vazio.");

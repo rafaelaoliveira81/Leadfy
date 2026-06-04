@@ -1,11 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
-import { Badge, Card, Col, Form, Modal, Row } from "react-bootstrap";
+import { Badge, Card, Col, Form, Modal, Row, Spinner } from "react-bootstrap";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { FaDollarSign } from "react-icons/fa";
 import { MdExpandMore, MdInventory2 } from "react-icons/md";
-import { BsCalendarCheck } from "react-icons/bs";
+import { BsCalendarCheck, BsStars } from "react-icons/bs";
 import { FaWhatsapp } from "react-icons/fa";
 
 import { Sidebar } from "../../components/Sidebar/Sidebar";
@@ -64,6 +64,12 @@ function handleClickWhatsApp(phoneNumber, message) {
   window.open(whatsappUrl, "_blank");
 }
 
+function buildInteractionOptimizePayload(description) {
+  return {
+    content: description.trim(),
+  };
+}
+
 function Kanban() {
   const { claims } = useAuth();
   const [board, setBoard] = useState({});
@@ -74,6 +80,7 @@ function Kanban() {
   const [isInteractionsLoading, setIsInteractionsLoading] = useState(false);
   const [interactionDescription, setInteractionDescription] = useState("");
   const [isAddingInteraction, setIsAddingInteraction] = useState(false);
+  const [isOptimizing, setIsOptimizing] = useState(false);
   const [isInteractionSectionOpen, setIsInteractionSectionOpen] =
     useState(false);
   const [opportunityForm, setOpportunityForm] = useState({
@@ -394,6 +401,35 @@ function Kanban() {
     }
   }
 
+  const handleClickOptimizeInteraction = async (e) => {
+    e.preventDefault();
+
+    if (!interactionDescription.trim()) {
+      toast.error("Descreva a interação antes de otimizar.");
+      return;
+    }
+
+    setIsOptimizing(true);
+
+    try {
+      const response = await interactionApi.OptimizeInteraction(
+        buildInteractionOptimizePayload(interactionDescription),
+      );
+
+      if (!response?.optimizedInteraction?.content?.trim()) {
+        throw new Error("A API não retornou uma interação otimizada.");
+      }
+
+      setInteractionDescription(response.optimizedInteraction.content.trim());
+
+      toast.success("Interação otimizada com sucesso.");
+    } catch (error) {
+      toast.error(error?.message || "Erro ao otimizar interação.");
+    } finally {
+      setIsOptimizing(false);
+    }
+  };
+
   async function handleGeneratePlan() {
     if (!selectedOpportunity?.id) return;
 
@@ -517,19 +553,23 @@ function Kanban() {
               <button
                 type="button"
                 className={style["whatsapp-button"]}
-                onClick={() => handleClickWhatsApp(selectedOpportunity?.phoneNumber || "", "")}
+                onClick={() =>
+                  handleClickWhatsApp(
+                    selectedOpportunity?.phoneNumber || "",
+                    "",
+                  )
+                }
               >
                 <FaWhatsapp size={20} />
               </button>
             </div>
             <div className={style["modal-subtitle"]}>
               <Badge bg="primary" className={style["modal-stage-badge"]}>
-                {STAGES.find((s) => s.id === selectedOpportunity?.stage)?.label ||
-                  "NOVO LEAD"}
+                {STAGES.find((s) => s.id === selectedOpportunity?.stage)
+                  ?.label || "NOVO LEAD"}
               </Badge>
             </div>
           </div>
-
         </Modal.Header>
 
         <Modal.Body>
@@ -632,17 +672,36 @@ function Kanban() {
                         Registrar interação
                       </h6>
 
-                      <Form.Control
-                        as="textarea"
-                        rows={4}
-                        placeholder="O que foi conversado com o lead?"
-                        value={interactionDescription}
-                        onChange={(event) =>
-                          setInteractionDescription(event.target.value)
-                        }
-                        disabled={isAddingInteraction}
-                        className={style["interaction-textarea"]}
-                      />
+                      <div className={style["interaction-textarea-wrapper"]}>
+                        <Form.Control
+                          as="textarea"
+                          rows={4}
+                          placeholder="O que foi conversado com o lead?"
+                          value={interactionDescription}
+                          onChange={(event) =>
+                            setInteractionDescription(event.target.value)
+                          }
+                          disabled={isAddingInteraction}
+                          className={style["interaction-textarea"]}
+                        />
+                        <button
+                          type="button"
+                          className={style["interaction-optimize-button"]}
+                          onClick={handleClickOptimizeInteraction}
+                          disabled={isOptimizing}
+                          aria-label="Otimizar texto da interação"
+                        >
+                          {isOptimizing ? (
+                            <Spinner
+                              animation="border"
+                              role="status"
+                              size="sm"
+                            />
+                          ) : (
+                            <BsStars />
+                          )}
+                        </button>
+                      </div>
 
                       <div className={style["interaction-actions"]}>
                         <Button
@@ -793,7 +852,12 @@ function Kanban() {
                           <button
                             type="button"
                             className={style["whatsapp-button"]}
-                            onClick={() => handleClickWhatsApp(selectedOpportunity?.phoneNumber || "", actionPlans[0].message || "")}
+                            onClick={() =>
+                              handleClickWhatsApp(
+                                selectedOpportunity?.phoneNumber || "",
+                                actionPlans[0].message || "",
+                              )
+                            }
                           >
                             <FaWhatsapp size={20} />
                           </button>

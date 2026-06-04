@@ -90,7 +90,7 @@ public class OpportunityApp : IOpportunityApp
         if (opportunity.Amount <= 0)
             throw new ArgumentException("O amount deve ser maior que zero.");
 
-        if (opportunity.ExpectedCloseDate.HasValue && opportunity.ExpectedCloseDate.Value < DateTime.UtcNow.Date)
+        if (opportunity.ExpectedCloseDate.HasValue && opportunity.ExpectedCloseDate.Value < DateTime.Now.Date)
             throw new ArgumentException("A data esperada de encerramento não pode ser anterior a hoje.");
 
         await ValidateLeadExistsByIdAsync(opportunity.LeadId);

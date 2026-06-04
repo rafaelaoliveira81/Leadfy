@@ -41,6 +41,18 @@ const interactionApi = {
       return mapApiError(error);
     }
   },
+
+  async OptimizeInteraction(interaction) {
+    try {
+      const response = await HTTPClient.post(
+        `/interactions/optimize`,
+        interaction,
+      );
+      return response.data;
+    } catch (error) {
+      return mapApiError(error);
+    }
+  },
 };
 
 export default interactionApi;
