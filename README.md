@@ -57,6 +57,8 @@ As principais funcionalidades disponíveis no sistema são:
 #### Pipeline Kanban
 
 ![Tela Login](./assets/kanban.png)
+
+#### Card Opportunidade
 ![Tela Login](./assets/card-oportunidade.png)
 ![Tela Login](./assets/card-oportunidade-interacoes.png)
 
@@ -254,7 +256,7 @@ Principais tabelas do sistema:
 - `Interactions`;
 - `Prompts`.
 
-![Diagrama ERD](./assets/Diagrama.png)
+![Diagrama ERD](./assets/DiagramaERD.png)
 
 ---
 
@@ -323,7 +325,3 @@ Possíveis melhorias futuras para o projeto:
 Este projeto foi desenvolvido por **Rafaela de Oliveira Alves** como requisito para conclusão do curso de **Desenvolvedor Full Stack** da **Itera360**.
 
 Agradeço à equipe da **Itera360**, especialmente aos monitores Alysson e João Victor Holanda, pelo apoio durante o curso e pelo suporte ao longo do desenvolvimento do projeto. Também agradeço aos colegas de turma pela troca de experiências, colaboração e incentivo.
-
-```
-
-```
