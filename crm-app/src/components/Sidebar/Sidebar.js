@@ -206,17 +206,17 @@ export function Sidebar({ children }) {
           </Modal.Body>
           <Modal.Footer>
             <Button
-                  variant="secondary"
-                  buttonLabel="Cancelar"
-                  onButtonClick={closePasswordModal}
-                  disabled={isSubmittingPassword}
-                />
-              <Button
-                  variant="success"
-                  type="submit"
-                  buttonLabel={isSubmittingPassword ? "Salvando..." : "Salvar"}
-                  disabled={isSubmittingPassword}
-                />
+              variant="secondary"
+              buttonLabel="Cancelar"
+              onButtonClick={closePasswordModal}
+              disabled={isSubmittingPassword}
+            />
+            <Button
+              variant="success"
+              type="submit"
+              buttonLabel={isSubmittingPassword ? "Salvando..." : "Salvar"}
+              disabled={isSubmittingPassword}
+            />
           </Modal.Footer>
         </Form>
       </Modal>
