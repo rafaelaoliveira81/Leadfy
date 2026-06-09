@@ -2,5 +2,5 @@ namespace Application.DTO;
 
 public class GenerateActionPlanRequest
 {
-    public int PromptId { get; set; }
+    public string PromptId { get; set; }
 }

@@ -1,8 +1,8 @@
 namespace Domain.Entities;
 
-public class Prompt
+public class Prompt : IEntity
 {
-    public int Id { get; set; }
+    public Guid Id { get; set; }
     public string Title { get; set; }
     public string Content { get; set; }
     public bool IsActive { get; set; }
@@ -10,6 +10,7 @@ public class Prompt
 
     public Prompt()
     {
+        Id = Guid.NewGuid();
         IsActive = true;
         CreatedAt = DateTime.Now;
     }

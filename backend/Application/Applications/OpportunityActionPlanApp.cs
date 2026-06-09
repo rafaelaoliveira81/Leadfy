@@ -32,7 +32,7 @@ public class OpportunityActionPlanApp : IOpportunityActionPlanApp
         _aiService = aiService;
     }
 
-    public async Task<OpportunityActionPlanDto> GenerateAsync(int opportunityId, int promptId)
+    public async Task<OpportunityActionPlanDto> GenerateAsync(int opportunityId, string promptId)
     {
         var opportunity = await GetOpportunityAsync(opportunityId);
 

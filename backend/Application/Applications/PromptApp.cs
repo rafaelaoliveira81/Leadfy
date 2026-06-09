@@ -14,16 +14,16 @@ public class PromptApp : IPromptApp
         _promptRepo = promptRepo;
         _aiService = aiService;
     }
-    public async Task<int> AddAsync(PromptRequest request)
+    public async Task<string> AddAsync(PromptRequest request)
     {
         ValidatePromptInformation(request);
 
         var prompt = MapToPromptRequest(request);
 
-        return await _promptRepo.AddAsync(prompt);
+        return (await _promptRepo.CreateAsync(prompt)).ToString();
     }
 
-    public async Task<PromptResponse> GetByIdAsync(int idPrompt)
+    public async Task<PromptResponse> GetByIdAsync(string idPrompt)
     {
         var prompt = await ValidatePromptExistsByIdAsync(idPrompt);
 
@@ -54,14 +54,14 @@ public class PromptApp : IPromptApp
         await _promptRepo.UpdateAsync(prompt);
     }
 
-    public async Task DeleteAsync(int idPrompt)
+    public async Task DeleteAsync(string idPrompt)
     {
         var promptEntity = await ValidatePromptExistsByIdAsync(idPrompt);
 
         await _promptRepo.DeleteAsync(promptEntity);
     }
 
-    public async Task DeactivateAsync(int idPrompt)
+    public async Task DeactivateAsync(string idPrompt)
     {
         var promptEntity = await ValidatePromptExistsByIdAsync(idPrompt);
 
@@ -70,7 +70,7 @@ public class PromptApp : IPromptApp
         await _promptRepo.UpdateAsync(promptEntity);
     }
 
-    public async Task ActivateAsync(int idPrompt)
+    public async Task ActivateAsync(string idPrompt)
     {
         var promptEntity = await ValidatePromptExistsByIdAsync(idPrompt);
 
@@ -113,9 +113,12 @@ public class PromptApp : IPromptApp
             throw new ArgumentException("O prompt não pode exceder 1000 caracteres.");
     }
 
-    private async Task<Prompt> ValidatePromptExistsByIdAsync(int idPrompt)
+    private async Task<Prompt> ValidatePromptExistsByIdAsync(string idPrompt)
     {
-        var prompt = await _promptRepo.GetByIdAsync(idPrompt);
+        if (!Guid.TryParse(idPrompt, out var guid))
+            throw new ArgumentException("ID do prompt inválido.");
+
+        var prompt = await _promptRepo.GetByIdAsync(guid);
 
         if (prompt == null)
             throw new KeyNotFoundException("Prompt não localizado.");
@@ -136,7 +139,7 @@ public class PromptApp : IPromptApp
     {
         return new PromptResponse
         {
-            Id = prompt.Id,
+            Id = prompt.Id.ToString(),
             Title = prompt.Title,
             Content = prompt.Content,
             IsActive = prompt.IsActive

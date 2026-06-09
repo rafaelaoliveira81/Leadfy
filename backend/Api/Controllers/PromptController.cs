@@ -69,15 +69,15 @@ public class PromptController : ControllerBase
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
     [Authorize]
-    [HttpGet("{id:int}")]
+    [HttpGet("{guidId}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> GetById([FromRoute] int id)
+    public async Task<ActionResult> GetById([FromRoute] string guidId)
     {
         try
         {
-            var prompt = await _promptApp.GetByIdAsync(id);
+            var prompt = await _promptApp.GetByIdAsync(guidId);
 
             return Ok(prompt);
         }
@@ -179,15 +179,15 @@ public class PromptController : ControllerBase
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
     [Authorize]
-    [HttpDelete("{id:int}")]
+    [HttpDelete("{guidId}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> Delete([FromRoute] int id)
+    public async Task<ActionResult> Delete([FromRoute] string guidId)
     {
         try
         {
-            await _promptApp.DeleteAsync(id);
+            await _promptApp.DeleteAsync(guidId);
 
             return NoContent();
         }
@@ -212,15 +212,15 @@ public class PromptController : ControllerBase
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
     [Authorize]
-    [HttpPatch("{id:int}/deactivate")]
+    [HttpPatch("{guidId}/deactivate")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> Deactivate([FromRoute] int id)
+    public async Task<ActionResult> Deactivate([FromRoute] string guidId)
     {
         try
         {
-            await _promptApp.DeactivateAsync(id);
+            await _promptApp.DeactivateAsync(guidId);
 
             return NoContent();
         }
@@ -249,15 +249,15 @@ public class PromptController : ControllerBase
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
     [Authorize]
-    [HttpPatch("{id:int}/activate")]
+    [HttpPatch("{guidId}/activate")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> Activate([FromRoute] int id)
+    public async Task<ActionResult> Activate([FromRoute] string guidId)
     {
         try
         {
-            await _promptApp.ActivateAsync(id);
+            await _promptApp.ActivateAsync(guidId);
 
             return NoContent();
         }
