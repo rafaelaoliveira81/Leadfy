@@ -18,7 +18,7 @@ public class InteractionApp : IInteractionApp
         _userRepo = userRepo;
         _aiService = aiService;
     }
-    public async Task<int> AddToOpportunityAsync(int opportunityId, InteractionAdd interactionRequest)
+    public async Task<int> AddToOpportunityAsync(int opportunityId, InteractionRequest interactionRequest)
     {
         var interaction = MapToEntity(interactionRequest);
 
@@ -79,7 +79,7 @@ public class InteractionApp : IInteractionApp
         if (interaction.Description.Length > 1000)
             throw new ArgumentException("A descrição da interação não pode exceder 1000 caracteres.");
 
-        if (interaction.UserId <= 0)
+        if (interaction.UserId.Equals(Guid.Empty))
             throw new ArgumentException("O usuário da interação deve ser informado.");
 
         if (interaction.FromStage.HasValue && !Enum.IsDefined(typeof(OpportunityStage), interaction.FromStage.Value))
@@ -124,7 +124,7 @@ public class InteractionApp : IInteractionApp
         return interactionEntity;
     }
 
-    private static Interaction MapToEntity(InteractionAdd request)
+    private static Interaction MapToEntity(InteractionRequest request)
     {
         if (request == null)
             return null;
@@ -132,7 +132,7 @@ public class InteractionApp : IInteractionApp
         return new Interaction
         {
             Description = request.Description,
-            UserId = request.UserId,
+            UserId = request.UserId != null && Guid.TryParse(request.UserId, out var guid) ? guid : Guid.Empty,
             FromStage = request.FromStage,
             ToStage = request.ToStage,
             InteractionDate = request.InteractionDate ?? DateTime.Now,
@@ -157,7 +157,6 @@ public class InteractionApp : IInteractionApp
             Description = interaction.Description,
             InteractionDate = interaction.InteractionDate,
             CreatedAt = interaction.CreatedAt,
-            UserId = interaction.UserId,
             UserName = interaction.User?.Name,
             NextContactDate = interaction.NextContactDate
         };

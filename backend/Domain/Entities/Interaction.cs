@@ -4,7 +4,7 @@ public class Interaction
 {
     public int Id { get; set; }
     public int OpportunityId { get; set; }
-    public int UserId { get; set; }
+    public Guid UserId { get; set; }
     public int? FromStage { get; set; }
     public int? ToStage { get; set; }
     public string Description { get; set; }

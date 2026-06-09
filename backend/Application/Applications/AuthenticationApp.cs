@@ -23,8 +23,8 @@ public class AuthenticationApp : IAuthenticationApp
         if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
             throw new ArgumentException("Email e senha são obrigatórios.");
 
-        var user = await _userRepo.GetActiveByEmailAsync(request.Email.Trim());
-        if (user == null || !VerifyPassword(request.Password, user.PasswordHash))
+        var user = await _userRepo.GetByEmailAsync(request.Email.Trim());
+        if (user == null || !user.IsActive || !VerifyPassword(request.Password, user.PasswordHash))
             throw new UnauthorizedAccessException("Email ou senha inválidos.");
 
         var token = _tokenService.GenerateToken(user);

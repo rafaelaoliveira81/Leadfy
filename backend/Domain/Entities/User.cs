@@ -1,8 +1,8 @@
 namespace Domain.Entities;
 
-public class User
+public class User : IEntity
 {
-    public int ID { get; set; }
+    public Guid Id { get; set; }
     public string Name { get; set; }
     public string Email { get; set; }
     public string PasswordHash { get; set; }
@@ -12,6 +12,7 @@ public class User
 
     public User()
     {
+        Id = Guid.NewGuid();
         IsActive = true;
         CreatedAt = DateTime.Now;
         Interactions = new List<Interaction>();

@@ -62,7 +62,7 @@ public class PromptController : ControllerBase
     /// <summary>
     /// Obtém um prompt pelo identificador.
     /// </summary>
-    /// <param name="id">Identificador do prompt.</param>
+    /// <param name="guidId">Identificador do prompt.</param>
     /// <returns>
     /// Retorna status 200 com os dados do prompt encontrado (`PromptResponse` ou similar).
     /// Retorna status 404 quando o prompt não é localizado.
@@ -172,7 +172,7 @@ public class PromptController : ControllerBase
     /// <summary>
     /// Remove um prompt do sistema.
     /// </summary>
-    /// <param name="id">Identificador do prompt a ser removido.</param>
+    /// <param name="guidId">Identificador do prompt a ser removido.</param>
     /// <returns>
     /// Retorna status 204 quando a exclusão é realizada com sucesso.
     /// Retorna status 404 quando o prompt não é localizado.
@@ -204,7 +204,7 @@ public class PromptController : ControllerBase
     /// <summary>
     /// Desativa um prompt.
     /// </summary>
-    /// <param name="id">Identificador do prompt a ser desativado.</param>
+    /// <param name="guidId">Identificador do prompt a ser desativado.</param>
     /// <returns>
     /// Retorna status 204 quando a desativação é realizada com sucesso.
     /// Retorna status 400 quando os dados informados são inválidos.
@@ -241,7 +241,7 @@ public class PromptController : ControllerBase
     /// <summary>
     /// Ativa um prompt.
     /// </summary>
-    /// <param name="id">Identificador do prompt a ser ativado.</param>
+    /// <param name="guidId">Identificador do prompt a ser ativado.</param>
     /// <returns>
     /// Retorna status 204 quando a ativação é realizada com sucesso.
     /// Retorna status 400 quando os dados informados são inválidos.

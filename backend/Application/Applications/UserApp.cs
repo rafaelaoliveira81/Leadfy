@@ -12,7 +12,7 @@ public class UserApp : IUserApp
         _userRepo = userRepo;
     }
 
-    public async Task<int> AddAsync(UserRequest request)
+    public async Task<string> AddAsync(UserRequest request)
     {
         ValidateUserInformation(request);
 
@@ -30,10 +30,10 @@ public class UserApp : IUserApp
             PasswordHash = PasswordHasher(request.Password)
         };
 
-        return await _userRepo.AddAsync(user);
+        return (await _userRepo.CreateAsync(user)).ToString();
     }
 
-    public async Task<UserResponse> GetByIdAsync(int idUser)
+    public async Task<UserResponse> GetByIdAsync(string idUser)
     {
         var user = await ValidateUserExistsByIdAsync(idUser);
 
@@ -65,7 +65,7 @@ public class UserApp : IUserApp
         };
     }
 
-    public async Task UpdateAsync(int id, UserRequest request)
+    public async Task UpdateAsync(string id, UserRequest request)
     {
         var user = await ValidateUserExistsByIdAsync(id);
 
@@ -73,7 +73,7 @@ public class UserApp : IUserApp
 
         var userByEmail = await _userRepo.GetByEmailAsync(request.Email);
 
-        if (userByEmail != null && id != userByEmail.ID)
+        if (userByEmail != null && id != userByEmail.Id.ToString())
             throw new ArgumentException("Já existe um usuário com o e-mail informado.");
 
         user.Name = request.Name;
@@ -85,7 +85,7 @@ public class UserApp : IUserApp
         await _userRepo.UpdateAsync(user);
     }
 
-    public async Task UpdatePasswordAsync(int id, UserUpdatePasswordRequest request)
+    public async Task UpdatePasswordAsync(string id, UserUpdatePasswordRequest request)
     {
         var user = await ValidateUserExistsByIdAsync(id);
 
@@ -105,13 +105,13 @@ public class UserApp : IUserApp
 
         await _userRepo.UpdateAsync(user);
     }
-    public async Task DeleteAsync(int idUser)
+    public async Task DeleteAsync(string idUser)
     {
         var userEntity = await ValidateUserExistsByIdAsync(idUser);
 
         await _userRepo.DeleteAsync(userEntity);
     }
-    public async Task DeactivateAsync(int idUser)
+    public async Task DeactivateAsync(string idUser)
     {
         var userEntity = await ValidateUserExistsByIdAsync(idUser);
 
@@ -119,7 +119,7 @@ public class UserApp : IUserApp
 
         await _userRepo.UpdateAsync(userEntity);
     }
-    public async Task ActivateAsync(int idUser)
+    public async Task ActivateAsync(string idUser)
     {
         var userEntity = await ValidateUserExistsByIdAsync(idUser);
 
@@ -140,19 +140,24 @@ public class UserApp : IUserApp
         if (string.IsNullOrWhiteSpace(request.Email))
             throw new ArgumentException("O e-mail do usuário deve ser informado.");
     }
-    private async Task<User> ValidateUserExistsByIdAsync(int idUser)
+    private async Task<User> ValidateUserExistsByIdAsync(string idUser)
     {
-        var userEntity = await _userRepo.GetByIdAsync(idUser);
+        if (!Guid.TryParse(idUser, out var guid))
+            throw new ArgumentException("ID do usuário inválido.");
+
+        var userEntity = await _userRepo.GetByIdAsync(guid);
+        
         if (userEntity == null)
             throw new KeyNotFoundException("Usuário não localizado.");
 
         return userEntity;
     }
+
     private static UserResponse MapToUserResponse(User user)
     {
         return new UserResponse
         {
-            ID = user.ID,
+            Id = user.Id.ToString(),
             Name = user.Name,
             Email = user.Email,
             IsActive = user.IsActive
