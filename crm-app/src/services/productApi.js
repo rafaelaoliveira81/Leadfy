@@ -4,8 +4,8 @@ import { HTTPClient } from "./client";
 export const productAPI = {
   async Create(productData) {
     try {
-      productData.id = 0;
-      const response = await HTTPClient.post(`/products`, productData);
+      const payload = { ...productData, id: null };
+      const response = await HTTPClient.post(`/products`, payload);
       return response.data;
     } catch (error) {
       return mapApiError(error);

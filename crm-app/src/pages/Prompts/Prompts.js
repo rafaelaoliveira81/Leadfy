@@ -132,7 +132,7 @@ export function Prompts() {
   };
 
   const buildPromptPayload = (currentPrompt) => ({
-    id: currentPrompt.id ?? 0,
+    id: currentPrompt.id ?? null,
     title: currentPrompt.title?.trim() ?? "",
     content: currentPrompt.content?.trim() ?? "",
   });

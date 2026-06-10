@@ -70,6 +70,12 @@ function buildInteractionOptimizePayload(description) {
   };
 }
 
+function isGuid(value) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+    String(value || ""),
+  );
+}
+
 function Kanban() {
   const { claims } = useAuth();
   const [board, setBoard] = useState({});
@@ -90,7 +96,7 @@ function Kanban() {
   });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const currentUserId = Number(claims?.usuarioId);
+  const currentUserId = claims?.usuarioId;
   const [prompts, setPrompts] = useState([]);
   const [selectedPromptId, setSelectedPromptId] = useState("");
   const [isGeneratingPlan, setIsGeneratingPlan] = useState(false);
@@ -320,9 +326,7 @@ function Kanban() {
 
     const payload = {
       leadId: selectedOpportunity.leadId,
-      productId: opportunityForm.productId
-        ? Number(opportunityForm.productId)
-        : null,
+      productId: opportunityForm.productId || null,
       stage: selectedOpportunity.stage,
       amount,
       expectedCloseDate: opportunityForm.expectedCloseDate || null,
@@ -334,7 +338,7 @@ function Kanban() {
       await opportunityAPI.Update(selectedOpportunity.id, payload);
 
       const selectedProduct = products.find(
-        (product) => product.id === payload.productId,
+        (product) => String(product.id) === String(payload.productId),
       );
 
       const updatedOpportunity = {
@@ -375,7 +379,7 @@ function Kanban() {
       return;
     }
 
-    if (!Number.isInteger(currentUserId) || currentUserId <= 0) {
+    if (!isGuid(currentUserId)) {
       toast.error("Não foi possível identificar o usuário logado.");
       return;
     }
@@ -443,7 +447,7 @@ function Kanban() {
     try {
       const newPlan = await opportunityAPI.GenerateActionPlan(
         selectedOpportunity.id,
-        Number(selectedPromptId),
+        selectedPromptId,
       );
       setActionPlans((prev) => [newPlan, ...prev]);
       setIsActionPlansOpen(false);
