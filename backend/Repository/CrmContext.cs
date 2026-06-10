@@ -1,16 +1,23 @@
 using Microsoft.EntityFrameworkCore;
 using Domain.Entities;
+using Domain.Interface;
 using Repository.Configurations;
 
 namespace Repository.Context;
 
 public class CRMContext : DbContext
 {
-    public CRMContext(DbContextOptions<CRMContext> options)
+    private readonly ITenantProvider _tenantProvider;
+
+    private Guid? CurrentTenantId => _tenantProvider.TenantId;
+
+    public CRMContext(DbContextOptions<CRMContext> options, ITenantProvider tenantProvider)
         : base(options)
     {
+        _tenantProvider = tenantProvider;
     }
 
+    public DbSet<Tenant> Tenants { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<Lead> Leads { get; set; }
     public DbSet<Product> Products { get; set; }
@@ -21,7 +28,10 @@ public class CRMContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.ApplyConfiguration(new TenantConfig());
         modelBuilder.ApplyConfiguration(new UserConfig());
+        modelBuilder.Entity<User>()
+            .HasQueryFilter(user => !CurrentTenantId.HasValue || user.TenantId == CurrentTenantId.Value);
 
         modelBuilder.ApplyConfiguration(new LeadConfig());
         modelBuilder.ApplyConfiguration(new ProductConfig());

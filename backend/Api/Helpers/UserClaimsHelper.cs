@@ -5,6 +5,7 @@ namespace Api.Helpers;
 public static class UserClaimsHelper
 {
     private const string UserIdClaimType = "usuarioId";
+    private const string TenantIdClaimType = "tenantId";
 
     public static string GetAuthenticatedUserId(this ClaimsPrincipal user)
     {
@@ -20,5 +21,21 @@ public static class UserClaimsHelper
             throw new UnauthorizedAccessException($"Claim '{UserIdClaimType}' inválida na requisição.");
 
         return userIdClaim;
+    }
+
+    public static string GetAuthenticatedTenantId(this ClaimsPrincipal user)
+    {
+        if (user?.Identity?.IsAuthenticated != true)
+            throw new UnauthorizedAccessException("Usuário não autenticado.");
+
+        var tenantIdClaim = user.FindFirst(TenantIdClaimType)?.Value;
+
+        if (string.IsNullOrWhiteSpace(tenantIdClaim))
+            throw new UnauthorizedAccessException($"Claim '{TenantIdClaimType}' não encontrada na requisição.");
+
+        if (!Guid.TryParse(tenantIdClaim, out _))
+            throw new UnauthorizedAccessException($"Claim '{TenantIdClaimType}' inválida na requisição.");
+
+        return tenantIdClaim;
     }
 }

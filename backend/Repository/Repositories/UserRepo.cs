@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Dapper;
 using Domain.Entities;
 using Repository.Context;
 
@@ -13,7 +12,30 @@ public class UserRepository : BaseRepository<User>, IUserRepo
 
     public async Task<User> GetByEmailAsync(string emailUser)
     {
-        return await _context.Users.FirstOrDefaultAsync(u => u.Email == emailUser);
+        return await _context.Users
+            .FirstOrDefaultAsync(u => u.Email == emailUser);
+    }
+
+    public async Task<User> GetByUserNameGlobalAsync(string userName)
+    {
+        return await _context.Users
+            .IgnoreQueryFilters()
+            .FirstOrDefaultAsync(u => u.UserName == userName);
+    }
+
+    public async Task<List<User>> GetByEmailAnyTenantAsync(string emailUser)
+    {
+        return await _context.Users
+            .IgnoreQueryFilters()
+            .Where(u => u.Email == emailUser)
+            .OrderBy(u => u.CreatedAt)
+            .ToListAsync();
+    }
+
+    public async Task<User> GetScopedByIdAsync(Guid userId)
+    {
+        return await _context.Users
+            .FirstOrDefaultAsync(u => u.Id == userId);
     }
 
     public async Task<PagedResult<User>> GetPagedAsync(
@@ -21,21 +43,23 @@ public class UserRepository : BaseRepository<User>, IUserRepo
         int pagina,
         int quantidadePorPagina)
     {
-        using var connection = GetConnection();
+        if (pagina <= 0)
+            throw new ArgumentException("Página deve ser maior que zero.");
 
-        using var multi = await connection.QueryMultipleAsync(
-            "sp_GetUsersPaginado",
-            new
-            {
-                isActive = isActive.HasValue ? (isActive.Value ? 1 : 0) : (int?)null,
-                Pagina = pagina,
-                QuantidadePorPagina = quantidadePorPagina
-            },
-            commandType: System.Data.CommandType.StoredProcedure
-        );
+        if (quantidadePorPagina <= 0)
+            throw new ArgumentException("Quantidade por página deve ser maior que zero.");
 
-        var totalRegistros = await multi.ReadFirstAsync<int>();
-        var users = (await multi.ReadAsync<User>()).ToList();
+        var query = _context.Users.AsNoTracking();
+
+        if (isActive.HasValue)
+            query = query.Where(u => u.IsActive == isActive.Value);
+
+        var totalRegistros = await query.CountAsync();
+        var users = await query
+            .OrderBy(u => u.Name)
+            .Skip((pagina - 1) * quantidadePorPagina)
+            .Take(quantidadePorPagina)
+            .ToListAsync();
 
         return new PagedResult<User>
         {

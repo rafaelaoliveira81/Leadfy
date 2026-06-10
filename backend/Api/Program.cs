@@ -4,10 +4,12 @@ using Repository.Context;
 using System.Reflection;
 using Application;
 using Domain.Config;
+using Domain.Interface;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
+using Api.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -60,9 +62,12 @@ builder.Services.AddScoped<IDashboardApp, DashboardApp>();
 
 builder.Services.AddScoped<IAiService, AiService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ITenantProvider, HttpContextTenantProvider>();
 
 // Adicione as interfaces de banco de dados
 builder.Services.AddScoped<IUserRepo, UserRepository>();
+builder.Services.AddScoped<ITenantRepo, TenantRepository>();
 builder.Services.AddScoped<ILeadRepo, LeadRepo>();
 builder.Services.AddScoped<IProductRepo, ProductRepo>();
 builder.Services.AddScoped<IOpportunityRepo, OpportunityRepo>();

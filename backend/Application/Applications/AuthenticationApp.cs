@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using Application.DTO;
+using Domain.Entities;
 namespace Application;
 
 public class AuthenticationApp : IAuthenticationApp
@@ -23,7 +24,27 @@ public class AuthenticationApp : IAuthenticationApp
         if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
             throw new ArgumentException("Email e senha são obrigatórios.");
 
-        var user = await _userRepo.GetByEmailAsync(request.Email.Trim());
+        var email = request.Email.Trim();
+        User user;
+
+        if (!string.IsNullOrWhiteSpace(request.TenantId))
+        {
+            if (!Guid.TryParse(request.TenantId, out var tenantGuid))
+                throw new ArgumentException("TenantId inválido.");
+
+            user = (await _userRepo.GetByEmailAnyTenantAsync(email))
+                .FirstOrDefault(currentUser => currentUser.TenantId == tenantGuid);
+        }
+        else
+        {
+            var usersByEmail = await _userRepo.GetByEmailAnyTenantAsync(email);
+
+            if (usersByEmail.Count > 1)
+                throw new ArgumentException("Há mais de um usuário com este e-mail em tenants diferentes. Informe o TenantId no login.");
+
+            user = usersByEmail.FirstOrDefault();
+        }
+
         if (user == null || !user.IsActive || !VerifyPassword(request.Password, user.PasswordHash))
             throw new UnauthorizedAccessException("Email ou senha inválidos.");
 

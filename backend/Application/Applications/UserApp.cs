@@ -1,20 +1,27 @@
 using System.Security.Cryptography;
 using Application.DTO;
 using Domain.Entities;
+using Domain.Interface;
 
 namespace Application;
 
 public class UserApp : IUserApp
 {
     private readonly IUserRepo _userRepo;
-    public UserApp(IUserRepo userRepo)
+    private readonly ITenantRepo _tenantRepo;
+    private readonly ITenantProvider _tenantProvider;
+
+    public UserApp(IUserRepo userRepo, ITenantRepo tenantRepo, ITenantProvider tenantProvider)
     {
         _userRepo = userRepo;
+        _tenantRepo = tenantRepo;
+        _tenantProvider = tenantProvider;
     }
 
     public async Task<string> AddAsync(UserRequest request)
     {
         ValidateUserInformation(request);
+        var tenantGuid = _tenantProvider.GetRequiredTenantId();
 
         if (string.IsNullOrWhiteSpace(request.Password))
             throw new ArgumentException("A senha do usuário deve ser informada.");
@@ -23,9 +30,15 @@ public class UserApp : IUserApp
         if (userEntity != null)
             throw new ArgumentException("Já existe usuário com o e-mail informado.");
 
+        var userByUserName = await _userRepo.GetByUserNameGlobalAsync(request.UserName);
+        if (userByUserName != null)
+            throw new ArgumentException("Já existe usuário com o UserName informado.");
+
         var user = new User
         {
+            TenantId = tenantGuid,
             Name = request.Name,
+            UserName = request.UserName,
             Email = request.Email,
             PasswordHash = PasswordHasher(request.Password)
         };
@@ -39,13 +52,22 @@ public class UserApp : IUserApp
         if (string.IsNullOrWhiteSpace(request.Password))
             throw new ArgumentException("A senha do usuário deve ser informada.");
 
-        var userEntity = await _userRepo.GetByEmailAsync(request.Email);
-        if (userEntity != null)
-            throw new ArgumentException("Já existe usuário com o e-mail informado.");
+        var userByUserName = await _userRepo.GetByUserNameGlobalAsync(request.UserName);
+        if (userByUserName != null)
+            throw new ArgumentException("Já existe usuário com o UserName informado.");
+
+        var tenant = new Tenant
+        {
+            Name = BuildDefaultTenantName(request.Name)
+        };
+
+        await _tenantRepo.CreateAsync(tenant);
 
         var user = new User
         {
+            TenantId = tenant.Id,
             Name = request.Name,
+            UserName = request.UserName,
             Email = request.Email,
             PasswordHash = PasswordHasher(request.Password)
         };
@@ -96,7 +118,13 @@ public class UserApp : IUserApp
         if (userByEmail != null && id != userByEmail.Id.ToString())
             throw new ArgumentException("Já existe um usuário com o e-mail informado.");
 
+        var userByUserName = await _userRepo.GetByUserNameGlobalAsync(request.UserName);
+
+        if (userByUserName != null && id != userByUserName.Id.ToString())
+            throw new ArgumentException("Já existe um usuário com o UserName informado.");
+
         user.Name = request.Name;
+        user.UserName = request.UserName;
         user.Email = request.Email;
 
         if (!string.IsNullOrWhiteSpace(request.Password))
@@ -157,6 +185,9 @@ public class UserApp : IUserApp
         if (string.IsNullOrWhiteSpace(request.Name))
             throw new ArgumentException("O nome do usuário deve ser informado.");
 
+        if (string.IsNullOrWhiteSpace(request.UserName))
+            throw new ArgumentException("O UserName do usuário deve ser informado.");
+
         if (string.IsNullOrWhiteSpace(request.Email))
             throw new ArgumentException("O e-mail do usuário deve ser informado.");
     }
@@ -165,12 +196,22 @@ public class UserApp : IUserApp
         if (!Guid.TryParse(idUser, out var guid))
             throw new ArgumentException("ID do usuário inválido.");
 
-        var userEntity = await _userRepo.GetByIdAsync(guid);
+        var userEntity = await _userRepo.GetScopedByIdAsync(guid);
         
         if (userEntity == null)
             throw new KeyNotFoundException("Usuário não localizado.");
 
         return userEntity;
+    }
+
+    private static string BuildDefaultTenantName(string userName)
+    {
+        var trimmed = userName?.Trim();
+
+        if (string.IsNullOrWhiteSpace(trimmed))
+            return "Novo Tenant";
+
+        return $"Tenant {trimmed}";
     }
 
     private static UserResponse MapToUserResponse(User user)
@@ -179,6 +220,7 @@ public class UserApp : IUserApp
         {
             Id = user.Id.ToString(),
             Name = user.Name,
+            UserName = user.UserName,
             Email = user.Email,
             IsActive = user.IsActive
         };
