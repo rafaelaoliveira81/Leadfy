@@ -317,7 +317,13 @@ export function Leads() {
                       Carregando...
                     </td>
                   </tr>
-                ) : (
+                ) : allLeads.length === 0 ? (
+                                  <tr>
+                                    <td colSpan={5} className={style["celula-carregando"]}>
+                                      Nenhum lead encontrado.
+                                    </td>
+                                  </tr>
+                                ) : (
                   allLeads.map((lead) => (
                     <tr key={lead.id}>
                       <td>{lead.name}</td>

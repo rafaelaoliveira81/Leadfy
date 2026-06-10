@@ -11,7 +11,7 @@ import { Link, useNavigate } from "react-router-dom";
 
 export default function Login() {
   const INITIAL_USER_STATE = {
-    email: "",
+    userName: "",
     password: "",
   };
 
@@ -83,15 +83,15 @@ export default function Login() {
 
           <Form onSubmit={handleSubmit} className={style.form}>
             <Form.Group className={style.formGroup}>
-              <Form.Label>E-mail</Form.Label>
+              <Form.Label>Usuário</Form.Label>
 
               <div className={style["campo-input"]}>
                 <MdEmail className={style["icone-input"]} />
                 <Form.Control
-                  type="email"
-                  name="email"
-                  placeholder="voce@empresa.com"
-                  value={user.email}
+                  type="text"
+                  name="userName"
+                  placeholder="Nome de usuário"
+                  value={user.userName}
                   onChange={handleInputChange}
                 />
               </div>

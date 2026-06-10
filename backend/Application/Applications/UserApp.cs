@@ -32,7 +32,7 @@ public class UserApp : IUserApp
 
         var userByUserName = await _userRepo.GetByUserNameGlobalAsync(request.UserName);
         if (userByUserName != null)
-            throw new ArgumentException("Já existe usuário com o UserName informado.");
+            throw new ArgumentException("Este nome já está sendo utilizado, teste outro.");
 
         var user = new User
         {
@@ -54,7 +54,7 @@ public class UserApp : IUserApp
 
         var userByUserName = await _userRepo.GetByUserNameGlobalAsync(request.UserName);
         if (userByUserName != null)
-            throw new ArgumentException("Já existe usuário com o UserName informado.");
+            throw new ArgumentException("Este nome já está sendo utilizado, teste outro.");
 
         var tenant = new Tenant
         {
@@ -121,7 +121,7 @@ public class UserApp : IUserApp
         var userByUserName = await _userRepo.GetByUserNameGlobalAsync(request.UserName);
 
         if (userByUserName != null && id != userByUserName.Id.ToString())
-            throw new ArgumentException("Já existe um usuário com o UserName informado.");
+            throw new ArgumentException("Este nome já está sendo utilizado, teste outro.");
 
         user.Name = request.Name;
         user.UserName = request.UserName;

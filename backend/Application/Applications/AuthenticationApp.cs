@@ -21,32 +21,15 @@ public class AuthenticationApp : IAuthenticationApp
         if (request == null)
             throw new ArgumentException("Requisição inválida.");
 
-        if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
-            throw new ArgumentException("Email e senha são obrigatórios.");
+        if (string.IsNullOrWhiteSpace(request.UserName) || string.IsNullOrWhiteSpace(request.Password))
+            throw new ArgumentException("Nome de usuário e senha são obrigatórios.");
 
-        var email = request.Email.Trim();
-        User user;
+        var userName = request.UserName.Trim();
 
-        if (!string.IsNullOrWhiteSpace(request.TenantId))
-        {
-            if (!Guid.TryParse(request.TenantId, out var tenantGuid))
-                throw new ArgumentException("TenantId inválido.");
-
-            user = (await _userRepo.GetByEmailAnyTenantAsync(email))
-                .FirstOrDefault(currentUser => currentUser.TenantId == tenantGuid);
-        }
-        else
-        {
-            var usersByEmail = await _userRepo.GetByEmailAnyTenantAsync(email);
-
-            if (usersByEmail.Count > 1)
-                throw new ArgumentException("Há mais de um usuário com este e-mail em tenants diferentes. Informe o TenantId no login.");
-
-            user = usersByEmail.FirstOrDefault();
-        }
+        var user = await _userRepo.GetByUserNameGlobalAsync(userName);
 
         if (user == null || !user.IsActive || !VerifyPassword(request.Password, user.PasswordHash))
-            throw new UnauthorizedAccessException("Email ou senha inválidos.");
+            throw new UnauthorizedAccessException("Usuário ou senha inválidos.");
 
         var token = _tokenService.GenerateToken(user);
 
