@@ -32,6 +32,26 @@ public class UserApp : IUserApp
 
         return (await _userRepo.CreateAsync(user)).ToString();
     }
+    public async Task<string> RegisterAsync(UserRequest request)
+    {
+        ValidateUserInformation(request);
+
+        if (string.IsNullOrWhiteSpace(request.Password))
+            throw new ArgumentException("A senha do usuário deve ser informada.");
+
+        var userEntity = await _userRepo.GetByEmailAsync(request.Email);
+        if (userEntity != null)
+            throw new ArgumentException("Já existe usuário com o e-mail informado.");
+
+        var user = new User
+        {
+            Name = request.Name,
+            Email = request.Email,
+            PasswordHash = PasswordHasher(request.Password)
+        };
+
+        return (await _userRepo.CreateAsync(user)).ToString();
+    }
 
     public async Task<UserResponse> GetByIdAsync(string idUser)
     {

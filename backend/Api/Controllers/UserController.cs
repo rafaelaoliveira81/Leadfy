@@ -34,6 +34,7 @@ public class UserController : ControllerBase
     /// Este endpoint recebe os dados de entrada e delega o processo de cadastro
     /// para a camada de aplicação.
     /// </remarks>
+    [Authorize]
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -44,6 +45,29 @@ public class UserController : ControllerBase
         try
         {
             var idUser = await _userApp.AddAsync(request);
+
+            return CreatedAtAction(nameof(GetById), new { id = idUser }, new { id = idUser });
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = ex.Message });
+        }
+    }
+
+    [HttpPost("register")]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult> Register([FromBody] UserRequest request)
+    {
+        try
+        {
+            var idUser = await _userApp.RegisterAsync(request);
 
             return CreatedAtAction(nameof(GetById), new { id = idUser }, new { id = idUser });
         }

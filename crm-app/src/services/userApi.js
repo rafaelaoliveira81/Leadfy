@@ -2,6 +2,15 @@ import { HTTPClient } from "./client";
 import mapApiError from "../utils/MapApiError";
 
 const userAPI = {
+  async Register(userData) {
+    try {
+      const response = await HTTPClient.post(`/users/register`, userData);
+      return response.data;
+    } catch (error) {
+      return mapApiError(error);
+    }
+  },
+  
   async Create(userData) {
     try {
       const response = await HTTPClient.post(`/users`, userData);
