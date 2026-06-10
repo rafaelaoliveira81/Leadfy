@@ -5,35 +5,10 @@ using Repository.Context;
 
 namespace Repository.Repositories;
 
-public class ProductRepo : BaseRepo, IProductRepo
+public class ProductRepo : BaseRepository<Product>, IProductRepo
 {
     public ProductRepo(CRMContext context) : base(context)
     {
-    }
-    public async Task<int> AddAsync(Product product)
-    {
-        var query = "sp_CreateProduct";
-        var parameters = new
-        {
-            Name = product.Name,
-            Description = product.Description,
-            Price = product.Price
-        };
-
-        using (var connection = GetConnection())
-        {
-            return await connection.ExecuteScalarAsync<int>(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
-        }
-    }
-    public async Task<Product> GetByIdAsync(int idProduct)
-    {
-        var query = "sp_GetProductById";
-        var parameters = new { ID = idProduct };
-
-        using (var connection = GetConnection())
-        {
-            return await connection.QueryFirstOrDefaultAsync<Product>(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
-        }
     }
 
    public async Task<PagedResult<Product>> GetPagedAsync(
@@ -62,33 +37,5 @@ public class ProductRepo : BaseRepo, IProductRepo
             TotalRegistros = totalRegistros,
             Dados = products
         };
-    }
-    
-    public async Task UpdateAsync(Product product)
-    {
-        var query = "sp_UpdateProduct";
-        var parameters = new
-        {
-            ID = product.Id,
-            Name = product.Name,
-            Description = product.Description,
-            Price = product.Price,
-            IsActive = product.IsActive
-        };
-
-        using (var connection = GetConnection())
-        {
-            await connection.ExecuteAsync(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
-        }
-    }
-    public async Task DeleteAsync(Product product)
-    {
-        var query = "sp_DeleteProduct";
-        var parameters = new { ID = product.Id };
-
-        using (var connection = GetConnection())
-        {
-            await connection.ExecuteAsync(query, parameters, commandType: System.Data.CommandType.StoredProcedure);
-        }
-    }
+    }    
 }

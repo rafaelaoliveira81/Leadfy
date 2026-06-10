@@ -33,6 +33,11 @@ export function Sidebar({ children }) {
     newPassword: "",
   });
 
+  const isGuid = (value) =>
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+      String(value || ""),
+    );
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
@@ -80,14 +85,14 @@ export function Sidebar({ children }) {
 
     const currentPassword = passwordForm.currentPassword.trim();
     const newPassword = passwordForm.newPassword.trim();
-    const authenticatedUserId = Number(claims?.usuarioId);
+    const authenticatedUserId = claims?.usuarioId;
 
     if (!currentPassword || !newPassword) {
       toast.error("Preencha a senha atual e a nova senha.");
       return;
     }
 
-    if (!authenticatedUserId) {
+    if (!isGuid(authenticatedUserId)) {
       toast.error("Não foi possível identificar o usuário autenticado.");
       return;
     }

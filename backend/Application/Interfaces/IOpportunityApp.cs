@@ -2,12 +2,12 @@ using Application.DTO;
 
 public interface IOpportunityApp
 {
-    Task<int> AddAsync(OpportunityAdd request, int idUser);
-    Task<OpportunityResponse> GetByIdAsync(int idOpportunity);
+    Task<string> AddAsync(OpportunityAdd request, string idUser);
+    Task<OpportunityResponse> GetByIdAsync(string idOpportunity);
     Task<IEnumerable<OpportunityResponse>> GetAllAsync();
     Task<IEnumerable<OpportunityResponse>> GetByStageAsync(int stage);
-    Task UpdateAsync(int idOpportunity, OpportunityUpdate request);
-    Task DeleteAsync(int idOpportunity);
-    Task ChangeStageAsync(int idOpportunity, int newStage);
+    Task UpdateAsync(string idOpportunity, OpportunityUpdate request);
+    Task DeleteAsync(string idOpportunity);
+    Task ChangeStageAsync(string idOpportunity, int newStage);
     Task UpdateSortOrderAsync(IEnumerable<OpportunitySortOrderItem> items);
 }

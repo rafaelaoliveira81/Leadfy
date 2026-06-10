@@ -1,9 +1,9 @@
 namespace Domain.Entities;
 
-public class OpportunityActionPlan
+public class OpportunityActionPlan : IEntity
 {
-    public int Id { get; set; }
-    public int OpportunityId { get; set; }
+    public Guid Id { get; set; }
+    public Guid OpportunityId { get; set; }
     public string ActionPlan { get; set; }
     public string Message { get; set; }
     public DateTime GeneratedAt { get; set; }
@@ -13,6 +13,7 @@ public class OpportunityActionPlan
 
     public OpportunityActionPlan()
     {
+        Id = Guid.NewGuid();
         GeneratedAt = DateTime.Now;
     }
 }

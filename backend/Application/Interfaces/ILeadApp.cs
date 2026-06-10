@@ -2,11 +2,11 @@ using Application.DTO;
 
 public interface ILeadApp
 {
-    Task<int> AddAsync(LeadRequest lead, int idUser);
-    Task<LeadResponse> GetByIdAsync(int idLead);
+    Task<string> AddAsync(LeadRequest lead, string idUser);
+    Task<LeadResponse> GetByIdAsync(string idLead);
     Task<LeadPagedResponse> GetAllAsync(bool? status, int pagina, int quantidadePorPagina);
     Task UpdateAsync(LeadRequest lead);
-    Task DeleteAsync(int idLead);
-    Task DeactivateAsync(int idLead);
-    Task ActivateAsync(int idLead);
+    Task DeleteAsync(string idLead);
+    Task DeactivateAsync(string idLead);
+    Task ActivateAsync(string idLead);
 }

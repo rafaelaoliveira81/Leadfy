@@ -2,12 +2,12 @@ using Domain.Enuns;
 
 namespace Domain.Entities;
 
-public class Opportunity
+public class Opportunity : IEntity
 {
-    public int ID { get; set; }
-    public int LeadId { get; set; }
-    public int UserId { get; set; }
-    public int? ProductId { get; set; }
+    public Guid Id { get; set; }
+    public Guid LeadId { get; set; }
+    public Guid UserId { get; set; }
+    public Guid? ProductId { get; set; }
     public decimal Amount { get; set; }
     public OpportunityStage Stage { get; set; }
     public int SortOrder { get; set; }
@@ -24,6 +24,7 @@ public class Opportunity
 
     public Opportunity()
     {
+        Id = Guid.NewGuid();
         CreatedAt = DateTime.Now;
     }
 }

@@ -1,11 +1,7 @@
 using Domain.Entities;
 
-public interface IInteractionRepo
+public interface IInteractionRepo  : IBaseRepository<Interaction>
 {
-    Task<int> AddAsync(Interaction interaction);
-    Task<Interaction> GetByIdAsync(int idInteraction);
-    Task<IEnumerable<Interaction>> GetAllByOpportunityIdAsync(int opportunityId);
-    Task<IEnumerable<Interaction>> GetLastInteractionsByOpportunityIdAsync(int opportunityId);
-    Task UpdateAsync(Interaction interaction);
-    Task DeleteAsync(Interaction interaction);
+    Task<IEnumerable<Interaction>> GetAllByOpportunityIdAsync(Guid opportunityId);
+    Task<IEnumerable<Interaction>> GetLastInteractionsByOpportunityIdAsync(Guid opportunityId);
 }

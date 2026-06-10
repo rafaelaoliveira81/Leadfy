@@ -4,8 +4,8 @@ import { HTTPClient } from "./client";
 export const leadAPI = {
   async Create(leadData) {
     try {
-      leadData.id = 0;
-      const response = await HTTPClient.post(`/leads`, leadData);
+      const payload = { ...leadData, id: null };
+      const response = await HTTPClient.post(`/leads`, payload);
       return response.data;
     } catch (error) {
       return mapApiError(error);

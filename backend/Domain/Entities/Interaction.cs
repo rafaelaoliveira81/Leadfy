@@ -1,10 +1,10 @@
 namespace Domain.Entities;
 
-public class Interaction
+public class Interaction : IEntity
 {
-    public int Id { get; set; }
-    public int OpportunityId { get; set; }
-    public int UserId { get; set; }
+    public Guid Id { get; set; }
+    public Guid OpportunityId { get; set; }
+    public Guid UserId { get; set; }
     public int? FromStage { get; set; }
     public int? ToStage { get; set; }
     public string Description { get; set; }
@@ -18,6 +18,7 @@ public class Interaction
 
     public Interaction()
     {
+        Id = Guid.NewGuid();
         CreatedAt = DateTime.Now;
         InteractionDate = DateTime.Now;
     }

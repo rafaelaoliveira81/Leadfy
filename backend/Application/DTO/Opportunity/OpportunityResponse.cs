@@ -2,11 +2,11 @@ namespace Application.DTO;
 
 public class OpportunityResponse
 {
-    public int ID { get; set; }
-    public int LeadId { get; set; }
+    public string Id { get; set; }
+    public string LeadId { get; set; }
     public string LeadName { get; set; }
     public string PhoneNumber { get; set; }
-    public int? ProductId { get; set; }
+    public string ProductId { get; set; }
     public string ProductName { get; set; }
     public int Stage { get; set; }
     public string StageName { get; set; }

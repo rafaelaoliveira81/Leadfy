@@ -1,8 +1,6 @@
 using Domain.Entities;
 
-public interface IOpportunityActionPlanRepo
+public interface IOpportunityActionPlanRepo  : IBaseRepository<OpportunityActionPlan>
 {
-    Task<int> AddAsync(OpportunityActionPlan actionPlan);
-    Task<OpportunityActionPlan> GetByIdAsync(int id);
-    Task<IEnumerable<OpportunityActionPlan>> GetByOpportunityIdAsync(int opportunityId);
+    Task<IEnumerable<OpportunityActionPlan>> GetByOpportunityIdAsync(Guid opportunityId);
 }
