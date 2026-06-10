@@ -18,36 +18,35 @@ public class InteractionApp : IInteractionApp
         _userRepo = userRepo;
         _aiService = aiService;
     }
-    public async Task<int> AddToOpportunityAsync(int opportunityId, InteractionRequest interactionRequest)
+    public async Task<string> AddToOpportunityAsync(InteractionRequest interactionRequest)
     {
+        await ValidateOpportunityUserExistsByIdAsync(interactionRequest);
+
         var interaction = MapToEntity(interactionRequest);
 
-        await ValidateOpportunityExistsAsync(opportunityId);
         await ValidateInteractionAsync(interaction);
-
-        interaction.OpportunityId = opportunityId;
-        interaction.CreatedAt = DateTime.Now;
 
         if (interaction.InteractionDate == default)
             interaction.InteractionDate = DateTime.Now;
 
-        return await _interactionRepo.AddAsync(interaction);
+        return (await _interactionRepo.CreateAsync(interaction)).ToString();
     }
-    public async Task<InteractionResponse> GetByIdAsync(int idInteraction)
+
+    public async Task<InteractionResponse> GetByIdAsync(string idInteraction)
     {
         var interactionEntity = await GetEntityByIdAsync(idInteraction);
 
         return MapToResponse(interactionEntity);
     }
-    public async Task<IEnumerable<InteractionResponse>> GetByOpportunityIdAsync(int opportunityId)
+    public async Task<IEnumerable<InteractionResponse>> GetByOpportunityIdAsync(string opportunityId)
     {
-        await ValidateOpportunityExistsAsync(opportunityId);
+        var opportunity = await ValidateOpportunityExistsAsync(opportunityId);
 
-        var interactions = await _interactionRepo.GetAllByOpportunityIdAsync(opportunityId);
+        var interactions = await _interactionRepo.GetAllByOpportunityIdAsync(opportunity.Id);
 
         return interactions.Select(MapToResponse);
     }
-    public async Task DeleteAsync(int idInteraction)
+    public async Task DeleteAsync(string idInteraction)
     {
         var interactionEntity = await GetEntityByIdAsync(idInteraction);
         await _interactionRepo.DeleteAsync(interactionEntity);
@@ -96,12 +95,12 @@ public class InteractionApp : IInteractionApp
         if (userEntity == null)
             throw new KeyNotFoundException("Usuário não localizado.");
     }
-    private async Task<Opportunity> ValidateOpportunityExistsAsync(int opportunityId)
+    private async Task<Opportunity> ValidateOpportunityExistsAsync(string opportunityId)
     {
-        if (opportunityId <= 0)
-            throw new ArgumentException("A opportunity informada é inválida.");
+         if (!Guid.TryParse(opportunityId, out Guid opportunityGuid))
+            throw new ArgumentException("O identificador da opportunity é inválido.");
 
-        var opportunityEntity = await _opportunityRepo.GetByIdAsync(opportunityId);
+        var opportunityEntity = await _opportunityRepo.GetByIdAsync(opportunityGuid);
 
         if (opportunityEntity == null)
             throw new KeyNotFoundException("Opportunity não localizada.");
@@ -109,30 +108,31 @@ public class InteractionApp : IInteractionApp
         return opportunityEntity;
     }
 
-    private async Task<Interaction> GetEntityByIdAsync(int idInteraction)
+    private async Task<Interaction> GetEntityByIdAsync(string idInteraction)
     {
-        if (idInteraction <= 0)
+        if (!Guid.TryParse(idInteraction, out Guid interactionId))
             throw new ArgumentException("O identificador da interação é inválido.");
 
-        var interactionEntity = await _interactionRepo.GetByIdAsync(idInteraction);
+        var interactionEntity = await _interactionRepo.GetByIdAsync(interactionId);
 
         if (interactionEntity == null)
             throw new KeyNotFoundException("Interação não localizada.");
 
-        await ValidateOpportunityExistsAsync(interactionEntity.OpportunityId);
+        await ValidateOpportunityExistsAsync(interactionEntity.OpportunityId.ToString());
 
         return interactionEntity;
     }
 
     private static Interaction MapToEntity(InteractionRequest request)
     {
-        if (request == null)
-            return null;
+        var userId = Guid.Parse(request.UserId);
+        var opportunityId = Guid.Parse(request.OpportunityId);
 
         return new Interaction
         {
             Description = request.Description,
-            UserId = request.UserId != null && Guid.TryParse(request.UserId, out var guid) ? guid : Guid.Empty,
+            OpportunityId = opportunityId,
+            UserId = userId,
             FromStage = request.FromStage,
             ToStage = request.ToStage,
             InteractionDate = request.InteractionDate ?? DateTime.Now,
@@ -144,8 +144,8 @@ public class InteractionApp : IInteractionApp
     {
         return new InteractionResponse
         {
-            Id = interaction.Id,
-            OpportunityId = interaction.OpportunityId,
+            Id = interaction.Id.ToString(),
+            OpportunityId = interaction.OpportunityId.ToString(),
             FromStage = interaction.FromStage,
             FromStageName = interaction.FromStage.HasValue
                 ? ((OpportunityStage)interaction.FromStage.Value).ToString()
@@ -160,6 +160,25 @@ public class InteractionApp : IInteractionApp
             UserName = interaction.User?.Name,
             NextContactDate = interaction.NextContactDate
         };
+    }
+
+    private async Task ValidateOpportunityUserExistsByIdAsync(InteractionRequest interactionRequest)
+    {
+        if (!Guid.TryParse(interactionRequest.OpportunityId, out Guid opportunityId))
+            throw new ArgumentException("O identificador da opportunity é inválido.");
+
+        var opportunity = await _opportunityRepo.GetByIdAsync(opportunityId);
+
+        if (opportunity == null)
+            throw new KeyNotFoundException("Opportunity não localizada.");
+
+        if (!Guid.TryParse(interactionRequest.UserId, out Guid userId))
+            throw new ArgumentException("O identificador do usuário é inválido.");
+
+        var user = await _userRepo.GetByIdAsync(userId);
+
+        if (user == null)
+            throw new KeyNotFoundException("Usuário não localizado.");
     }
 
     private string BuildPrompt(IteractionOptimizeDTO userInteraction)

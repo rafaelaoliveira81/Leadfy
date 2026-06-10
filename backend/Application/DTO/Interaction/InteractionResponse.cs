@@ -2,8 +2,8 @@ namespace Application.DTO;
 
 public class InteractionResponse
 {
-    public int Id { get; set; }
-    public int OpportunityId { get; set; }
+    public string Id { get; set; }
+    public string OpportunityId { get; set; }
     public int? FromStage { get; set; }
     public string FromStageName { get; set; }
     public int? ToStage { get; set; }

@@ -12,6 +12,9 @@ public class LeadConfig : IEntityTypeConfiguration<Lead>
 
               builder.HasKey(l => l.Id);
 
+              builder.Property(p => p.Id)
+                     .ValueGeneratedOnAdd();
+
               builder.Property(l => l.Name)
                      .IsRequired()
                      .HasMaxLength(150);

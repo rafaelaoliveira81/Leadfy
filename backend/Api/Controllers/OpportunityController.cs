@@ -72,11 +72,11 @@ public class OpportunityController : ControllerBase
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
     [Authorize]
-    [HttpGet("{id:int}")]
+    [HttpGet("{id:guid}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> GetById([FromRoute] int id)
+    public async Task<ActionResult> GetById([FromRoute] string id)
     {
         try
         {
@@ -170,12 +170,12 @@ public class OpportunityController : ControllerBase
     /// <param name="request">Dados da requisição contendo o identificador do prompt de IA.</param>
     /// <returns>Plano de ação gerado e persistido.</returns>
     [Authorize]
-    [HttpPost("{id:int}/generate-action-plan")]
+    [HttpPost("{id:guid}/generate-action-plan")]
     [ProducesResponseType(typeof(OpportunityActionPlanDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> GenerateActionPlan([FromRoute] int id, [FromBody] GenerateActionPlanRequest request)
+    public async Task<ActionResult> GenerateActionPlan([FromRoute] string id, [FromBody] GenerateActionPlanRequest request)
     {
         try
         {
@@ -203,11 +203,11 @@ public class OpportunityController : ControllerBase
     /// <param name="id">Identificador da opportunity.</param>
     /// <returns>Lista de planos de ação ordenada por data de geração decrescente.</returns>
     [Authorize]
-    [HttpGet("{id:int}/action-plans")]
+    [HttpGet("{id:guid}/action-plans")]
     [ProducesResponseType(typeof(IEnumerable<OpportunityActionPlanDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> GetActionPlans([FromRoute] int id)
+    public async Task<ActionResult> GetActionPlans([FromRoute] string id)
     {
         try
         {
@@ -237,12 +237,12 @@ public class OpportunityController : ControllerBase
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
     [Authorize]
-    [HttpPut("{id:int}")]
+    [HttpPut("{id:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> Update([FromRoute] int id, [FromBody] OpportunityUpdate opportunityRequest)
+    public async Task<ActionResult> Update([FromRoute] string id, [FromBody] OpportunityUpdate opportunityRequest)
     {
         try
         {
@@ -274,11 +274,11 @@ public class OpportunityController : ControllerBase
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
     [Authorize]
-    [HttpDelete("{id:int}")]
+    [HttpDelete("{id:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> Delete([FromRoute] int id)
+    public async Task<ActionResult> Delete([FromRoute] string id)
     {
         try
         {
@@ -302,12 +302,12 @@ public class OpportunityController : ControllerBase
     /// <param name="id">Identificador da opportunity.</param>
     /// <param name="request">Novo stage.</param>
     [Authorize]
-    [HttpPatch("{id:int}/stage")]
+    [HttpPatch("{id:guid}/stage")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> UpdateStage([FromRoute] int id, [FromBody] OpportunityStageUpdate request)
+    public async Task<ActionResult> UpdateStage([FromRoute] string id, [FromBody] OpportunityStageUpdate request)
     {
         try
         {

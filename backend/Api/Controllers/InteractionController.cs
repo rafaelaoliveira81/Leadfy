@@ -25,7 +25,6 @@ public class InteractionController : ControllerBase
     /// <summary>
     /// Adiciona uma nova interação ao histórico de uma opportunity.
     /// </summary>
-    /// <param name="opportunityId">Identificador da opportunity.</param>
     /// <param name="interactionRequest">Dados necessários para criação da interação.</param>
     /// <returns>
     /// Retorna status 201 com o identificador da interação criada.
@@ -34,16 +33,16 @@ public class InteractionController : ControllerBase
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
     [Authorize]
-    [HttpPost("opportunities/{opportunityId:int}/interactions")]
+    [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> AddToOpportunity([FromRoute] int opportunityId, [FromBody] InteractionRequest interactionRequest)
+    public async Task<ActionResult> AddToOpportunity([FromBody] InteractionRequest interactionRequest)
     {
         try
         {
-            var interactionId = await _interactionApp.AddToOpportunityAsync(opportunityId, interactionRequest);
+            var interactionId = await _interactionApp.AddToOpportunityAsync(interactionRequest);
 
             return CreatedAtAction(nameof(GetById), new { id = interactionId }, new { id = interactionId });
         }
@@ -72,12 +71,12 @@ public class InteractionController : ControllerBase
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
     [Authorize]
-    [HttpGet("opportunities/{opportunityId:int}/interactions")]
+    [HttpGet("/interactions/{opportunityId:guid}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> GetByOpportunityId([FromRoute] int opportunityId)
+    public async Task<ActionResult> GetByOpportunityId([FromRoute] string opportunityId)
     {
         try
         {
@@ -110,12 +109,12 @@ public class InteractionController : ControllerBase
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
     [Authorize]
-    [HttpGet("interactions/{id:int}")]
+    [HttpGet("interactions/{id:guid}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> GetById([FromRoute] int id)
+    public async Task<ActionResult> GetById([FromRoute] string id)
     {
         try
         {
@@ -148,12 +147,12 @@ public class InteractionController : ControllerBase
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
     [Authorize]
-    [HttpDelete("interactions/{id:int}")]
+    [HttpDelete("interactions/{id:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> Delete([FromRoute] int id)
+    public async Task<ActionResult> Delete([FromRoute] string id)
     {
         try
         {

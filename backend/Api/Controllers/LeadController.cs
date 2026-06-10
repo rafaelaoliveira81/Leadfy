@@ -71,11 +71,11 @@ public class LeadController : ControllerBase
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
     [Authorize]
-    [HttpGet("{id:int}")]
+    [HttpGet("{id:guid}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> GetById([FromRoute] int id)
+    public async Task<ActionResult> GetById([FromRoute] string id)
     {
         try
         {
@@ -181,11 +181,11 @@ public class LeadController : ControllerBase
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
     [Authorize]
-    [HttpDelete("{id:int}")]
+    [HttpDelete("{id:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> Delete([FromRoute] int id)
+    public async Task<ActionResult> Delete([FromRoute] string id)
     {
         try
         {
@@ -214,11 +214,11 @@ public class LeadController : ControllerBase
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
     [Authorize]
-    [HttpPatch("{id:int}/deactivate")]
+    [HttpPatch("{id:guid}/deactivate")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> Deactivate([FromRoute] int id)
+    public async Task<ActionResult> Deactivate([FromRoute] string id)
     {
         try
         {
@@ -251,11 +251,11 @@ public class LeadController : ControllerBase
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
     [Authorize]
-    [HttpPatch("{id:int}/activate")]
+    [HttpPatch("{id:guid}/activate")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> Activate([FromRoute] int id)
+    public async Task<ActionResult> Activate([FromRoute] string id)
     {
         try
         {

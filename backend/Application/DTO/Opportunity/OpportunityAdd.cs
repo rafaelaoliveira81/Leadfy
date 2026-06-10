@@ -2,8 +2,8 @@ namespace Application.DTO;
 
 public class OpportunityAdd
 {
-    public int LeadId { get; set; }
-    public int? ProductId { get; set; }
+    public string LeadId { get; set; }
+    public string ProductId { get; set; }
     public int Stage { get; set; }
     public decimal Amount { get; set; }
     public DateTime? ExpectedCloseDate { get; set; }
