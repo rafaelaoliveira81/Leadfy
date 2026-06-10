@@ -34,7 +34,7 @@ export function Registro() {
     setIsLoading(true);
 
     try {
-      await userApi.Create(user);
+      await userApi.Register(user);
       toast.success("Conta criada com sucesso!");
       navigate("/login");
     } catch (error) {

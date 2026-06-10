@@ -3,6 +3,7 @@ using Application.DTO;
 public interface IUserApp
 {
     Task<string> AddAsync(UserRequest user);
+    Task<string> RegisterAsync(UserRequest user);
     Task<UserResponse> GetByIdAsync(string idUser);
     Task<UserResponse> GetByEmailAsync(string emailUser);
     Task<UserPagedResponse> GetAllAsync(bool? isActive, int pagina, int quantidadePorPagina);
