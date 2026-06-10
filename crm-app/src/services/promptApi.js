@@ -4,8 +4,8 @@ import { HTTPClient } from "./client";
 export const promptAPI = {
   async Create(promptData) {
     try {
-      promptData.id = 0;
-      const response = await HTTPClient.post(`/prompts`, promptData);
+      const payload = { ...promptData, id: null };
+      const response = await HTTPClient.post(`/prompts`, payload);
       return response.data;
     } catch (error) {
       return mapApiError(error);

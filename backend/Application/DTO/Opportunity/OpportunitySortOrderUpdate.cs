@@ -7,7 +7,7 @@ public class OpportunitySortOrderUpdate
 
 public class OpportunitySortOrderItem
 {
-    public int Id { get; set; }
+    public string Id { get; set; }
     public int Stage { get; set; }
     public int SortOrder { get; set; }
 }

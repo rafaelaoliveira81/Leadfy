@@ -32,15 +32,15 @@ public class OpportunityActionPlanApp : IOpportunityActionPlanApp
         _aiService = aiService;
     }
 
-    public async Task<OpportunityActionPlanDto> GenerateAsync(int opportunityId, int promptId)
+    public async Task<OpportunityActionPlanDto> GenerateAsync(string opportunityId, string promptId)
     {
         var opportunity = await GetOpportunityAsync(opportunityId);
 
         var prompt = await _promptApp.GetByIdAsync(promptId);
 
-        var interactions = (await _interactionRepo.GetLastInteractionsByOpportunityIdAsync(opportunityId)).ToList();
+        var interactions = (await _interactionRepo.GetLastInteractionsByOpportunityIdAsync(opportunity.Id)).ToList();
 
-        var lead = await _leadApp.GetByIdAsync(opportunity.LeadId);
+        var lead = await _leadApp.GetByIdAsync(opportunity.LeadId.ToString());
 
         var promptRequest = BuildPrompt(prompt.Content, opportunity, interactions, lead.Name);
 
@@ -58,9 +58,9 @@ public class OpportunityActionPlanApp : IOpportunityActionPlanApp
 
             var actionPlanDto = MapToDtoByDto(parsedActionPlan);
             var actionPlan = MapToDtEntity(actionPlanDto);
-            actionPlan.OpportunityId = opportunityId;
+            actionPlan.OpportunityId = opportunity.Id;
 
-            var id = await _actionPlanRepo.AddAsync(actionPlan);
+            var id = await _actionPlanRepo.CreateAsync(actionPlan);
             actionPlan.Id = id;
 
             return MapToDto(actionPlan);
@@ -71,11 +71,11 @@ public class OpportunityActionPlanApp : IOpportunityActionPlanApp
         }
     }
 
-    public async Task<IEnumerable<OpportunityActionPlanDto>> GetByOpportunityIdAsync(int opportunityId)
+    public async Task<IEnumerable<OpportunityActionPlanDto>> GetByOpportunityIdAsync(string opportunityId)
     {
-        await GetOpportunityAsync(opportunityId);
+        var opportunity = await GetOpportunityAsync(opportunityId);
 
-        var actionPlans = await _actionPlanRepo.GetByOpportunityIdAsync(opportunityId);
+        var actionPlans = await _actionPlanRepo.GetByOpportunityIdAsync(opportunity.Id);
 
         return actionPlans.Select(ap => MapToDto(ap));
     }
@@ -86,8 +86,8 @@ public class OpportunityActionPlanApp : IOpportunityActionPlanApp
     {
         return new OpportunityActionPlanDto
         {
-            Id = actionPlan.Id,
-            OpportunityId = actionPlan.OpportunityId,
+            Id = actionPlan.Id.ToString(),
+            OpportunityId = actionPlan.OpportunityId.ToString(),
             Message = actionPlan.Message ?? string.Empty,
             ActionPlan = actionPlan.ActionPlan,
             GeneratedAt = actionPlan.GeneratedAt
@@ -107,20 +107,20 @@ public class OpportunityActionPlanApp : IOpportunityActionPlanApp
     {
         return new OpportunityActionPlan
         {
-            Id = actionPlan.Id,
-            OpportunityId = actionPlan.OpportunityId,
+            Id = string.IsNullOrWhiteSpace(actionPlan.Id) ? Guid.NewGuid() : Guid.Parse(actionPlan.Id),
+            OpportunityId = string.IsNullOrWhiteSpace(actionPlan.OpportunityId) ? Guid.Empty : Guid.Parse(actionPlan.OpportunityId),
             Message = actionPlan.Message ?? string.Empty,
             ActionPlan = actionPlan.ActionPlan,
             GeneratedAt = actionPlan.GeneratedAt
         };
     }
 
-    private async Task<Opportunity> GetOpportunityAsync(int opportunityId)
+    private async Task<Opportunity> GetOpportunityAsync(string opportunityId)
     {
-        if (opportunityId <= 0)
+        if (!Guid.TryParse(opportunityId, out var opportunityGuid))
             throw new ArgumentException("A opportunity informada é inválida.");
 
-        var opportunity = await _opportunityRepo.GetByIdAsync(opportunityId);
+        var opportunity = await _opportunityRepo.GetByIdAsync(opportunityGuid);
 
         if (opportunity == null)
             throw new KeyNotFoundException("Opportunity não localizada.");

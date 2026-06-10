@@ -2,6 +2,6 @@ using Application.DTO;
 
 public interface IOpportunityActionPlanApp
 {
-    Task<OpportunityActionPlanDto> GenerateAsync(int opportunityId, int promptId);
-    Task<IEnumerable<OpportunityActionPlanDto>> GetByOpportunityIdAsync(int opportunityId);
+    Task<OpportunityActionPlanDto> GenerateAsync(string opportunityId, string promptId);
+    Task<IEnumerable<OpportunityActionPlanDto>> GetByOpportunityIdAsync(string opportunityId);
 }

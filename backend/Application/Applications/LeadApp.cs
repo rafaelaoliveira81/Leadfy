@@ -13,27 +13,30 @@ public class LeadApp : ILeadApp
         _leadRepo = leadRepo;
         _opportunityRepo = opportunityRepo;
     }
-    public async Task<int> AddAsync(LeadRequest request, int idUser)
+    public async Task<string> AddAsync(LeadRequest request, string idUser)
     {
         ValidateLeadInformation(request);
 
+        if (!Guid.TryParse(idUser, out var userGuid))
+            throw new ArgumentException("O identificador do usuário é inválido.");
+
         var lead = MapToLeadRequest(request);
 
-        var idLead = await _leadRepo.AddAsync(lead);
+        var idLead = await _leadRepo.CreateAsync(lead);
 
-        var idOpportunity = await _opportunityRepo.AddAsync(new Opportunity
+        await _opportunityRepo.CreateAsync(new Opportunity
         {
             LeadId = idLead,
-            UserId = idUser,
+            UserId = userGuid,
             Amount = 0,
             Stage = OpportunityStage.NewLead,
             ExpectedCloseDate = null
         });
 
-        return idLead;
+        return idLead.ToString();
     }
 
-    public async Task<LeadResponse> GetByIdAsync(int idLead)
+    public async Task<LeadResponse> GetByIdAsync(string idLead)
     {
         var lead = await ValidateLeadExistsByIdAsync(idLead);
 
@@ -65,14 +68,14 @@ public class LeadApp : ILeadApp
         await _leadRepo.UpdateAsync(lead);
     }
 
-    public async Task DeleteAsync(int idLead)
+    public async Task DeleteAsync(string idLead)
     {
         var leadEntity = await ValidateLeadExistsByIdAsync(idLead);
 
         await _leadRepo.DeleteAsync(leadEntity);
     }
 
-    public async Task DeactivateAsync(int idLead)
+    public async Task DeactivateAsync(string idLead)
     {
         var leadEntity = await ValidateLeadExistsByIdAsync(idLead);
 
@@ -81,7 +84,7 @@ public class LeadApp : ILeadApp
         await _leadRepo.UpdateAsync(leadEntity);
     }
 
-    public async Task ActivateAsync(int idLead)
+    public async Task ActivateAsync(string idLead)
     {
         var leadEntity = await ValidateLeadExistsByIdAsync(idLead);
 
@@ -117,9 +120,12 @@ public class LeadApp : ILeadApp
                 throw new ArgumentException("O telefone do lead não pode exceder 20 caracteres.");
         }
     }
-    private async Task<Lead> ValidateLeadExistsByIdAsync(int idLead)
+    private async Task<Lead> ValidateLeadExistsByIdAsync(string idLead)
     {
-        var leadEntity = await _leadRepo.GetByIdAsync(idLead);
+        if (!Guid.TryParse(idLead, out var leadGuid))
+            throw new ArgumentException("O identificador do lead é inválido.");
+
+        var leadEntity = await _leadRepo.GetByIdAsync(leadGuid);
 
         if (leadEntity == null)
             throw new KeyNotFoundException("Lead não localizado.");
@@ -138,7 +144,6 @@ public class LeadApp : ILeadApp
             return false;
         }
     }
-
     private static Lead MapToLeadRequest(LeadRequest request)
     {
         return new Lead
@@ -153,7 +158,7 @@ public class LeadApp : ILeadApp
     {
         return new LeadResponse
         {
-            ID = lead.Id,
+            Id = lead.Id.ToString(),
             Name = lead.Name,
             Email = lead.Email,
             PhoneNumber = lead.PhoneNumber,

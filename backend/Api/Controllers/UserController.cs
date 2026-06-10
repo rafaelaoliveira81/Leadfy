@@ -34,6 +34,7 @@ public class UserController : ControllerBase
     /// Este endpoint recebe os dados de entrada e delega o processo de cadastro
     /// para a camada de aplicação.
     /// </remarks>
+    [Authorize]
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -57,10 +58,33 @@ public class UserController : ControllerBase
         }
     }
 
+    [HttpPost("register")]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult> Register([FromBody] UserRequest request)
+    {
+        try
+        {
+            var idUser = await _userApp.RegisterAsync(request);
+
+            return CreatedAtAction(nameof(GetById), new { id = idUser }, new { id = idUser });
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = ex.Message });
+        }
+    }
+
     /// <summary>
     /// Obtém um usuário pelo identificador.
     /// </summary>
-    /// <param name="id">Identificador do usuário.</param>
+    /// <param name="guidId">Identificador do usuário.</param>
     /// <returns>
     /// Retorna status 200 com os dados do usuário encontrado.
     /// Retorna status 401 quando o usuário não está autenticado.
@@ -68,16 +92,16 @@ public class UserController : ControllerBase
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
     [Authorize]
-    [HttpGet("{id:int}")]
+    [HttpGet("{id:guid}")]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> GetById([FromRoute] int id)
+    public async Task<ActionResult> GetById([FromRoute] string guidId)
     {
         try
         {
-            var user = await _userApp.GetByIdAsync(id);
+            var user = await _userApp.GetByIdAsync(guidId);
 
             return Ok(user);
         }
@@ -186,13 +210,13 @@ public class UserController : ControllerBase
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
     [Authorize]
-    [HttpPut("{id:int}")]
+    [HttpPut("{id:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> Update([FromRoute] int id, [FromBody] UserRequest request)
+    public async Task<ActionResult> Update([FromRoute] string id, [FromBody] UserRequest request)
     {
         try
         {
@@ -227,13 +251,13 @@ public class UserController : ControllerBase
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
     [Authorize]
-    [HttpPatch("{id:int}/password")]
+    [HttpPatch("{id:guid}/password")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> UpdatePassword([FromRoute] int id, [FromBody] UserUpdatePasswordRequest request)
+    public async Task<ActionResult> UpdatePassword([FromRoute] string id, [FromBody] UserUpdatePasswordRequest request)
     {
         try
         {
@@ -270,12 +294,12 @@ public class UserController : ControllerBase
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
     [Authorize]
-    [HttpDelete("{id:int}")]
+    [HttpDelete("{id:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> Delete([FromRoute] int id)
+    public async Task<ActionResult> Delete([FromRoute] string id)
     {
         try
         {
@@ -304,12 +328,12 @@ public class UserController : ControllerBase
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
     [Authorize]
-    [HttpPatch("{id:int}/deactivate")]
+    [HttpPatch("{id:guid}/deactivate")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> Deactivate([FromRoute] int id)
+    public async Task<ActionResult> Deactivate([FromRoute] string id)
     {
         try
         {
@@ -338,12 +362,12 @@ public class UserController : ControllerBase
     /// Retorna status 500 em caso de erro interno.
     /// </returns>
     [Authorize]
-    [HttpPatch("{id:int}/activate")]
+    [HttpPatch("{id:guid}/activate")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> Activate([FromRoute] int id)
+    public async Task<ActionResult> Activate([FromRoute] string id)
     {
         try
         {

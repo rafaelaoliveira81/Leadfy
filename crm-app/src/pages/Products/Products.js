@@ -87,7 +87,7 @@ export function Products() {
   }, []);
 
   const buildProductPayload = (currentProduct) => ({
-    id: currentProduct.id ?? 0,
+    id: currentProduct.id ?? null,
     name: currentProduct.name?.trim() ?? "",
     description: currentProduct.description?.trim() ?? "",
     price: Number(currentProduct.price) || 0,

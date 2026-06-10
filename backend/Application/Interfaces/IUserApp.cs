@@ -1,15 +1,15 @@
 using Application.DTO;
-using Domain.Entities;
 
 public interface IUserApp
 {
-    Task<int> AddAsync(UserRequest user);
-    Task<UserResponse> GetByIdAsync(int idUser);
+    Task<string> AddAsync(UserRequest user);
+    Task<string> RegisterAsync(UserRequest user);
+    Task<UserResponse> GetByIdAsync(string idUser);
     Task<UserResponse> GetByEmailAsync(string emailUser);
     Task<UserPagedResponse> GetAllAsync(bool? isActive, int pagina, int quantidadePorPagina);
-    Task UpdateAsync(int id, UserRequest user);
-    Task DeleteAsync(int idUser);
-    Task DeactivateAsync(int idUser);
-    Task ActivateAsync(int idUser);
-    Task UpdatePasswordAsync(int id, UserUpdatePasswordRequest request);
+    Task UpdateAsync(string id, UserRequest user);
+    Task DeleteAsync(string idUser);
+    Task DeactivateAsync(string idUser);
+    Task ActivateAsync(string idUser);
+    Task UpdatePasswordAsync(string id, UserUpdatePasswordRequest request);
 }

@@ -12,6 +12,9 @@ public class OpportunityActionPlanConfig : IEntityTypeConfiguration<OpportunityA
 
               builder.HasKey(ap => ap.Id);
 
+              builder.Property(p => p.Id)
+                     .ValueGeneratedOnAdd();
+
               builder.Property(ap => ap.Message)
                      .HasColumnType("nvarchar(max)");
 

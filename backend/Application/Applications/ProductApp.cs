@@ -10,16 +10,16 @@ public class ProductApp : IProductApp
     {
         _productRepo = productRepo;
     }
-    public async Task<int> AddAsync(ProductRequest request)
+    public async Task<string> AddAsync(ProductRequest request)
     {
         ValidateProductInformation(request);
 
         var product = MapToProductRequest(request);
 
-        return await _productRepo.AddAsync(product);
+        return (await _productRepo.CreateAsync(product)).ToString();
     }
 
-    public async Task<ProductResponse> GetByIdAsync(int idProduct)
+    public async Task<ProductResponse> GetByIdAsync(string idProduct)
     {
         var product = await ValidateProductExistsByIdAsync(idProduct);
 
@@ -49,13 +49,13 @@ public class ProductApp : IProductApp
 
         await _productRepo.UpdateAsync(productEntity);
     }
-    public async Task DeleteAsync(int idProduct)
+    public async Task DeleteAsync(string idProduct)
     {
         var productEntity = await ValidateProductExistsByIdAsync(idProduct);
 
         await _productRepo.DeleteAsync(productEntity);
     }
-    public async Task DeactivateAsync(int idProduct)
+    public async Task DeactivateAsync(string idProduct)
     {
         var productEntity = await ValidateProductExistsByIdAsync(idProduct);
 
@@ -63,7 +63,7 @@ public class ProductApp : IProductApp
 
         await _productRepo.UpdateAsync(productEntity);
     }
-    public async Task ActivateAsync(int idProduct)
+    public async Task ActivateAsync(string idProduct)
     {
         var productEntity = await ValidateProductExistsByIdAsync(idProduct);
 
@@ -87,9 +87,12 @@ public class ProductApp : IProductApp
         if (request.Price <= 0)
             throw new ArgumentException("Preço do produto deve ser maior que zero.");
     }
-    private async Task<Product> ValidateProductExistsByIdAsync(int idProduct)
+    private async Task<Product> ValidateProductExistsByIdAsync(string idProduct)
     {
-        var productEntity = await _productRepo.GetByIdAsync(idProduct);
+        if (!Guid.TryParse(idProduct, out var productGuid))
+            throw new ArgumentException("O identificador do produto é inválido.");
+
+        var productEntity = await _productRepo.GetByIdAsync(productGuid);
 
         if (productEntity == null)
             throw new KeyNotFoundException("Produto não localizado.");
@@ -101,7 +104,7 @@ public class ProductApp : IProductApp
     {
         var productResponse = new ProductResponse
         {
-            Id = product.Id,
+            Id = product.Id.ToString(),
             Name = product.Name,
             Description = product.Description,
             Price = product.Price,

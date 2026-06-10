@@ -15,17 +15,20 @@ public class OpportunityApp : IOpportunityApp
         _leadRepo = leadRepo;
         _productRepo = productRepo;
     }
-    public async Task<int> AddAsync(OpportunityAdd request, int idUser)
+    public async Task<string> AddAsync(OpportunityAdd request, string idUser)
     {
+        if (!Guid.TryParse(idUser, out var userGuid))
+            throw new ArgumentException("O identificador do usuário é inválido.");
+
         var opportunity = MapToOpportunity(request);
 
-        opportunity.UserId = idUser;
+        opportunity.UserId = userGuid;
 
         await ValidateOpportunityInformation(opportunity);
 
-        return await _opportunityRepo.AddAsync(opportunity);
+        return (await _opportunityRepo.CreateAsync(opportunity)).ToString();
     }
-    public async Task<OpportunityResponse> GetByIdAsync(int idOpportunity)
+    public async Task<OpportunityResponse> GetByIdAsync(string idOpportunity)
     {
         var opportunity = await ValidateOpportunityExistsByIdAsync(idOpportunity);
 
@@ -45,7 +48,7 @@ public class OpportunityApp : IOpportunityApp
 
         return opportunities.Select(MapToOpportunityResponse);
     }
-    public async Task UpdateAsync(int idOpportunity, OpportunityUpdate request)
+    public async Task UpdateAsync(string idOpportunity, OpportunityUpdate request)
     {
         var opportunityEntity = await ValidateOpportunityExistsByIdAsync(idOpportunity);
         var opportunity = MapToOpportunity(request, idOpportunity);
@@ -65,7 +68,7 @@ public class OpportunityApp : IOpportunityApp
 
         await _opportunityRepo.UpdateAsync(opportunityEntity);
     }
-    public async Task DeleteAsync(int idOpportunity)
+    public async Task DeleteAsync(string idOpportunity)
     {
         var opportunityEntity = await ValidateOpportunityExistsByIdAsync(idOpportunity);
 
@@ -81,10 +84,10 @@ public class OpportunityApp : IOpportunityApp
         if (!Enum.IsDefined(typeof(OpportunityStage), opportunity.Stage))
             throw new ArgumentException("A stage da opportunity é inválida.");
 
-        if (opportunity.LeadId <= 0)
+        if (opportunity.LeadId == Guid.Empty)
             throw new ArgumentException("O lead vinculado à opportunity deve ser informado.");
 
-        if (opportunity.ProductId.HasValue && opportunity.ProductId.Value <= 0)
+        if (opportunity.ProductId.HasValue && opportunity.ProductId.Value == Guid.Empty)
             throw new ArgumentException("Quando informado, o produto vinculado à opportunity deve ser válido.");
 
         if (opportunity.Amount <= 0)
@@ -98,16 +101,19 @@ public class OpportunityApp : IOpportunityApp
         if (opportunity.ProductId.HasValue)
             await ValidateProductExistsByIdAsync(opportunity.ProductId.Value);
     }
-    private async Task<Opportunity> ValidateOpportunityExistsByIdAsync(int idOpportunity)
+    private async Task<Opportunity> ValidateOpportunityExistsByIdAsync(string idOpportunity)
     {
-        var opportunityEntity = await _opportunityRepo.GetByIdAsync(idOpportunity);
+        if (!Guid.TryParse(idOpportunity, out var opportunityGuid))
+            throw new ArgumentException("O identificador da opportunity é inválido.");
+
+        var opportunityEntity = await _opportunityRepo.GetByIdAsync(opportunityGuid);
 
         if (opportunityEntity == null)
             throw new KeyNotFoundException("Opportunity não localizada.");
 
         return opportunityEntity;
     }
-    private async Task<Lead> ValidateLeadExistsByIdAsync(int idLead)
+    private async Task<Lead> ValidateLeadExistsByIdAsync(Guid idLead)
     {
         var leadEntity = await _leadRepo.GetByIdAsync(idLead);
         if (leadEntity == null)
@@ -115,7 +121,7 @@ public class OpportunityApp : IOpportunityApp
 
         return leadEntity;
     }
-    private async Task<Product> ValidateProductExistsByIdAsync(int idProduct)
+    private async Task<Product> ValidateProductExistsByIdAsync(Guid idProduct)
     {
         var productEntity = await _productRepo.GetByIdAsync(idProduct);
         if (productEntity == null)
@@ -125,22 +131,43 @@ public class OpportunityApp : IOpportunityApp
     }
     private static Opportunity MapToOpportunity(OpportunityAdd request)
     {
+        if (!Guid.TryParse(request.LeadId, out var leadId))
+            throw new ArgumentException("O identificador do lead é inválido.");
+
+        if (!string.IsNullOrWhiteSpace(request.ProductId) &&
+            !Guid.TryParse(request.ProductId, out _))
+            throw new ArgumentException("O identificador do produto é inválido.");
+
         return new Opportunity
         {
-            LeadId = request.LeadId,
-            ProductId = request.ProductId,
+            LeadId = leadId,
+            ProductId = string.IsNullOrWhiteSpace(request.ProductId)
+                ? null
+                : Guid.Parse(request.ProductId),
             Stage = (OpportunityStage)request.Stage,
             Amount = request.Amount,
             ExpectedCloseDate = request.ExpectedCloseDate
         };
     }
-    private static Opportunity MapToOpportunity(OpportunityUpdate request, int idOpportunity)
+    private static Opportunity MapToOpportunity(OpportunityUpdate request, string idOpportunity)
     {
+        if (!Guid.TryParse(idOpportunity, out var opportunityGuid))
+            throw new ArgumentException("O identificador da opportunity é inválido.");
+
+        if (!Guid.TryParse(request.LeadId, out var leadId))
+            throw new ArgumentException("O identificador do lead é inválido.");
+
+        if (!string.IsNullOrWhiteSpace(request.ProductId) &&
+            !Guid.TryParse(request.ProductId, out _))
+            throw new ArgumentException("O identificador do produto é inválido.");
+
         return new Opportunity
         {
-            ID = idOpportunity,
-            LeadId = request.LeadId,
-            ProductId = request.ProductId,
+            Id = opportunityGuid,
+            LeadId = leadId,
+            ProductId = string.IsNullOrWhiteSpace(request.ProductId)
+                ? null
+                : Guid.Parse(request.ProductId),
             Stage = (OpportunityStage)request.Stage,
             Amount = request.Amount,
             ExpectedCloseDate = request.ExpectedCloseDate,
@@ -150,11 +177,11 @@ public class OpportunityApp : IOpportunityApp
     {
         return new OpportunityResponse
         {
-            ID = opportunity.ID,
-            LeadId = opportunity.LeadId,
+            Id = opportunity.Id.ToString(),
+            LeadId = opportunity.LeadId.ToString(),
             LeadName = opportunity.Lead?.Name,
             PhoneNumber = opportunity.Lead?.PhoneNumber,
-            ProductId = opportunity.ProductId,
+            ProductId = opportunity.ProductId?.ToString(),
             ProductName = opportunity.Product?.Name,
             Stage = (int)opportunity.Stage,
             StageName = opportunity.Stage.ToString(),
@@ -166,7 +193,7 @@ public class OpportunityApp : IOpportunityApp
     }
 
     #endregion
-    public async Task ChangeStageAsync(int idOpportunity, int newStage)
+    public async Task ChangeStageAsync(string idOpportunity, int newStage)
     {
         var stage = ParseOpportunityStage(newStage, "A stage informada é inválida.");
 

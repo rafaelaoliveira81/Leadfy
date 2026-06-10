@@ -10,13 +10,15 @@ public class OpportunityConfig : IEntityTypeConfiguration<Opportunity>
        {
               builder.ToTable("Opportunities");
 
-              builder.HasKey(o => o.ID);
+              builder.HasKey(o => o.Id);
+
+              builder.Property(o => o.Id)
+                     .ValueGeneratedOnAdd();
 
               builder.Property(o => o.LeadId)
                      .IsRequired();
 
-              builder.Property(o => o.ProductId)
-                     .IsRequired(false);
+              builder.Property(o => o.ProductId);
 
               builder.Property(o => o.UserId)
                      .IsRequired();

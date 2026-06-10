@@ -6,7 +6,7 @@ public static class UserClaimsHelper
 {
     private const string UserIdClaimType = "usuarioId";
 
-    public static int GetAuthenticatedUserId(this ClaimsPrincipal user)
+    public static string GetAuthenticatedUserId(this ClaimsPrincipal user)
     {
         if (user?.Identity?.IsAuthenticated != true)
             throw new UnauthorizedAccessException("Usuário não autenticado.");
@@ -16,9 +16,9 @@ public static class UserClaimsHelper
         if (string.IsNullOrWhiteSpace(userIdClaim))
             throw new UnauthorizedAccessException($"Claim '{UserIdClaimType}' não encontrada na requisição.");
 
-        if (!int.TryParse(userIdClaim, out var userId))
+        if (!Guid.TryParse(userIdClaim, out _))
             throw new UnauthorizedAccessException($"Claim '{UserIdClaimType}' inválida na requisição.");
 
-        return userId;
+        return userIdClaim;
     }
 }

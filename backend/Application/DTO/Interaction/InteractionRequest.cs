@@ -1,9 +1,10 @@
 namespace Application.DTO;
 
-public class InteractionAdd
+public class InteractionRequest
 {
     public string Description { get; set; }
-    public int UserId { get; set; }
+    public string OpportunityId { get; set; }
+    public string UserId { get; set; }
     public int? FromStage { get; set; }
     public int? ToStage { get; set; }
     public DateTime? InteractionDate { get; set; }
