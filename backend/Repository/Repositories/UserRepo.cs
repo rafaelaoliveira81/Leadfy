@@ -24,15 +24,6 @@ public class UserRepository : BaseRepository<User>, IUserRepo
             .FirstOrDefaultAsync(u => u.UserName == userName);
     }
 
-    public async Task<List<User>> GetByEmailAnyTenantAsync(string emailUser)
-    {
-        return await _context.Users
-            .IgnoreQueryFilters()
-            .Where(u => u.Email == emailUser)
-            .OrderBy(u => u.CreatedAt)
-            .ToListAsync();
-    }
-
     public async Task<PagedResult<User>> GetPagedAsync(
         Guid tenantId,
         bool? isActive,

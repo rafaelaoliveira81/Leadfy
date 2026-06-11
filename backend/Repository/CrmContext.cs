@@ -38,19 +38,19 @@ public class CRMContext : DbContext
         modelBuilder.ApplyConfiguration(new PromptConfig());
         
         modelBuilder.Entity<User>()
-            .HasQueryFilter(user => !CurrentTenantId.HasValue || user.TenantId == CurrentTenantId.Value);
+            .HasQueryFilter(user => CurrentTenantId.HasValue && user.TenantId == CurrentTenantId.Value);
         modelBuilder.Entity<Lead>()
-            .HasQueryFilter(lead => !CurrentTenantId.HasValue || lead.TenantId == CurrentTenantId.Value);
+            .HasQueryFilter(lead => CurrentTenantId.HasValue && lead.TenantId == CurrentTenantId.Value);
         modelBuilder.Entity<Product>()
-            .HasQueryFilter(product => !CurrentTenantId.HasValue || product.TenantId == CurrentTenantId.Value);
+            .HasQueryFilter(product => CurrentTenantId.HasValue && product.TenantId == CurrentTenantId.Value);
         modelBuilder.Entity<Opportunity>()
-            .HasQueryFilter(opportunity => !CurrentTenantId.HasValue || opportunity.TenantId == CurrentTenantId.Value);
+            .HasQueryFilter(opportunity => CurrentTenantId.HasValue && opportunity.TenantId == CurrentTenantId.Value);
         modelBuilder.Entity<OpportunityActionPlan>()
-            .HasQueryFilter(actionPlan => !CurrentTenantId.HasValue || actionPlan.TenantId == CurrentTenantId.Value);
+            .HasQueryFilter(actionPlan => CurrentTenantId.HasValue && actionPlan.TenantId == CurrentTenantId.Value);
         modelBuilder.Entity<Interaction>()
-            .HasQueryFilter(interaction => !CurrentTenantId.HasValue || interaction.TenantId == CurrentTenantId.Value);
+            .HasQueryFilter(interaction => CurrentTenantId.HasValue && interaction.TenantId == CurrentTenantId.Value);
         modelBuilder.Entity<Prompt>()
-            .HasQueryFilter(prompt => !CurrentTenantId.HasValue || prompt.TenantId == CurrentTenantId.Value);
+            .HasQueryFilter(prompt => CurrentTenantId.HasValue && prompt.TenantId == CurrentTenantId.Value);
 
         base.OnModelCreating(modelBuilder);
     }

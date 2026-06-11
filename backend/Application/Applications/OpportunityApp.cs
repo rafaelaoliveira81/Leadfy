@@ -54,7 +54,7 @@ public class OpportunityApp : IOpportunityApp
 
         var tenantId = _tenantProvider.GetRequiredTenantId();
 
-        var opportunities = await _opportunityRepo.GetByStageAsync(stage);
+        var opportunities = await _opportunityRepo.GetByStageAsync(tenantId, stage);
 
         return opportunities.Select(MapToOpportunityResponse);
     }

@@ -106,8 +106,7 @@ namespace Repository.Migrations
                     ORDER BY Name DESC
                     OFFSET (@Pagina - 1) * @QuantidadePorPagina ROWS
                     FETCH NEXT @QuantidadePorPagina ROWS ONLY;
-                END;
-                GO"
+                END;"
             );
         }
 
@@ -190,8 +189,7 @@ namespace Repository.Migrations
                     ORDER BY Name DESC
                     OFFSET (@Pagina - 1) * @QuantidadePorPagina ROWS
                     FETCH NEXT @QuantidadePorPagina ROWS ONLY;
-                END;
-                GO"
+                END;"
             );
 
             migrationBuilder.DropColumn(
