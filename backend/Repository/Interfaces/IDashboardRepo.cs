@@ -2,5 +2,5 @@ using Domain.DTO;
 
 public interface IDashboardRepo
 {
-    Task<DashboardDto> GetDashboardDataAsync();
+    Task<DashboardDto> GetDashboardDataAsync(Guid tenantId);
 }
