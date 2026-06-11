@@ -33,7 +33,9 @@ public class ProductApp : IProductApp
     }
     public async Task<ProductPagedResponse> GetAllAsync(bool? statusProduct, int pagina, int quantidadePorPagina)
     {
-        var products = await _productRepo.GetPagedAsync(statusProduct, pagina, quantidadePorPagina);
+        var tenantId = _tenantProvider.GetRequiredTenantId();
+
+        var products = await _productRepo.GetPagedAsync(tenantId, statusProduct, pagina, quantidadePorPagina);
 
         var response = products.Dados.Select(p => MapToProductResponse(p)).ToList();
 

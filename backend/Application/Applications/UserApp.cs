@@ -96,7 +96,9 @@ public class UserApp : IUserApp
 
     public async Task<UserPagedResponse> GetAllAsync(bool? isActive, int pagina, int quantidadePorPagina)
     {
-        var users = await _userRepo.GetPagedAsync(isActive, pagina, quantidadePorPagina);
+        var tenantId = _tenantProvider.GetRequiredTenantId();
+
+        var users = await _userRepo.GetPagedAsync(tenantId, isActive, pagina, quantidadePorPagina);
 
         var response = users.Dados.Select(MapToUserResponse).ToList();
 

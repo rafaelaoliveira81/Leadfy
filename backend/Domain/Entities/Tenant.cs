@@ -7,6 +7,7 @@ public class Tenant : IEntity
     public DateTime CreatedAt { get; set; }
     public ICollection<User> Users { get; set; }
     public ICollection<Product> Products { get; set; }
+    public ICollection<Prompt> Prompts { get; set; }
 
     public Tenant()
     {
@@ -14,5 +15,6 @@ public class Tenant : IEntity
         CreatedAt = DateTime.Now;
         Users = new List<User>();
         Products = new List<Product>();
+        Prompts = new List<Prompt>();
     }
 }

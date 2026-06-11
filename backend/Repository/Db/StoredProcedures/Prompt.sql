@@ -1,4 +1,5 @@
 CREATE PROCEDURE sp_GetPromptsPaginado
+    @TenantId UNIQUEIDENTIFIER,
     @Status INT = NULL,
     @Pagina INT = 1,
     @QuantidadePorPagina INT = 10
@@ -11,7 +12,8 @@ BEGIN
 
     SELECT COUNT(*) AS TotalRegistros
     FROM Prompts
-    WHERE (@Status IS NULL OR IsActive = @Status);
+        WHERE TenantId = @TenantId
+            AND (@Status IS NULL OR IsActive = @Status);
 
     SELECT
         Id,
@@ -20,7 +22,8 @@ BEGIN
         IsActive,
         CreatedAt
     FROM Prompts
-    WHERE (@Status IS NULL OR IsActive = @Status)
+        WHERE TenantId = @TenantId
+            AND (@Status IS NULL OR IsActive = @Status)
     ORDER BY Id DESC
     OFFSET (@Pagina - 1) * @QuantidadePorPagina ROWS
     FETCH NEXT @QuantidadePorPagina ROWS ONLY;

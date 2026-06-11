@@ -1,27 +1,22 @@
 using Microsoft.EntityFrameworkCore;
 using Dapper;
 using Domain.Entities;
-using Domain.Interface;
 using Repository.Context;
 
 namespace Repository.Repositories;
 
 public class ProductRepo : BaseRepository<Product>, IProductRepo
 {
-    private readonly ITenantProvider _tenantProvider;
-
-    public ProductRepo(CRMContext context, ITenantProvider tenantProvider) : base(context)
+    public ProductRepo(CRMContext context) : base(context)
     {
-        _tenantProvider = tenantProvider;
     }
 
    public async Task<PagedResult<Product>> GetPagedAsync(
+        Guid tenantId,
         bool? isActive,
         int pagina,
         int quantidadePorPagina)
     {
-        var tenantId = _tenantProvider.GetRequiredTenantId();
-
         using var connection = GetConnection();
 
         using var multi = await connection.QueryMultipleAsync(

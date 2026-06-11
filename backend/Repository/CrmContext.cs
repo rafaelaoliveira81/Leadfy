@@ -42,6 +42,8 @@ public class CRMContext : DbContext
         modelBuilder.ApplyConfiguration(new OpportunityActionPlanConfig());
         modelBuilder.ApplyConfiguration(new InteractionConfig());
         modelBuilder.ApplyConfiguration(new PromptConfig());
+        modelBuilder.Entity<Prompt>()
+            .HasQueryFilter(prompt => !CurrentTenantId.HasValue || prompt.TenantId == CurrentTenantId.Value);
 
         base.OnModelCreating(modelBuilder);
     }

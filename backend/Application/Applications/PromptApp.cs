@@ -1,5 +1,6 @@
 using Application.DTO;
 using Domain.Entities;
+using Domain.Interface;
 using System.Text;
 
 
@@ -9,16 +10,21 @@ public class PromptApp : IPromptApp
 {
     private readonly IPromptRepo _promptRepo;
     private readonly IAiService _aiService;
-    public PromptApp(IPromptRepo promptRepo, IAiService aiService)
+    private readonly ITenantProvider _tenantProvider;
+
+    public PromptApp(IPromptRepo promptRepo, IAiService aiService, ITenantProvider tenantProvider)
     {
         _promptRepo = promptRepo;
         _aiService = aiService;
+        _tenantProvider = tenantProvider;
     }
     public async Task<string> AddAsync(PromptRequest request)
     {
         ValidatePromptInformation(request);
 
-        var prompt = MapToPromptRequest(request);
+        var tenantId = _tenantProvider.GetRequiredTenantId();
+
+        var prompt = MapToPromptRequest(request, tenantId);
 
         return (await _promptRepo.CreateAsync(prompt)).ToString();
     }
@@ -32,7 +38,9 @@ public class PromptApp : IPromptApp
 
     public async Task<PromptPagedResponse> GetAllAsync(bool? status, int pagina, int quantidadePorPagina)
     {
-        var prompt = await _promptRepo.GetPagedAsync(status, pagina, quantidadePorPagina);
+        var tenantId = _tenantProvider.GetRequiredTenantId();
+        
+        var prompt = await _promptRepo.GetPagedAsync(tenantId, status, pagina, quantidadePorPagina);
 
         var response = prompt.Dados.Select(MapToPromptResponse).ToList();
         return new PromptPagedResponse
@@ -118,7 +126,7 @@ public class PromptApp : IPromptApp
         if (!Guid.TryParse(idPrompt, out var guid))
             throw new ArgumentException("ID do prompt inválido.");
 
-        var prompt = await _promptRepo.GetByIdAsync(guid);
+        var prompt = await _promptRepo.GetScopedByIdAsync(guid);
 
         if (prompt == null)
             throw new KeyNotFoundException("Prompt não localizado.");
@@ -126,10 +134,11 @@ public class PromptApp : IPromptApp
         return prompt;
     }
 
-    private static Prompt MapToPromptRequest(PromptRequest request)
+    private static Prompt MapToPromptRequest(PromptRequest request, Guid tenantId)
     {
         return new Prompt
         {
+            TenantId = tenantId,
             Title = request.Title,
             Content = request.Content
         };

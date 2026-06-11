@@ -1,17 +1,14 @@
 using Microsoft.EntityFrameworkCore;
 using Dapper;
 using Domain.Entities;
-using Domain.Interface;
 using Repository.Context;
 
 namespace Repository.Repositories;
 
 public class UserRepository : BaseRepository<User>, IUserRepo
 {
-    private readonly ITenantProvider _tenantProvider;
-    public UserRepository(CRMContext context, ITenantProvider tenantProvider) : base(context)
+    public UserRepository(CRMContext context) : base(context)
     {
-        _tenantProvider = tenantProvider;
     }
 
     public async Task<User> GetByEmailAsync(string emailUser)
@@ -37,11 +34,11 @@ public class UserRepository : BaseRepository<User>, IUserRepo
     }
 
     public async Task<PagedResult<User>> GetPagedAsync(
+        Guid tenantId,
         bool? isActive,
         int pagina,
         int quantidadePorPagina)
     {
-        var tenantId = _tenantProvider.GetRequiredTenantId();
 
         using var connection = GetConnection();
 
