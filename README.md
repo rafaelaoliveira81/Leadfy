@@ -33,8 +33,9 @@ O Leadfy utiliza arquitetura em camadas para deixar o projeto mais organizado, f
 
 - **Frontend:** aplicação React com autenticação usando Context API, roteamento com `react-router-dom` e comunicação com a API através do Axios.
 - **Backend:** API REST desenvolvida em ASP.NET Core 6, separada nos projetos `Api`, `Application`, `Domain`, `Repository` e `Service`.
-- **Banco de Dados:** SQL Server.
+- **Banco de Dados:** SQL Server com arquitetura **multi-tenant** (single database, single schema).
 - **ORM:** Entity Framework Core 6 e Dapper.
+- **Multi-Tenancy:** O sistema implementa isolamento de dados por tenant, com filtragem de `TenantId` em todas as operações de leitura e escrita.
 
 ### Funcionalidades
 
@@ -200,10 +201,10 @@ Crm-Vendas/
 
 - **Apresentação:** composta pelo frontend (`crm-app`) e pelo projeto `Api`, responsáveis pela interface do usuário, controllers HTTP, autenticação, Swagger e fluxo das requisições.
 - **Domínio:** localizado no projeto `Domain`, onde ficam as entidades, enums e regras principais do negócio.
-- **Repositório:** implementado no projeto `Repository`, responsável pelo contexto do banco, mapeamentos, migrations e acesso aos dados.
+- **Repositório:** implementado no projeto `Repository`, responsável pelo contexto do banco, mapeamentos, migrations e acesso aos dados. Implementa isolamento multi-tenant através de query filters e parâmetros de `TenantId`.
 - **Serviços:** localizado no projeto `Service`, contendo serviços auxiliares utilizados pela aplicação.
 
-Além dessas camadas, o projeto `Application` é responsável pelos casos de uso, validações e DTOs usados pela API.
+Além dessas camadas, o projeto `Application` é responsável pelos casos de uso, validações e DTOs usados pela API. A camada de aplicação também gerencia a propagação do `TenantId` através do `ITenantProvider` para garantir isolamento de dados.
 
 ---
 
@@ -257,6 +258,47 @@ Principais tabelas do sistema:
 - `Prompts`.
 
 ![Diagrama ERD](./assets/DiagramaERD.png)
+
+### Modelo Multi-Tenant (Single Database, Single Schema)
+
+O Leadfy implementa um modelo multi-tenant onde múltiplos clientes compartilham uma única base de dados e schema, com isolamento de dados através de um campo `TenantId`.
+
+#### Entidades Tenant-Scoped
+
+As seguintes entidades implementam isolamento multi-tenant e possuem um campo `TenantId` que identifica o tenant proprietário dos dados:
+
+- `User`: usuários vinculados a um tenant específico
+- `Product`: produtos cadastrados por tenant
+- `Prompt`: configurações de prompts de IA por tenant
+- `Lead`: leads e prospectos por tenant
+- `Opportunity`: oportunidades de venda por tenant
+- `Interaction`: interações de vendas por tenant
+- `OpportunityActionPlan`: planos de ação por tenant
+
+#### Isolamento de Dados
+
+O isolamento é garantido através de:
+
+1. **Query Filters no Entity Framework Core**: Filtros aplicados automaticamente a todas as consultas, impedindo que um tenant acesse dados de outro
+2. **Parâmetro TenantId**: Todos os métodos de repositório recebem um parâmetro `tenantId` para garantir isolamento em operações de leitura e escrita
+3. **Stored Procedures com @TenantId**: Procedimentos armazenados incluem filtros por `@TenantId` na camada SQL
+4. **ITenantProvider**: Serviço que fornece o `TenantId` do tenant autenticado, extraído do token JWT
+
+#### Propagação de TenantId
+
+O fluxo de propagação segue a arquitetura em camadas:
+
+```
+Controller (recebe autenticação)
+  ↓
+Application (injeta ITenantProvider, obtém TenantId via GetRequiredTenantId())
+  ↓
+Service (recebe tenantId como parâmetro)
+  ↓
+Repository (filtra queries com WHERE TenantId = @TenantId)
+```
+
+Essas garantias previnem vazamento de dados cross-tenant e asseguram conformidade com requisitos de privacidade e segurança.
 
 ---
 
