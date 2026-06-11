@@ -43,7 +43,7 @@ public class PromptController : ControllerBase
         {
             var idPrompt = await _promptApp.AddAsync(request);
 
-            return CreatedAtAction(nameof(GetById), new { id = idPrompt }, new { id = idPrompt });
+            return CreatedAtAction(nameof(GetById), new { guidId = idPrompt }, new { guidId = idPrompt });
         }
         catch (ArgumentException ex)
         {
