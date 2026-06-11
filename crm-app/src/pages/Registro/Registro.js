@@ -12,6 +12,7 @@ import { Link, useNavigate } from "react-router-dom";
 export function Registro() {
   const INITIAL_USER_STATE = {
     name: "",
+    userName: "",
     email: "",
     password: "",
   };
@@ -62,6 +63,20 @@ export function Registro() {
                   name="name"
                   placeholder="Seu nome"
                   value={user.name}
+                  onChange={handleInputChange}
+                />
+              </div>
+            </Form.Group>
+            <Form.Group className={style.formGroup}>
+              <Form.Label>Login</Form.Label>
+
+              <div className={style["campo-input"]}>
+                <MdEmail className={style["icone-input"]} />
+                <Form.Control
+                  type="text"
+                  name="userName"
+                  placeholder="Seu login"
+                  value={user.userName}
                   onChange={handleInputChange}
                 />
               </div>
