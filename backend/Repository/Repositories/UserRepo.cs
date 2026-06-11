@@ -47,7 +47,7 @@ public class UserRepository : BaseRepository<User>, IUserRepo
             new
             {
                 TenantId = tenantId,
-                Status = isActive.HasValue ? (isActive.Value ? 1 : 0) : (int?)null,
+                IsActive = isActive.HasValue ? (isActive.Value ? 1 : 0) : (int?)null,
                 Pagina = pagina,
                 QuantidadePorPagina = quantidadePorPagina
             },
