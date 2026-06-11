@@ -27,6 +27,7 @@ const ITEMS_PER_PAGE = 10;
 const INITIAL_USER_STATE = {
   id: null,
   name: "",
+  userName: "",
   email: "",
   password: "",
 };
@@ -130,6 +131,7 @@ export function Users() {
   const buildUserPayload = (currentUser, includePassword = false) => {
     const payload = {
       name: currentUser.name?.trim() ?? "",
+      userName: currentUser.userName?.trim() ?? "",
       email: currentUser.email?.trim() ?? "",
     };
 
@@ -166,6 +168,7 @@ export function Users() {
     setUser({
       id: user.id,
       name: user.name ?? "",
+      userName: user.userName ?? "",
       email: user.email ?? "",
       password: "",
     });
@@ -494,6 +497,30 @@ export function Users() {
                 />
                 <Form.Control.Feedback type="invalid">
                   Nome é obrigatório.
+                </Form.Control.Feedback>
+              </Form.Group>
+
+              <Form.Group className="mb-3">
+                <Form.Label>Login</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="userName"
+                  placeholder="Digite o login"
+                  value={user.userName}
+                  onChange={(e) => {
+                    handleInputChange(e);
+
+                    if (errors?.userName) {
+                      setErrors((prev) => ({
+                        ...prev,
+                        userName: false,
+                      }));
+                    }
+                  }}
+                  isInvalid={errors?.userName}
+                />
+                <Form.Control.Feedback type="invalid">
+                  Login é obrigatório.
                 </Form.Control.Feedback>
               </Form.Group>
 

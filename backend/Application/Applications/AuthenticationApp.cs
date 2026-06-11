@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using Application.DTO;
+using Domain.Entities;
 namespace Application;
 
 public class AuthenticationApp : IAuthenticationApp
@@ -20,12 +21,15 @@ public class AuthenticationApp : IAuthenticationApp
         if (request == null)
             throw new ArgumentException("Requisição inválida.");
 
-        if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
-            throw new ArgumentException("Email e senha são obrigatórios.");
+        if (string.IsNullOrWhiteSpace(request.UserName) || string.IsNullOrWhiteSpace(request.Password))
+            throw new ArgumentException("Nome de usuário e senha são obrigatórios.");
 
-        var user = await _userRepo.GetByEmailAsync(request.Email.Trim());
+        var userName = request.UserName.Trim();
+
+        var user = await _userRepo.GetByUserNameGlobalAsync(userName);
+
         if (user == null || !user.IsActive || !VerifyPassword(request.Password, user.PasswordHash))
-            throw new UnauthorizedAccessException("Email ou senha inválidos.");
+            throw new UnauthorizedAccessException("Usuário ou senha inválidos.");
 
         var token = _tokenService.GenerateToken(user);
 

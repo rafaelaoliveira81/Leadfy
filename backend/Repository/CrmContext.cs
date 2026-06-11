@@ -1,16 +1,23 @@
 using Microsoft.EntityFrameworkCore;
 using Domain.Entities;
+using Domain.Interface;
 using Repository.Configurations;
 
 namespace Repository.Context;
 
 public class CRMContext : DbContext
 {
-    public CRMContext(DbContextOptions<CRMContext> options)
+    private readonly ITenantProvider _tenantProvider;
+
+    private Guid? CurrentTenantId => _tenantProvider.TenantId;
+
+    public CRMContext(DbContextOptions<CRMContext> options, ITenantProvider tenantProvider)
         : base(options)
     {
+        _tenantProvider = tenantProvider;
     }
 
+    public DbSet<Tenant> Tenants { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<Lead> Leads { get; set; }
     public DbSet<Product> Products { get; set; }
@@ -21,14 +28,29 @@ public class CRMContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.ApplyConfiguration(new TenantConfig());
         modelBuilder.ApplyConfiguration(new UserConfig());
-
         modelBuilder.ApplyConfiguration(new LeadConfig());
         modelBuilder.ApplyConfiguration(new ProductConfig());
         modelBuilder.ApplyConfiguration(new OpportunityConfig());
         modelBuilder.ApplyConfiguration(new OpportunityActionPlanConfig());
         modelBuilder.ApplyConfiguration(new InteractionConfig());
         modelBuilder.ApplyConfiguration(new PromptConfig());
+        
+        modelBuilder.Entity<User>()
+            .HasQueryFilter(user => CurrentTenantId.HasValue && user.TenantId == CurrentTenantId.Value);
+        modelBuilder.Entity<Lead>()
+            .HasQueryFilter(lead => CurrentTenantId.HasValue && lead.TenantId == CurrentTenantId.Value);
+        modelBuilder.Entity<Product>()
+            .HasQueryFilter(product => CurrentTenantId.HasValue && product.TenantId == CurrentTenantId.Value);
+        modelBuilder.Entity<Opportunity>()
+            .HasQueryFilter(opportunity => CurrentTenantId.HasValue && opportunity.TenantId == CurrentTenantId.Value);
+        modelBuilder.Entity<OpportunityActionPlan>()
+            .HasQueryFilter(actionPlan => CurrentTenantId.HasValue && actionPlan.TenantId == CurrentTenantId.Value);
+        modelBuilder.Entity<Interaction>()
+            .HasQueryFilter(interaction => CurrentTenantId.HasValue && interaction.TenantId == CurrentTenantId.Value);
+        modelBuilder.Entity<Prompt>()
+            .HasQueryFilter(prompt => CurrentTenantId.HasValue && prompt.TenantId == CurrentTenantId.Value);
 
         base.OnModelCreating(modelBuilder);
     }

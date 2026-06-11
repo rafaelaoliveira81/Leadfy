@@ -13,7 +13,7 @@ Use este arquivo como ponto de entrada para os dois guias de skills do projeto.
 
 | Area     | Skills Principais                                                                                                                               |
 | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| Backend  | `backend-feature-flow`, `backend-endpoint-swagger`, `backend-data-access-patterns`, `backend-application-validation`, `backend-auth-jwt-claims` |
+| Backend  | `backend-feature-flow`, `backend-endpoint-swagger`, `backend-data-access-patterns`, `backend-application-validation`, `backend-auth-jwt-claims`, `backend-tenant-entity-refactor` |
 | Frontend | `frontend-feature-flow`, `frontend-page-crud-flow`, `frontend-service-api-integration`, `frontend-auth-routing`, `frontend-kanban-workflow`     |
 
 Este arquivo documenta como criar skills reutilizaveis para o backend do Leadfy.
@@ -113,6 +113,7 @@ Use este indice para navegar direto para cada skill e escolher a mais adequada p
 | `backend-data-access-patterns`   | [`.github/skills/backend-data-access-patterns/SKILL.md`](./backend-data-access-patterns/SKILL.md)     | Quando o centro da mudanca esta em Repository, EF Core, Dapper, stored procedure ou conexao. |
 | `backend-application-validation` | [`.github/skills/backend-application-validation/SKILL.md`](./backend-application-validation/SKILL.md) | Quando o centro da mudanca esta em validacao, mapeamento e orquestracao na Application.      |
 | `backend-auth-jwt-claims`        | [`.github/skills/backend-auth-jwt-claims/SKILL.md`](./backend-auth-jwt-claims/SKILL.md)               | Quando o centro da mudanca esta em `Authorize`, claims, JWT ou usuario autenticado.          |
+| `backend-tenant-entity-refactor` | [`.github/skills/backend-tenant-entity-refactor/SKILL.md`](./backend-tenant-entity-refactor/SKILL.md) | Quando o centro da mudanca esta em incluir `tenantId` em entidades, schema e persistencia.   |
 
 ## Regra Rapida De Escolha
 

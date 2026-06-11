@@ -1,4 +1,3 @@
-using Microsoft.EntityFrameworkCore;
 using Dapper;
 using Domain.Entities;
 using Repository.Context;
@@ -11,6 +10,7 @@ public class PromptRepo : BaseRepository<Prompt>, IPromptRepo
     {
     }
     public async Task<PagedResult<Prompt>> GetPagedAsync(
+        Guid tenantId,
         bool? isActive,
         int pagina,
         int quantidadePorPagina)
@@ -21,6 +21,7 @@ public class PromptRepo : BaseRepository<Prompt>, IPromptRepo
             "sp_GetPromptsPaginado",
             new
             {
+                TenantId = tenantId,
                 Status = isActive.HasValue ? (isActive.Value ? 1 : 0) : (int?)null,
                 Pagina = pagina,
                 QuantidadePorPagina = quantidadePorPagina

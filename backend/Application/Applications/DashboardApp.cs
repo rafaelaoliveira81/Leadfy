@@ -1,20 +1,24 @@
 using Application.DTO;
 using Domain.DTO;
+using Domain.Interface;
 using System.Text.Json;
 namespace Application;
 
 public class DashboardApp : IDashboardApp
 {
+    private readonly ITenantProvider _tenantProvider;
     private readonly IDashboardRepo _dashboardRepo;
 
-    public DashboardApp(IDashboardRepo dashboardRepo)
+    public DashboardApp(IDashboardRepo dashboardRepo, ITenantProvider tenantProvider)
     {
+        _tenantProvider = tenantProvider;
         _dashboardRepo = dashboardRepo;
     }
 
     public async Task<DashboardResponse> GetDashboardDataAsync()
     {
-        var dados = await _dashboardRepo.GetDashboardDataAsync();
+        var tenantId = _tenantProvider.GetRequiredTenantId();
+        var dados = await _dashboardRepo.GetDashboardDataAsync(tenantId);
 
         var response = new DashboardResponse
         {

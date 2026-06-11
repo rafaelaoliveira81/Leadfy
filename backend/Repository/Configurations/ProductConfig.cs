@@ -15,6 +15,9 @@ public class ProductConfig : IEntityTypeConfiguration<Product>
               builder.Property(p => p.Id)
                      .ValueGeneratedOnAdd();
 
+              builder.Property(p => p.TenantId)
+                     .IsRequired();
+
               builder.Property(p => p.Name)
                      .IsRequired()
                      .HasMaxLength(150);
@@ -32,5 +35,15 @@ public class ProductConfig : IEntityTypeConfiguration<Product>
               builder.Property(p => p.CreatedAt)
                      .IsRequired()
                      .ValueGeneratedOnAdd();
+
+              builder.HasIndex(p => p.TenantId);
+
+              builder.HasIndex(p => new { p.TenantId, p.Name })
+                     .IsUnique();
+
+              builder.HasOne(p => p.Tenant)
+                     .WithMany(t => t.Products)
+                     .HasForeignKey(p => p.TenantId)
+                     .OnDelete(DeleteBehavior.Restrict);
        }
 }

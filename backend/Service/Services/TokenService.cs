@@ -26,6 +26,7 @@ public class TokenService : ITokenService
         var claims = new List<Claim>
         {
             new("usuarioId", user.Id.ToString()),
+            new("tenantId", user.TenantId.ToString()),
             new("nome", user.Name),
             new("email", user.Email)
         };

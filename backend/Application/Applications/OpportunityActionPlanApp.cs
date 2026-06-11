@@ -4,6 +4,7 @@ using Domain.Entities;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Application.DTO;
+using Domain.Interface;
 
 namespace Application;
 
@@ -15,6 +16,7 @@ public class OpportunityActionPlanApp : IOpportunityActionPlanApp
     private readonly IInteractionRepo _interactionRepo;
     private readonly IPromptApp _promptApp;
     private readonly IAiService _aiService;
+    private readonly ITenantProvider _tenantProvider;
 
     public OpportunityActionPlanApp(
         IOpportunityRepo opportunityRepo,
@@ -22,7 +24,8 @@ public class OpportunityActionPlanApp : IOpportunityActionPlanApp
         ILeadApp leadApp,
         IInteractionRepo interactionRepo,
         IPromptApp promptApp,
-        IAiService aiService)
+        IAiService aiService,
+        ITenantProvider tenantProvider)
     {
         _opportunityRepo = opportunityRepo;
         _actionPlanRepo = actionPlanRepo;
@@ -30,10 +33,13 @@ public class OpportunityActionPlanApp : IOpportunityActionPlanApp
         _interactionRepo = interactionRepo;
         _promptApp = promptApp;
         _aiService = aiService;
+        _tenantProvider = tenantProvider;
     }
 
     public async Task<OpportunityActionPlanDto> GenerateAsync(string opportunityId, string promptId)
     {
+        var tenantId = _tenantProvider.GetRequiredTenantId();
+
         var opportunity = await GetOpportunityAsync(opportunityId);
 
         var prompt = await _promptApp.GetByIdAsync(promptId);
@@ -57,7 +63,7 @@ public class OpportunityActionPlanApp : IOpportunityActionPlanApp
             var parsedActionPlan = JsonSerializer.Deserialize<ActionPlanServiceResponse>(generatedActionPlan);
 
             var actionPlanDto = MapToDtoByDto(parsedActionPlan);
-            var actionPlan = MapToDtEntity(actionPlanDto);
+            var actionPlan = MapToDtEntity(actionPlanDto, tenantId);
             actionPlan.OpportunityId = opportunity.Id;
 
             var id = await _actionPlanRepo.CreateAsync(actionPlan);
@@ -103,11 +109,12 @@ public class OpportunityActionPlanApp : IOpportunityActionPlanApp
         };
     }
 
-    private static OpportunityActionPlan MapToDtEntity(OpportunityActionPlanDto actionPlan)
+    private static OpportunityActionPlan MapToDtEntity(OpportunityActionPlanDto actionPlan, Guid tenantId)
     {
         return new OpportunityActionPlan
         {
             Id = string.IsNullOrWhiteSpace(actionPlan.Id) ? Guid.NewGuid() : Guid.Parse(actionPlan.Id),
+            TenantId = tenantId,
             OpportunityId = string.IsNullOrWhiteSpace(actionPlan.OpportunityId) ? Guid.Empty : Guid.Parse(actionPlan.OpportunityId),
             Message = actionPlan.Message ?? string.Empty,
             ActionPlan = actionPlan.ActionPlan,

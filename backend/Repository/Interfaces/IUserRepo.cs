@@ -3,5 +3,6 @@ using Domain.Entities;
 public interface IUserRepo : IBaseRepository<User>
 {
     Task<User> GetByEmailAsync(string emailUser);
-    Task<PagedResult<User>> GetPagedAsync(bool? isActive, int pagina, int quantidadePorPagina);
+    Task<User> GetByUserNameGlobalAsync(string userName);
+    Task<PagedResult<User>> GetPagedAsync(Guid tenantId, bool? isActive, int pagina, int quantidadePorPagina);
 }

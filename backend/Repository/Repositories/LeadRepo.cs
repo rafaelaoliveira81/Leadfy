@@ -11,6 +11,7 @@ public class LeadRepo : BaseRepository<Lead>, ILeadRepo
     {
     }
     public async Task<PagedResult<Lead>> GetPagedAsync(
+        Guid tenantId,
         bool? isActive,
         int pagina,
         int quantidadePorPagina)
@@ -21,6 +22,7 @@ public class LeadRepo : BaseRepository<Lead>, ILeadRepo
             "sp_GetLeadsPaginado",
             new
             {
+                TenantId = tenantId,
                 Status = isActive.HasValue ? (isActive.Value ? 1 : 0) : (int?)null,
                 Pagina = pagina,
                 QuantidadePorPagina = quantidadePorPagina

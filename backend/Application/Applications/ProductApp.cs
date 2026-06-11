@@ -1,20 +1,26 @@
 using Domain.Entities;
 using Application.DTO;
+using Domain.Interface;
 
 namespace Application;
 
 public class ProductApp : IProductApp
 {
     private readonly IProductRepo _productRepo;
-    public ProductApp(IProductRepo productRepo)
+    private readonly ITenantProvider _tenantProvider;
+
+    public ProductApp(IProductRepo productRepo, ITenantProvider tenantProvider)
     {
         _productRepo = productRepo;
+        _tenantProvider = tenantProvider;
     }
     public async Task<string> AddAsync(ProductRequest request)
     {
         ValidateProductInformation(request);
 
-        var product = MapToProductRequest(request);
+        var tenantId = _tenantProvider.GetRequiredTenantId();
+
+        var product = MapToProductRequest(request, tenantId);
 
         return (await _productRepo.CreateAsync(product)).ToString();
     }
@@ -27,7 +33,9 @@ public class ProductApp : IProductApp
     }
     public async Task<ProductPagedResponse> GetAllAsync(bool? statusProduct, int pagina, int quantidadePorPagina)
     {
-        var products = await _productRepo.GetPagedAsync(statusProduct, pagina, quantidadePorPagina);
+        var tenantId = _tenantProvider.GetRequiredTenantId();
+
+        var products = await _productRepo.GetPagedAsync(tenantId, statusProduct, pagina, quantidadePorPagina);
 
         var response = products.Dados.Select(p => MapToProductResponse(p)).ToList();
 
@@ -114,10 +122,11 @@ public class ProductApp : IProductApp
         return productResponse;
     }
 
-    private static Product MapToProductRequest(ProductRequest request)
+    private static Product MapToProductRequest(ProductRequest request, Guid tenantId)
     {
         return new Product
         {
+            TenantId = tenantId,
             Name = request.Name.Trim(),
             Description = request.Description?.Trim(),
             Price = request.Price,

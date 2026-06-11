@@ -49,6 +49,9 @@ namespace Repository.Migrations
                     b.Property<Guid>("OpportunityId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<int?>("ToStage")
                         .HasColumnType("int");
 
@@ -58,6 +61,8 @@ namespace Repository.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("OpportunityId");
+
+                    b.HasIndex("TenantId");
 
                     b.HasIndex("UserId");
 
@@ -90,7 +95,12 @@ namespace Repository.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("TenantId");
 
                     b.ToTable("Leads", (string)null);
                 });
@@ -126,6 +136,9 @@ namespace Repository.Migrations
                     b.Property<int>("Stage")
                         .HasColumnType("int");
 
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
@@ -134,6 +147,8 @@ namespace Repository.Migrations
                     b.HasIndex("LeadId");
 
                     b.HasIndex("ProductId");
+
+                    b.HasIndex("TenantId");
 
                     b.HasIndex("UserId");
 
@@ -159,9 +174,14 @@ namespace Repository.Migrations
                     b.Property<Guid>("OpportunityId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
 
                     b.HasIndex("OpportunityId");
+
+                    b.HasIndex("TenantId");
 
                     b.ToTable("OpportunityActionPlans", (string)null);
                 });
@@ -191,7 +211,15 @@ namespace Repository.Migrations
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("TenantId");
+
+                    b.HasIndex("TenantId", "Name")
+                        .IsUnique();
 
                     b.ToTable("Products", (string)null);
                 });
@@ -213,6 +241,9 @@ namespace Repository.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(150)
@@ -220,7 +251,29 @@ namespace Repository.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("TenantId");
+
                     b.ToTable("Prompts", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Entities.Tenant", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Tenants", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.User", b =>
@@ -251,9 +304,22 @@ namespace Repository.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("UserName")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("Email")
+                    b.HasIndex("TenantId");
+
+                    b.HasIndex("UserName")
+                        .IsUnique();
+
+                    b.HasIndex("TenantId", "Email")
                         .IsUnique();
 
                     b.ToTable("Users", (string)null);
@@ -267,6 +333,12 @@ namespace Repository.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Domain.Entities.Tenant", "Tenant")
+                        .WithMany("Interactions")
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("Domain.Entities.User", "User")
                         .WithMany("Interactions")
                         .HasForeignKey("UserId")
@@ -275,7 +347,20 @@ namespace Repository.Migrations
 
                     b.Navigation("Opportunity");
 
+                    b.Navigation("Tenant");
+
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Lead", b =>
+                {
+                    b.HasOne("Domain.Entities.Tenant", "Tenant")
+                        .WithMany("Leads")
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Tenant");
                 });
 
             modelBuilder.Entity("Domain.Entities.Opportunity", b =>
@@ -291,6 +376,12 @@ namespace Repository.Migrations
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Restrict);
 
+                    b.HasOne("Domain.Entities.Tenant", "Tenant")
+                        .WithMany("Opportunities")
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("Domain.Entities.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
@@ -300,6 +391,8 @@ namespace Repository.Migrations
                     b.Navigation("Lead");
 
                     b.Navigation("Product");
+
+                    b.Navigation("Tenant");
 
                     b.Navigation("User");
                 });
@@ -312,7 +405,48 @@ namespace Repository.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Domain.Entities.Tenant", "Tenant")
+                        .WithMany("OpportunityActionPlans")
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.Navigation("Opportunity");
+
+                    b.Navigation("Tenant");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Product", b =>
+                {
+                    b.HasOne("Domain.Entities.Tenant", "Tenant")
+                        .WithMany("Products")
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Tenant");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Prompt", b =>
+                {
+                    b.HasOne("Domain.Entities.Tenant", "Tenant")
+                        .WithMany("Prompts")
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Tenant");
+                });
+
+            modelBuilder.Entity("Domain.Entities.User", b =>
+                {
+                    b.HasOne("Domain.Entities.Tenant", "Tenant")
+                        .WithMany("Users")
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Tenant");
                 });
 
             modelBuilder.Entity("Domain.Entities.Opportunity", b =>
@@ -320,6 +454,23 @@ namespace Repository.Migrations
                     b.Navigation("ActionPlans");
 
                     b.Navigation("Interactions");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Tenant", b =>
+                {
+                    b.Navigation("Interactions");
+
+                    b.Navigation("Leads");
+
+                    b.Navigation("Opportunities");
+
+                    b.Navigation("OpportunityActionPlans");
+
+                    b.Navigation("Products");
+
+                    b.Navigation("Prompts");
+
+                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("Domain.Entities.User", b =>

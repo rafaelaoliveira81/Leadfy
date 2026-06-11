@@ -18,6 +18,10 @@ public class UserConfig : IEntityTypeConfiguration<User>
         builder.Property(u => u.Name)
                 .IsRequired(true)
                 .HasMaxLength(150);
+
+        builder.Property(u => u.UserName)
+                .IsRequired(true)
+                .HasMaxLength(150);
         
         builder.Property(u => u.Email)
                 .IsRequired(true)
@@ -26,6 +30,9 @@ public class UserConfig : IEntityTypeConfiguration<User>
         builder.Property(u => u.PasswordHash)
                 .IsRequired(true)
                 .HasMaxLength(255);
+
+        builder.Property(u => u.TenantId)
+                .IsRequired(true);
         
         builder.Property(u => u.IsActive)
                 .IsRequired(true);
@@ -34,6 +41,15 @@ public class UserConfig : IEntityTypeConfiguration<User>
                 .IsRequired(true)
                 .ValueGeneratedOnAdd();
 
-        builder.HasIndex(u => u.Email).IsUnique();
+                builder.HasIndex(u => u.TenantId);
+
+                builder.HasIndex(u => u.UserName).IsUnique();
+
+                builder.HasIndex(u => new { u.TenantId, u.Email }).IsUnique();
+
+                builder.HasOne(u => u.Tenant)
+                           .WithMany(t => t.Users)
+                           .HasForeignKey(u => u.TenantId)
+                           .OnDelete(DeleteBehavior.Restrict);
     }
 }

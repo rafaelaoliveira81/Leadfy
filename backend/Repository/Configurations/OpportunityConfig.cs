@@ -15,6 +15,9 @@ public class OpportunityConfig : IEntityTypeConfiguration<Opportunity>
               builder.Property(o => o.Id)
                      .ValueGeneratedOnAdd();
 
+              builder.Property(o => o.TenantId)
+                     .IsRequired();
+
               builder.Property(o => o.LeadId)
                      .IsRequired();
 
@@ -39,6 +42,13 @@ public class OpportunityConfig : IEntityTypeConfiguration<Opportunity>
               builder.Property(o => o.SortOrder)
                      .IsRequired()
                      .HasDefaultValue(0);
+
+              builder.HasIndex(o => o.TenantId);
+
+              builder.HasOne(o => o.Tenant)
+                     .WithMany(t => t.Opportunities)
+                     .HasForeignKey(o => o.TenantId)
+                     .OnDelete(DeleteBehavior.Restrict);
 
               builder.HasOne(o => o.Lead)
                      .WithMany()

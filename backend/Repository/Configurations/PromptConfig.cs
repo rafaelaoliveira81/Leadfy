@@ -22,11 +22,21 @@ public class PromptConfig : IEntityTypeConfiguration<Prompt>
               builder.Property(p => p.Content)
                      .HasMaxLength(1000);
 
+              builder.Property(p => p.TenantId)
+                     .IsRequired();
+
+              builder.HasIndex(p => p.TenantId);
+
               builder.Property(p => p.IsActive)
                      .IsRequired();
 
               builder.Property(p => p.CreatedAt)
                      .IsRequired()
                      .ValueGeneratedOnAdd();
+
+              builder.HasOne(p => p.Tenant)
+                     .WithMany(t => t.Prompts)
+                     .HasForeignKey(p => p.TenantId)
+                     .OnDelete(DeleteBehavior.Restrict);
        }
 }

@@ -2,6 +2,7 @@ using System.Text;
 using Application.DTO;
 using Domain.Entities;
 using Domain.Enuns;
+using Domain.Interface;
 
 namespace Application;
 
@@ -11,18 +12,28 @@ public class InteractionApp : IInteractionApp
     private readonly IOpportunityRepo _opportunityRepo;
     private readonly IUserRepo _userRepo;
     private readonly IAiService _aiService;
-    public InteractionApp(IInteractionRepo interactionRepo, IOpportunityRepo opportunityRepo, IUserRepo userRepo, IAiService aiService)
+    private readonly ITenantProvider _tenantProvider;
+
+    public InteractionApp(
+        IInteractionRepo interactionRepo,
+        IOpportunityRepo opportunityRepo,
+        IUserRepo userRepo,
+        IAiService aiService,
+        ITenantProvider tenantProvider)
     {
         _interactionRepo = interactionRepo;
         _opportunityRepo = opportunityRepo;
         _userRepo = userRepo;
         _aiService = aiService;
+        _tenantProvider = tenantProvider;
     }
-    public async Task<string> AddToOpportunityAsync(InteractionRequest interactionRequest)
+    public async Task<string> AddToOpportunityAsync(InteractionRequest interactionRequest, string idUser)
     {
-        await ValidateOpportunityUserExistsByIdAsync(interactionRequest);
+        var tenantId = _tenantProvider.GetRequiredTenantId();
 
-        var interaction = MapToEntity(interactionRequest);
+        var (opportunityId, userId) = await ValidateOpportunityUserExistsByIdAsync(interactionRequest, idUser);
+
+        var interaction = MapToEntity(interactionRequest, opportunityId, userId, tenantId);
 
         await ValidateInteractionAsync(interaction);
 
@@ -40,6 +51,7 @@ public class InteractionApp : IInteractionApp
     }
     public async Task<IEnumerable<InteractionResponse>> GetByOpportunityIdAsync(string opportunityId)
     {
+
         var opportunity = await ValidateOpportunityExistsAsync(opportunityId);
 
         var interactions = await _interactionRepo.GetAllByOpportunityIdAsync(opportunity.Id);
@@ -123,13 +135,11 @@ public class InteractionApp : IInteractionApp
         return interactionEntity;
     }
 
-    private static Interaction MapToEntity(InteractionRequest request)
+    private static Interaction MapToEntity(InteractionRequest request, Guid opportunityId, Guid userId, Guid tenantId)
     {
-        var userId = Guid.Parse(request.UserId);
-        var opportunityId = Guid.Parse(request.OpportunityId);
-
         return new Interaction
         {
+            TenantId = tenantId,
             Description = request.Description,
             OpportunityId = opportunityId,
             UserId = userId,
@@ -162,7 +172,7 @@ public class InteractionApp : IInteractionApp
         };
     }
 
-    private async Task ValidateOpportunityUserExistsByIdAsync(InteractionRequest interactionRequest)
+    private async Task<(Guid OpportunityId, Guid UserId)> ValidateOpportunityUserExistsByIdAsync(InteractionRequest interactionRequest, string idUser)
     {
         if (!Guid.TryParse(interactionRequest.OpportunityId, out Guid opportunityId))
             throw new ArgumentException("O identificador da opportunity é inválido.");
@@ -172,13 +182,19 @@ public class InteractionApp : IInteractionApp
         if (opportunity == null)
             throw new KeyNotFoundException("Opportunity não localizada.");
 
-        if (!Guid.TryParse(interactionRequest.UserId, out Guid userId))
+        if (!Guid.TryParse(idUser, out Guid userId))
             throw new ArgumentException("O identificador do usuário é inválido.");
+
+        if (!string.IsNullOrWhiteSpace(interactionRequest.UserId)
+            && !string.Equals(interactionRequest.UserId, idUser, StringComparison.OrdinalIgnoreCase))
+            throw new ArgumentException("O usuário da interação deve ser o usuário autenticado.");
 
         var user = await _userRepo.GetByIdAsync(userId);
 
         if (user == null)
             throw new KeyNotFoundException("Usuário não localizado.");
+
+        return (opportunityId, userId);
     }
 
     private string BuildPrompt(IteractionOptimizeDTO userInteraction)

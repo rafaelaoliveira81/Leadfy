@@ -12,6 +12,7 @@ public class ProductRepo : BaseRepository<Product>, IProductRepo
     }
 
    public async Task<PagedResult<Product>> GetPagedAsync(
+        Guid tenantId,
         bool? isActive,
         int pagina,
         int quantidadePorPagina)
@@ -22,6 +23,7 @@ public class ProductRepo : BaseRepository<Product>, IProductRepo
             "sp_GetProductsPaginado",
             new
             {
+                TenantId = tenantId,
                 Status = isActive.HasValue ? (isActive.Value ? 1 : 0) : (int?)null,
                 Pagina = pagina,
                 QuantidadePorPagina = quantidadePorPagina

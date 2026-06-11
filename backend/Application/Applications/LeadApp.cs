@@ -1,6 +1,7 @@
 using Application.DTO;
 using Domain.Entities;
 using Domain.Enuns;
+using Domain.Interface;
 
 namespace Application;
 
@@ -8,24 +9,30 @@ public class LeadApp : ILeadApp
 {
     private readonly ILeadRepo _leadRepo;
     private readonly IOpportunityRepo _opportunityRepo;
-    public LeadApp(ILeadRepo leadRepo, IOpportunityRepo opportunityRepo)
+    private readonly ITenantProvider _tenantProvider;
+
+    public LeadApp(ILeadRepo leadRepo, IOpportunityRepo opportunityRepo, ITenantProvider tenantProvider)
     {
         _leadRepo = leadRepo;
         _opportunityRepo = opportunityRepo;
+        _tenantProvider = tenantProvider;
     }
     public async Task<string> AddAsync(LeadRequest request, string idUser)
     {
         ValidateLeadInformation(request);
 
+        var tenantId = _tenantProvider.GetRequiredTenantId();
+
         if (!Guid.TryParse(idUser, out var userGuid))
             throw new ArgumentException("O identificador do usuário é inválido.");
 
-        var lead = MapToLeadRequest(request);
+        var lead = MapToLeadRequest(request, tenantId);
 
         var idLead = await _leadRepo.CreateAsync(lead);
 
         await _opportunityRepo.CreateAsync(new Opportunity
         {
+            TenantId = tenantId,
             LeadId = idLead,
             UserId = userGuid,
             Amount = 0,
@@ -45,7 +52,9 @@ public class LeadApp : ILeadApp
 
     public async Task<LeadPagedResponse> GetAllAsync(bool? status, int pagina, int quantidadePorPagina)
     {
-        var lead = await _leadRepo.GetPagedAsync(status, pagina, quantidadePorPagina);
+        var tenantId = _tenantProvider.GetRequiredTenantId();
+
+        var lead = await _leadRepo.GetPagedAsync(tenantId, status, pagina, quantidadePorPagina);
 
         var response = lead.Dados.Select(MapToLeadResponse).ToList();
         return new LeadPagedResponse
@@ -144,10 +153,11 @@ public class LeadApp : ILeadApp
             return false;
         }
     }
-    private static Lead MapToLeadRequest(LeadRequest request)
+    private static Lead MapToLeadRequest(LeadRequest request, Guid tenantId)
     {
         return new Lead
         {
+            TenantId = tenantId,
             Name = request.Name,
             Email = request.Email,
             PhoneNumber = request.PhoneNumber
