@@ -1,20 +1,26 @@
 using Domain.Entities;
 using Application.DTO;
+using Domain.Interface;
 
 namespace Application;
 
 public class ProductApp : IProductApp
 {
     private readonly IProductRepo _productRepo;
-    public ProductApp(IProductRepo productRepo)
+    private readonly ITenantProvider _tenantProvider;
+
+    public ProductApp(IProductRepo productRepo, ITenantProvider tenantProvider)
     {
         _productRepo = productRepo;
+        _tenantProvider = tenantProvider;
     }
     public async Task<string> AddAsync(ProductRequest request)
     {
         ValidateProductInformation(request);
 
-        var product = MapToProductRequest(request);
+        var tenantId = _tenantProvider.GetRequiredTenantId();
+
+        var product = MapToProductRequest(request, tenantId);
 
         return (await _productRepo.CreateAsync(product)).ToString();
     }
@@ -92,7 +98,7 @@ public class ProductApp : IProductApp
         if (!Guid.TryParse(idProduct, out var productGuid))
             throw new ArgumentException("O identificador do produto é inválido.");
 
-        var productEntity = await _productRepo.GetByIdAsync(productGuid);
+        var productEntity = await _productRepo.GetScopedByIdAsync(productGuid);
 
         if (productEntity == null)
             throw new KeyNotFoundException("Produto não localizado.");
@@ -114,10 +120,11 @@ public class ProductApp : IProductApp
         return productResponse;
     }
 
-    private static Product MapToProductRequest(ProductRequest request)
+    private static Product MapToProductRequest(ProductRequest request, Guid tenantId)
     {
         return new Product
         {
+            TenantId = tenantId,
             Name = request.Name.Trim(),
             Description = request.Description?.Trim(),
             Price = request.Price,

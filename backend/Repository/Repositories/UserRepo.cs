@@ -1,13 +1,17 @@
 using Microsoft.EntityFrameworkCore;
+using Dapper;
 using Domain.Entities;
+using Domain.Interface;
 using Repository.Context;
 
 namespace Repository.Repositories;
 
 public class UserRepository : BaseRepository<User>, IUserRepo
 {
-    public UserRepository(CRMContext context) : base(context)
+    private readonly ITenantProvider _tenantProvider;
+    public UserRepository(CRMContext context, ITenantProvider tenantProvider) : base(context)
     {
+        _tenantProvider = tenantProvider;
     }
 
     public async Task<User> GetByEmailAsync(string emailUser)
@@ -32,34 +36,28 @@ public class UserRepository : BaseRepository<User>, IUserRepo
             .ToListAsync();
     }
 
-    public async Task<User> GetScopedByIdAsync(Guid userId)
-    {
-        return await _context.Users
-            .FirstOrDefaultAsync(u => u.Id == userId);
-    }
-
     public async Task<PagedResult<User>> GetPagedAsync(
         bool? isActive,
         int pagina,
         int quantidadePorPagina)
     {
-        if (pagina <= 0)
-            throw new ArgumentException("Página deve ser maior que zero.");
+        var tenantId = _tenantProvider.GetRequiredTenantId();
 
-        if (quantidadePorPagina <= 0)
-            throw new ArgumentException("Quantidade por página deve ser maior que zero.");
+        using var connection = GetConnection();
 
-        var query = _context.Users.AsNoTracking();
-
-        if (isActive.HasValue)
-            query = query.Where(u => u.IsActive == isActive.Value);
-
-        var totalRegistros = await query.CountAsync();
-        var users = await query
-            .OrderBy(u => u.Name)
-            .Skip((pagina - 1) * quantidadePorPagina)
-            .Take(quantidadePorPagina)
-            .ToListAsync();
+        using var multi = await connection.QueryMultipleAsync(
+            "sp_GetUsersPaginado",
+            new
+            {
+                TenantId = tenantId,
+                Status = isActive.HasValue ? (isActive.Value ? 1 : 0) : (int?)null,
+                Pagina = pagina,
+                QuantidadePorPagina = quantidadePorPagina
+            },
+            commandType: System.Data.CommandType.StoredProcedure
+        );
+        var totalRegistros = await multi.ReadFirstAsync<int>();
+        var users = (await multi.ReadAsync<User>()).ToList();
 
         return new PagedResult<User>
         {

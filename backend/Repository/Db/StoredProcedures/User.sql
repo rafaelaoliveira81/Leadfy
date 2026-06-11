@@ -1,4 +1,5 @@
 CREATE PROCEDURE sp_GetUsersPaginado
+    @TenantId UNIQUEIDENTIFIER,
     @IsActive BIT = NULL,
     @Pagina INT = 1,
     @QuantidadePorPagina INT = 10
@@ -11,7 +12,8 @@ BEGIN
     
     SELECT COUNT(*) AS TotalRegistros
     FROM Users
-    WHERE (@IsActive IS NULL OR IsActive = @IsActive);
+    WHERE TenantId = @TenantId
+      AND (@IsActive IS NULL OR IsActive = @IsActive);
 
     SELECT
         ID,

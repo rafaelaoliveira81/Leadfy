@@ -35,6 +35,9 @@ public class CRMContext : DbContext
 
         modelBuilder.ApplyConfiguration(new LeadConfig());
         modelBuilder.ApplyConfiguration(new ProductConfig());
+        modelBuilder.Entity<Product>()
+            .HasQueryFilter(product => !CurrentTenantId.HasValue || product.TenantId == CurrentTenantId.Value);
+
         modelBuilder.ApplyConfiguration(new OpportunityConfig());
         modelBuilder.ApplyConfiguration(new OpportunityActionPlanConfig());
         modelBuilder.ApplyConfiguration(new InteractionConfig());

@@ -62,6 +62,11 @@ public abstract class BaseRepository<TEntity> : IBaseRepository<TEntity> where T
         return await _context.Set<TEntity>().FindAsync(id);
     }
 
+    public async Task<TEntity> GetScopedByIdAsync(Guid id)
+    {
+        return await _context.Set<TEntity>().FirstOrDefaultAsync(e => e.Id == id);
+    }
+
     public async Task<IEnumerable<TEntity>> GetAllAsync()
     {
         return await _context.Set<TEntity>().ToListAsync();
