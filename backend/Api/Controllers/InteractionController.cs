@@ -1,4 +1,5 @@
 using Application.DTO;
+using Api.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -42,7 +43,9 @@ public class InteractionController : ControllerBase
     {
         try
         {
-            var interactionId = await _interactionApp.AddToOpportunityAsync(interactionRequest);
+            var idUser = User.GetAuthenticatedUserId();
+
+            var interactionId = await _interactionApp.AddToOpportunityAsync(interactionRequest, idUser);
 
             return CreatedAtAction(nameof(GetById), new { id = interactionId }, new { id = interactionId });
         }

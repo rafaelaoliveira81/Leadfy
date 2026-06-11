@@ -15,6 +15,9 @@ public class LeadConfig : IEntityTypeConfiguration<Lead>
               builder.Property(p => p.Id)
                      .ValueGeneratedOnAdd();
 
+              builder.Property(l => l.TenantId)
+                     .IsRequired();
+
               builder.Property(l => l.Name)
                      .IsRequired()
                      .HasMaxLength(150);
@@ -31,5 +34,12 @@ public class LeadConfig : IEntityTypeConfiguration<Lead>
               builder.Property(l => l.CreatedAt)
                      .IsRequired()
                      .ValueGeneratedOnAdd();
+
+              builder.HasIndex(l => l.TenantId);
+
+              builder.HasOne(l => l.Tenant)
+                     .WithMany(t => t.Leads)
+                     .HasForeignKey(l => l.TenantId)
+                     .OnDelete(DeleteBehavior.Restrict);
        }
 }

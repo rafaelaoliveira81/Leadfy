@@ -198,7 +198,7 @@ public class UserApp : IUserApp
         if (!Guid.TryParse(idUser, out var guid))
             throw new ArgumentException("ID do usuário inválido.");
 
-        var userEntity = await _userRepo.GetScopedByIdAsync(guid);
+        var userEntity = await _userRepo.GetByIdAsync(guid);
         
         if (userEntity == null)
             throw new KeyNotFoundException("Usuário não localizado.");

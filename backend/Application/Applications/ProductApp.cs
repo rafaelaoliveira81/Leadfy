@@ -100,7 +100,7 @@ public class ProductApp : IProductApp
         if (!Guid.TryParse(idProduct, out var productGuid))
             throw new ArgumentException("O identificador do produto é inválido.");
 
-        var productEntity = await _productRepo.GetScopedByIdAsync(productGuid);
+        var productEntity = await _productRepo.GetByIdAsync(productGuid);
 
         if (productEntity == null)
             throw new KeyNotFoundException("Produto não localizado.");

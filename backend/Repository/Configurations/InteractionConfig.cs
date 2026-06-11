@@ -15,6 +15,9 @@ public class InteractionConfig : IEntityTypeConfiguration<Interaction>
               builder.Property(p => p.Id)
                      .ValueGeneratedOnAdd();
 
+              builder.Property(i => i.TenantId)
+                     .IsRequired();
+
               builder.Property(i => i.OpportunityId)
                      .IsRequired();
 
@@ -40,6 +43,13 @@ public class InteractionConfig : IEntityTypeConfiguration<Interaction>
 
               builder.Property(i => i.UserId)
                      .IsRequired();
+
+              builder.HasIndex(i => i.TenantId);
+
+              builder.HasOne(i => i.Tenant)
+                     .WithMany(t => t.Interactions)
+                     .HasForeignKey(i => i.TenantId)
+                     .OnDelete(DeleteBehavior.Restrict);
 
               builder.HasOne(i => i.User)
                      .WithMany(u => u.Interactions)

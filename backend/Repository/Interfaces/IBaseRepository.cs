@@ -1,9 +1,7 @@
 
 public interface IBaseRepository<TEntity> where TEntity : class, IEntity
 {
-    Task<TEntity> GetScopedByIdAsync(Guid id);
     Task<TEntity> GetByIdAsync(Guid id);
-
     Task<Guid> CreateAsync(TEntity entity);
     Task<IEnumerable<Guid>> CreateManyAsync(IEnumerable<TEntity> entities);
     Task UpdateAsync(TEntity entity);

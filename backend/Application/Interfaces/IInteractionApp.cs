@@ -2,7 +2,7 @@ using Application.DTO;
 
 public interface IInteractionApp
 {
-    Task<string> AddToOpportunityAsync(InteractionRequest interaction);
+    Task<string> AddToOpportunityAsync(InteractionRequest interaction, string idUser);
     Task<InteractionResponse> GetByIdAsync(string idInteraction);
     Task<IEnumerable<InteractionResponse>> GetByOpportunityIdAsync(string opportunityId);
     Task DeleteAsync(string idInteraction);

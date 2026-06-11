@@ -3,6 +3,7 @@ namespace Domain.Entities;
 public class Interaction : IEntity
 {
     public Guid Id { get; set; }
+    public Guid TenantId { get; set; }
     public Guid OpportunityId { get; set; }
     public Guid UserId { get; set; }
     public int? FromStage { get; set; }
@@ -13,6 +14,7 @@ public class Interaction : IEntity
     public DateTime CreatedAt { get; set; }
 
     // Relacionamentos
+    public Tenant Tenant { get; set; }
     public Opportunity Opportunity { get; set; }
     public User User { get; set; }
 

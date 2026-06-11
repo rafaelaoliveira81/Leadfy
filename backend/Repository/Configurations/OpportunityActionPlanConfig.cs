@@ -15,6 +15,9 @@ public class OpportunityActionPlanConfig : IEntityTypeConfiguration<OpportunityA
               builder.Property(p => p.Id)
                      .ValueGeneratedOnAdd();
 
+              builder.Property(ap => ap.TenantId)
+                     .IsRequired();
+
               builder.Property(ap => ap.Message)
                      .HasColumnType("nvarchar(max)");
 
@@ -27,6 +30,13 @@ public class OpportunityActionPlanConfig : IEntityTypeConfiguration<OpportunityA
 
               builder.Property(ap => ap.OpportunityId)
                      .IsRequired();
+
+              builder.HasIndex(ap => ap.TenantId);
+
+              builder.HasOne(ap => ap.Tenant)
+                     .WithMany(t => t.OpportunityActionPlans)
+                     .HasForeignKey(ap => ap.TenantId)
+                     .OnDelete(DeleteBehavior.Restrict);
 
               builder.HasOne(ap => ap.Opportunity)
                      .WithMany(o => o.ActionPlans)

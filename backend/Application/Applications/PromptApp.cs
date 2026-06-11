@@ -126,7 +126,7 @@ public class PromptApp : IPromptApp
         if (!Guid.TryParse(idPrompt, out var guid))
             throw new ArgumentException("ID do prompt inválido.");
 
-        var prompt = await _promptRepo.GetScopedByIdAsync(guid);
+        var prompt = await _promptRepo.GetByIdAsync(guid);
 
         if (prompt == null)
             throw new KeyNotFoundException("Prompt não localizado.");
